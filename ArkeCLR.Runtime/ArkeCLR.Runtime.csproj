@@ -108,6 +108,10 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyName.cs" />
+    <Compile Include="CouldNotResolveAssemblyException.cs" />
+    <Compile Include="Host.cs" />
+    <Compile Include="IAssemblyResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '15.0' ">
