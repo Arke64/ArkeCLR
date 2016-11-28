@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using ArkeCLR.Runtime.Pe;
+using System.Threading.Tasks;
 
 namespace ArkeCLR.Runtime {
     public class Host {
@@ -15,6 +16,8 @@ namespace ArkeCLR.Runtime {
 
             if (!entryAssemblyFound)
                 throw new CouldNotResolveAssemblyException(this.entryAssemblyName);
+
+            File.Extract(entryAssemblyData);
 
             return 0;
         }

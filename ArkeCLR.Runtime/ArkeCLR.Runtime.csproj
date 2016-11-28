@@ -112,7 +112,19 @@
     <Compile Include="CouldNotResolveAssemblyException.cs" />
     <Compile Include="Host.cs" />
     <Compile Include="IAssemblyResolver.cs" />
+    <Compile Include="InvalidPeFileException.cs" />
+    <Compile Include="PeHeaders.cs" />
+    <Compile Include="PeFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\ArkeCLR.Runtime.rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ArkeCLR.Utilities\ArkeCLR.Utilities.csproj">
+      <Project>{79938105-EB4A-4ED0-B61D-DFA7943FB6F1}</Project>
+      <Name>ArkeCLR.Utilities</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '15.0' ">
     <VisualStudioVersion>15.0</VisualStudioVersion>

@@ -1,4 +1,5 @@
 ﻿using ArkeCLR.Runtime;
+using ArkeCLR.Utilities;
 using System;
 using System.IO;
 using System.Linq;
@@ -54,12 +55,12 @@ namespace ArkeCLR.Hosts.UAP {
         }
 
         private class AssemblyResolver : IAssemblyResolver {
-            public async Task<(bool, byte[])> ResolveAsync(AssemblyName assemblyName) {
+            public async Task<(bool, ByteReader)> ResolveAsync(AssemblyName assemblyName) {
                 try {
-                    return (true, (await FileIO.ReadBufferAsync(await ApplicationData.Current.LocalFolder.GetFileAsync(assemblyName.Name))).ToArray());
+                    return (true, new ByteReader((await FileIO.ReadBufferAsync(await ApplicationData.Current.LocalFolder.GetFileAsync(assemblyName.Name))).ToArray()));
                 }
                 catch (FileNotFoundException) {
-                    return (false, null);
+                    return (false, default(ByteReader));
                 }
             }
         }

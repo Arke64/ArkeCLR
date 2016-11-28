@@ -1,7 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using ArkeCLR.Utilities;
+using System.Threading.Tasks;
 
 namespace ArkeCLR.Runtime {
     public interface IAssemblyResolver {
-        Task<(bool, byte[])> ResolveAsync(AssemblyName assemblyName);
+        Task<(bool, ByteReader)> ResolveAsync(AssemblyName assemblyName);
     }
 }
