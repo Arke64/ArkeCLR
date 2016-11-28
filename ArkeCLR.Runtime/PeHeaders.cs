@@ -1,8 +1,17 @@
-﻿using System;
+﻿using ArkeCLR.Utilities.Extensions;
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ArkeCLR.Runtime.Pe {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct DataDirectory {
+        public uint Rva;
+        public uint Size;
+
+        public bool IsZero => this.Rva == 0 && this.Size == 0;
+    }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct Header {
         private static byte[] MsDosStubData { get; } = new byte[] { 0x4D, 0x5A, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x0E, 0x1F, 0xBA, 0x0E, 0x00, 0xB4, 0x09, 0xCD, 0x21, 0xB8, 0x01, 0x4C, 0xCD, 0x21, 0x54, 0x68, 0x69, 0x73, 0x20, 0x70, 0x72, 0x6F, 0x67, 0x72, 0x61, 0x6D, 0x20, 0x63, 0x61, 0x6E, 0x6E, 0x6F, 0x74, 0x20, 0x62, 0x65, 0x20, 0x72, 0x75, 0x6E, 0x20, 0x69, 0x6E, 0x20, 0x44, 0x4F, 0x53, 0x20, 0x6D, 0x6F, 0x64, 0x65, 0x2E, 0x0D, 0x0D, 0x0A, 0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -27,7 +36,7 @@ namespace ArkeCLR.Runtime.Pe {
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct FileHeader {
-        public ushort Machine;
+        public Machine Machine;
         public ushort NumberOfSections;
         public uint TimeStamp;
         public uint PointerToSymbolTable;
@@ -36,7 +45,7 @@ namespace ArkeCLR.Runtime.Pe {
         public FileHeaderCharacteristics Characteristics;
 
         public void Verify() {
-            if (this.Machine != 0x14C || this.PointerToSymbolTable != 0 || this.NumberOfSymbols != 0 || this.OptionalHeaderSize != 0xE0) throw new InvalidPeFileException(InvalidPeFilePart.FileHeader);
+            if (!this.Machine.IsValid() || this.PointerToSymbolTable != 0 || this.NumberOfSymbols != 0 || this.OptionalHeaderSize != 0xE0) throw new InvalidPeFileException(InvalidPeFilePart.FileHeader);
             if (!this.Characteristics.HasFlag(FileHeaderCharacteristics.ExecutableImage) || this.Characteristics.HasFlag(FileHeaderCharacteristics.RelocsStripped)) throw new InvalidPeFileException(InvalidPeFilePart.FileHeader);
         }
     }
@@ -105,25 +114,26 @@ namespace ArkeCLR.Runtime.Pe {
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct DataDirectories {
-        public ulong ExportTable;
-        public ulong ImportTable;
-        public ulong ResourceTable;
-        public ulong ExceptionTable;
-        public ulong CertificateTable;
-        public ulong BaseRelocationTable;
-        public ulong Debug;
-        public ulong Copyright;
-        public ulong GlobalPtr;
-        public ulong TlsTable;
-        public ulong LoadConfigTable;
-        public ulong BoundImport;
-        public ulong Iat;
-        public ulong DelayImportDescriptior;
-        public ulong CliHeader;
-        public ulong Reserved;
+        public DataDirectory ExportTable;
+        public DataDirectory ImportTable;
+        public DataDirectory ResourceTable;
+        public DataDirectory ExceptionTable;
+        public DataDirectory CertificateTable;
+        public DataDirectory BaseRelocationTable;
+        public DataDirectory Debug;
+        public DataDirectory Copyright;
+        public DataDirectory GlobalPtr;
+        public DataDirectory TlsTable;
+        public DataDirectory LoadConfigTable;
+        public DataDirectory BoundImport;
+        public DataDirectory Iat;
+        public DataDirectory DelayImportDescriptior;
+        public DataDirectory CliHeader;
+        public DataDirectory Reserved;
 
         public void Verify() {
-            if (this.ExportTable != 0 || /*this.ResourceTable != 0 ||*/ this.ExceptionTable != 0 || this.CertificateTable != 0 || /*this.Debug != 0 ||*/ this.Copyright != 0 || this.GlobalPtr != 0 || this.TlsTable != 0 || this.LoadConfigTable != 0 || this.BoundImport != 0 || this.DelayImportDescriptior != 0 || this.Reserved != 0) throw new InvalidPeFileException(InvalidPeFilePart.DataDirectories);
+            if (!this.ExportTable.IsZero || /*!this.ResourceTable.IsZero || */ !this.ExceptionTable.IsZero || !this.CertificateTable.IsZero || /*this.Debug.IsZero || */ !this.Copyright.IsZero || !this.GlobalPtr.IsZero || !this.TlsTable.IsZero || !this.LoadConfigTable.IsZero || !this.BoundImport.IsZero || !this.DelayImportDescriptior.IsZero || !this.Reserved.IsZero) throw new InvalidPeFileException(InvalidPeFilePart.DataDirectories);
+            if (this.CliHeader.IsZero) throw new InvalidPeFileException(InvalidPeFilePart.DataDirectories);
         }
     }
 
@@ -142,6 +152,13 @@ namespace ArkeCLR.Runtime.Pe {
         public SectionHeaderCharacteristics Characteristics;
 
         public string Name => Encoding.ASCII.GetString(this.NameData, 0, 8).Replace("\0", "");
+    }
+
+    public enum Machine : ushort {
+        I386 = 0x014C,
+        AMD64 = 0x8664,
+        IA64 = 0x0200,
+        ARMv7 = 0x01C4,
     }
 
     [Flags]
