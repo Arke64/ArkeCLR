@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace ArkeCLR.Runtime.Pe {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -32,11 +33,11 @@ namespace ArkeCLR.Runtime.Pe {
         public uint PointerToSymbolTable;
         public uint NumberOfSymbols;
         public ushort OptionalHeaderSize;
-        public HeaderCharacteristics Characteristics;
+        public FileHeaderCharacteristics Characteristics;
 
         public void Verify() {
             if (this.Machine != 0x14C || this.PointerToSymbolTable != 0 || this.NumberOfSymbols != 0 || this.OptionalHeaderSize != 0xE0) throw new InvalidPeFileException(InvalidPeFilePart.FileHeader);
-            if (!this.Characteristics.HasFlag(HeaderCharacteristics.ExecutableImage) || this.Characteristics.HasFlag(HeaderCharacteristics.RelocsStripped)) throw new InvalidPeFileException(InvalidPeFilePart.FileHeader);
+            if (!this.Characteristics.HasFlag(FileHeaderCharacteristics.ExecutableImage) || this.Characteristics.HasFlag(FileHeaderCharacteristics.RelocsStripped)) throw new InvalidPeFileException(InvalidPeFilePart.FileHeader);
         }
     }
 
@@ -85,7 +86,7 @@ namespace ArkeCLR.Runtime.Pe {
         public uint ImageSize;
         public uint HeaderSize;
         public uint FileChecksum;
-        public SubSystem SubSystem;
+        public NtSpecificSubSystem SubSystem;
         public ushort DllFlags;
         public uint StackReserveSize;
         public uint StackCommitSize;
@@ -97,7 +98,7 @@ namespace ArkeCLR.Runtime.Pe {
         public void Verify() {
             if (this.ImageBase % 0x10000 != 0 || this.SectionAlignment <= this.FileAlignment || this.FileAlignment != 0x200 || this.HeaderSize % this.FileAlignment != 0) throw new InvalidPeFileException(InvalidPeFilePart.NtSpecificFields);
             if (/*this.OsMajor != 5 || this.OsMinor != 0 ||*/ this.UserMajor != 0 || this.UserMinor != 0 || /*this.SubSystemMajor != 5 || this.SubSystemMinor != 0 ||*/ this.Reserved != 0) throw new InvalidPeFileException(InvalidPeFilePart.NtSpecificFields);
-            if (this.FileChecksum != 0 || (this.SubSystem != SubSystem.Gui && this.SubSystem != SubSystem.Cui) || (this.DllFlags & 0x100F) != 0 || this.LoaderFlags != 0 || this.NumberOfDataDirectories != 0x10) throw new InvalidPeFileException(InvalidPeFilePart.NtSpecificFields);
+            if (this.FileChecksum != 0 || (this.SubSystem != NtSpecificSubSystem.Gui && this.SubSystem != NtSpecificSubSystem.Cui) || (this.DllFlags & 0x100F) != 0 || this.LoaderFlags != 0 || this.NumberOfDataDirectories != 0x10) throw new InvalidPeFileException(InvalidPeFilePart.NtSpecificFields);
             if (this.StackReserveSize != 0x100000 || this.StackCommitSize != 0x1000 || this.HeapReserveSize != 0x100000 || this.HeapCommitSize != 0x1000) throw new InvalidPeFileException(InvalidPeFilePart.NtSpecificFields);
         }
     }
@@ -126,15 +127,42 @@ namespace ArkeCLR.Runtime.Pe {
         }
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct SectionHeader {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+        public byte[] NameData;
+        public uint VirtualSize;
+        public uint VirtualAddress;
+        public uint SizeOfRawData;
+        public uint PointerToRawData;
+        public uint PointerToRelocations;
+        public uint PointerToLineNumbers;
+        public ushort NumberOfRelocations;
+        public ushort NumberOfLineNumbers;
+        public SectionHeaderCharacteristics Characteristics;
+
+        public string Name => Encoding.ASCII.GetString(this.NameData, 0, 8).Replace("\0", "");
+    }
+
     [Flags]
-    public enum HeaderCharacteristics : ushort {
+    public enum FileHeaderCharacteristics : ushort {
         RelocsStripped = 0x0001,
         ExecutableImage = 0x0002,
         x86Machine = 0x0100,
         Dll = 0x2000
     }
 
-    public enum SubSystem : ushort {
+    [Flags]
+    public enum SectionHeaderCharacteristics : uint {
+        ContainsCode = 0x00000020,
+        ContainsInitializedData = 0x00000040,
+        ContainsUninitializedData = 0x00000080,
+        MemoryExecute = 0x20000000,
+        MemoryRead = 0x40000000,
+        MemoryWrite = 0x80000000
+    }
+
+    public enum NtSpecificSubSystem : ushort {
         Gui = 0x2,
         Cui = 0x3
     }

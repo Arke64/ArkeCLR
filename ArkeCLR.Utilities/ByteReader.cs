@@ -63,5 +63,14 @@ namespace ArkeCLR.Utilities {
                     Marshal.FreeHGlobal(ptr);
             }
         }
+
+        public T[] ReadStruct<T>(int count) where T : struct {
+            var result = new T[count];
+
+            for (var i = 0; i < count; i++)
+                result[i] = this.ReadStruct<T>();
+
+            return result;
+        }
     }
 }

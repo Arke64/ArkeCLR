@@ -6,6 +6,8 @@ namespace ArkeCLR.Runtime.Pe {
             var header = file.ReadStruct<Header>();
 
             header.Verify();
+
+            var sections = file.ReadStruct<SectionHeader>(header.File.NumberOfSections);
         }
     }
 }
