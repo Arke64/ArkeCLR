@@ -17,7 +17,7 @@ namespace ArkeCLR.Runtime {
             if (!entryAssemblyFound)
                 throw new CouldNotResolveAssemblyException(this.entryAssemblyName);
 
-            File.Extract(entryAssemblyData);
+            var peFile = new File(entryAssemblyData);
 
             return 0;
         }

@@ -26,9 +26,9 @@ namespace ArkeCLR.Utilities {
             return true;
         }
 
-        public void AdvanceTo(uint newPosition) => this.AdvanceTo((int)newPosition);
+        public void MoveTo(uint newPosition) => this.MoveTo((int)newPosition);
 
-        public void AdvanceTo(int newPosition) {
+        public void MoveTo(int newPosition) {
             if (newPosition < 0 || newPosition > this.buffer.Length) throw new IndexOutOfRangeException();
 
             this.position = newPosition;

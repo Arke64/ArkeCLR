@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ArkeCLR.Runtime.Pe {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct DataDirectory {
+    public struct RvaAndSize {
         public uint Rva;
         public uint Size;
 
@@ -114,22 +114,22 @@ namespace ArkeCLR.Runtime.Pe {
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct DataDirectories {
-        public DataDirectory ExportTable;
-        public DataDirectory ImportTable;
-        public DataDirectory ResourceTable;
-        public DataDirectory ExceptionTable;
-        public DataDirectory CertificateTable;
-        public DataDirectory BaseRelocationTable;
-        public DataDirectory Debug;
-        public DataDirectory Copyright;
-        public DataDirectory GlobalPtr;
-        public DataDirectory TlsTable;
-        public DataDirectory LoadConfigTable;
-        public DataDirectory BoundImport;
-        public DataDirectory Iat;
-        public DataDirectory DelayImportDescriptior;
-        public DataDirectory CliHeader;
-        public DataDirectory Reserved;
+        public RvaAndSize ExportTable;
+        public RvaAndSize ImportTable;
+        public RvaAndSize ResourceTable;
+        public RvaAndSize ExceptionTable;
+        public RvaAndSize CertificateTable;
+        public RvaAndSize BaseRelocationTable;
+        public RvaAndSize Debug;
+        public RvaAndSize Copyright;
+        public RvaAndSize GlobalPtr;
+        public RvaAndSize TlsTable;
+        public RvaAndSize LoadConfigTable;
+        public RvaAndSize BoundImport;
+        public RvaAndSize Iat;
+        public RvaAndSize DelayImportDescriptior;
+        public RvaAndSize CliHeader;
+        public RvaAndSize Reserved;
 
         public void Verify() {
             if (!this.ExportTable.IsZero || /*!this.ResourceTable.IsZero || */ !this.ExceptionTable.IsZero || !this.CertificateTable.IsZero || /*this.Debug.IsZero || */ !this.Copyright.IsZero || !this.GlobalPtr.IsZero || !this.TlsTable.IsZero || !this.LoadConfigTable.IsZero || !this.BoundImport.IsZero || !this.DelayImportDescriptior.IsZero || !this.Reserved.IsZero) throw new InvalidPeFileException(InvalidPeFilePart.DataDirectories);
@@ -154,6 +154,22 @@ namespace ArkeCLR.Runtime.Pe {
         public string Name => Encoding.ASCII.GetString(this.NameData, 0, 8).Replace("\0", "");
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct CliHeader {
+        public uint Cb;
+        public ushort MajorRuntimeVersion;
+        public ushort MinorRuntimeVersion;
+        public RvaAndSize Metadata;
+        public CliRuntimeFlags Flags;
+        public uint EntryPointToken;
+        public RvaAndSize Resources;
+        public ulong StrongNameSignature;
+        public ulong CodeManagerTable;
+        public ulong VTableFixups;
+        public ulong ExportAddressTableJumps;
+        public ulong ManagedNativeHeader;
+    }
+
     public enum Machine : ushort {
         I386 = 0x014C,
         AMD64 = 0x8664,
@@ -161,11 +177,16 @@ namespace ArkeCLR.Runtime.Pe {
         ARMv7 = 0x01C4,
     }
 
+    public enum NtSpecificSubSystem : ushort {
+        Gui = 0x2,
+        Cui = 0x3
+    }
+
     [Flags]
     public enum FileHeaderCharacteristics : ushort {
         RelocsStripped = 0x0001,
         ExecutableImage = 0x0002,
-        x86Machine = 0x0100,
+        X86Machine = 0x0100,
         Dll = 0x2000
     }
 
@@ -179,8 +200,12 @@ namespace ArkeCLR.Runtime.Pe {
         MemoryWrite = 0x80000000
     }
 
-    public enum NtSpecificSubSystem : ushort {
-        Gui = 0x2,
-        Cui = 0x3
+    [Flags]
+    public enum CliRuntimeFlags : uint {
+        IlOnly = 0x00001,
+        X86Required = 0x00002,
+        StrongNameSIgned = 0x00008,
+        NativeEntryPointer = 0x00010,
+        TrackDebugData = 0x10000
     }
 }
