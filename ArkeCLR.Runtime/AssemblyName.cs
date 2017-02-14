@@ -3,31 +3,17 @@ using System.Globalization;
 
 namespace ArkeCLR.Runtime {
     public struct AssemblyName {
-        public string Name { get; set; }
-        public Version Version { get; set; }
-        public CultureInfo Culture { get; set; }
-        public string PublicKeyToken { get; set; }
+        public string Name { get; }
+        public Version Version { get; }
+        public CultureInfo Culture { get; }
+        public string PublicKeyToken { get; }
 
         public AssemblyName(string name) : this(name, default(string), default(string), default(string)) { }
-        public AssemblyName(string name, string version, string culture, string publicKeyToken) : this(name, version != null ? Version.Parse(version) : null, culture != null ? new CultureInfo(culture) : null, publicKeyToken) { }
+        public AssemblyName(string name, string version, string culture, string publicKeyToken) : this(name, version != null ? Version.Parse(version) : new Version(0, 0, 0, 0), culture != null ? new CultureInfo(culture) : CultureInfo.InvariantCulture, publicKeyToken) { }
+        public AssemblyName(string name, Version version, CultureInfo culture, string publicKeyToken) => (this.Name, this.Version, this.Culture, this.PublicKeyToken) = (name, version, culture, publicKeyToken);
 
-        public AssemblyName(string name, Version version, CultureInfo culture, string publicKeyToken) {
-            this.Name = name;
-            this.Version = version;
-            this.Culture = culture;
-            this.PublicKeyToken = publicKeyToken;
-        }
+        public string FullName => $"{this.Name}, Version={this.Version}, Culture={this.Culture.Name}, PublicKeyToken={(this.PublicKeyToken ?? "null")}";
 
-        public string FullName {
-            get {
-                var result = this.Name;
-
-                result += ", Version=" + (this.Version ?? new Version(0, 0, 0, 0));
-                result += ", Culture=" + (this.Culture?.Name ?? "neutral");
-                result += ", PublicKeyToken=" + (this.PublicKeyToken ?? "null");
-
-                return result;
-            }
-        }
+        public override string ToString() => this.FullName;
     }
 }

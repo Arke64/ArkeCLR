@@ -1,13 +1,14 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace ArkeCLR.Utilities {
-    public struct ByteReader {
+    public class ByteReader {
         private readonly byte[] buffer;
         private int position;
 
         public ByteReader(byte[] buffer) {
-            if (!BitConverter.IsLittleEndian) throw new InvalidOperationException("Can only run on a Little Endian system.");
+            if (!BitConverter.IsLittleEndian) throw new InvalidOperationException("Can only run on a little endian system.");
 
             this.buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
             this.position = 0;
@@ -26,12 +27,24 @@ namespace ArkeCLR.Utilities {
             return true;
         }
 
-        public void MoveTo(uint newPosition) => this.MoveTo((int)newPosition);
+        public void Seek(uint position, SeekOrigin seekOrigin) => this.Seek((int)position, seekOrigin);
 
-        public void MoveTo(int newPosition) {
-            if (newPosition < 0 || newPosition > this.buffer.Length) throw new IndexOutOfRangeException();
+        public void Seek(int position, SeekOrigin seekOrigin) {
+            if (seekOrigin == SeekOrigin.Begin) {
+                if (position < 0 || position > this.buffer.Length) throw new IndexOutOfRangeException();
 
-            this.position = newPosition;
+                this.position = position;
+            }
+            else if (seekOrigin == SeekOrigin.Current) {
+                var newPosition = this.position + position;
+
+                if (newPosition < 0 || newPosition > this.buffer.Length) throw new IndexOutOfRangeException();
+
+                this.position = newPosition;
+            }
+            else {
+                throw new NotSupportedException();
+            }
         }
 
         public byte ReadU8() => this.buffer[this.position++];
@@ -63,6 +76,8 @@ namespace ArkeCLR.Utilities {
                     Marshal.FreeHGlobal(ptr);
             }
         }
+
+        public T[] ReadStruct<T>(uint count) where T : struct => this.ReadStruct<T>((int)count);
 
         public T[] ReadStruct<T>(int count) where T : struct {
             var result = new T[count];

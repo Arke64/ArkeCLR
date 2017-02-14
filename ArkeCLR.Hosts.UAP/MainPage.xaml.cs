@@ -1,5 +1,6 @@
 ﻿using ArkeCLR.Runtime;
 using ArkeCLR.Utilities;
+using ArkeCLR.Utilities.Extensions;
 using System;
 using System.IO;
 using System.Linq;
@@ -23,14 +24,14 @@ namespace ArkeCLR.Hosts.UAP {
             var files = (await ApplicationData.Current.LocalFolder.GetFilesAsync()).Where(f => Path.GetExtension(f.Name) == ".exe");
 
             if (files.Any()) {
-                foreach (var f in files)
-                    this.RunnableAssemblyList.Items.Add(new ComboBoxItem() { Content = f.Name });
+                this.RunnableAssemblyList.Items.AddRange(files.Select(f => new ComboBoxItem { Content = f.Name }));
 
                 this.RunnableAssemblyList.IsEnabled = true;
                 this.RunButton.IsEnabled = true;
+                this.StatusField.Text = "Ready";
             }
             else {
-                this.RunnableAssemblyList.Items.Add(new ComboBoxItem() { Content = "No runnable assemblies found" });
+                this.RunnableAssemblyList.Items.Add(new ComboBoxItem { Content = "No runnable assemblies found." });
             }
 
             this.RunnableAssemblyList.SelectedIndex = 0;
@@ -43,10 +44,10 @@ namespace ArkeCLR.Hosts.UAP {
             this.host = new Host(new AssemblyName((string)((ComboBoxItem)this.RunnableAssemblyList.SelectedItem).Content), new AssemblyResolver());
 
             try {
-                this.StatusField.Text = "Exited with code " + await this.host.StartAsync();
+                this.StatusField.Text = $"Exited with code {await this.host.StartAsync()}.";
             }
-            catch (CouldNotResolveAssemblyException exception) {
-                this.StatusField.Text = "Could not find assembly: " + exception.AssemblyName.FullName;
+            catch (CouldNotResolveAssemblyException ex) {
+                this.StatusField.Text = $"Could not find assembly '{ex.AssemblyName.FullName}'.";
             }
 
             this.host = null;

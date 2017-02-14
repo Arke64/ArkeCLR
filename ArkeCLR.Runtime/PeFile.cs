@@ -1,23 +1,36 @@
-﻿using ArkeCLR.Utilities;
+﻿using ArkeCLR.Runtime.Headers;
+using ArkeCLR.Utilities;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace ArkeCLR.Runtime.Pe {
-    public class File {
-        public Header Header { get; }
+    public class PeFile {
+        public NtHeader NtHeader { get; }
+        public IReadOnlyList<RvaAndSize> DataDirectories { get; }
         public IReadOnlyList<SectionHeader> SectionHeaders { get; }
-        public CliHeader CliHeader { get; }
+        
+        public PeFile(ByteReader file) {
+            var dosHeader = file.ReadStruct<DosHeader>();
 
-        //TODO Actually expand the file in memory so RVAs don't need to be looked up.
-        public File(ByteReader file) {
-            this.Header = file.ReadStruct<Header>();
-            this.Header.Verify();
+            file.Seek(dosHeader.NewHeaderAddress, SeekOrigin.Begin);
 
-            this.SectionHeaders = file.ReadStruct<SectionHeader>(this.Header.File.NumberOfSections).ToList();
+            this.NtHeader = file.ReadStruct<NtHeader>();
+            this.NtHeader.Verify();
 
-            file.MoveTo(this.FindFileAddressForRva(this.Header.Optional.DataDirectories.CliHeader.Rva));
+            this.DataDirectories = file.ReadStruct<RvaAndSize>(this.NtHeader.NtSpecificFields.NumberOfDataDirectories).ToList();
 
-            this.CliHeader = file.ReadStruct<CliHeader>();
+            file.Seek(this.NtHeader.CoffHeader.OptionalHeaderSize - Marshal.SizeOf<StandardFields>() - Marshal.SizeOf<NtSpecificFields>() - Marshal.SizeOf<RvaAndSize>() * (int)this.NtHeader.NtSpecificFields.NumberOfDataDirectories, SeekOrigin.Current);
+
+            this.SectionHeaders = file.ReadStruct<SectionHeader>(this.NtHeader.CoffHeader.NumberOfSections).ToList();
+        }
+
+        public (bool, RvaAndSize) GetDataDirectory(DataDirectoryType type) {
+            if ((int)type >= this.NtHeader.NtSpecificFields.NumberOfDataDirectories)
+                return (false, default(RvaAndSize));
+
+            return (true, this.DataDirectories[(int)type]);
         }
 
         public uint FindFileAddressForRva(uint rva) {

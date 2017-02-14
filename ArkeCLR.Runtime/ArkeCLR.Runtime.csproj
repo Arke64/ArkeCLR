@@ -109,11 +109,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyName.cs" />
+    <Compile Include="CliFile.cs" />
     <Compile Include="CouldNotResolveAssemblyException.cs" />
     <Compile Include="Host.cs" />
     <Compile Include="IAssemblyResolver.cs" />
-    <Compile Include="InvalidPeFileException.cs" />
-    <Compile Include="PeHeaders.cs" />
+    <Compile Include="InvalidFileException.cs" />
+    <Compile Include="Headers.cs" />
     <Compile Include="PeFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

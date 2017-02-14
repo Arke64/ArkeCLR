@@ -5,9 +5,6 @@ namespace ArkeCLR.Runtime {
         public AssemblyName AssemblyName { get; }
 
         public CouldNotResolveAssemblyException(AssemblyName assemblyName) : this(assemblyName, null) { }
-
-        public CouldNotResolveAssemblyException(AssemblyName assemblyName, Exception innerException) : base("Could not resolve assembly: " + assemblyName.FullName, innerException) {
-            this.AssemblyName = assemblyName;
-        }
+        public CouldNotResolveAssemblyException(AssemblyName assemblyName, Exception innerException) : base($"Could not resolve assembly '{assemblyName.FullName}'", innerException) => this.AssemblyName = assemblyName;
     }
 }
