@@ -127,10 +127,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ArkeCLR.Metadata\ArkeCLR.Metadata.csproj">
-      <Project>{1bc2abad-d88c-4bd6-81bf-4e4708a8cbd7}</Project>
-      <Name>ArkeCLR.Metadata</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ArkeCLR.Runtime\ArkeCLR.Runtime.csproj">
       <Project>{9c2de933-bec0-44e0-bc26-35f66b2802be}</Project>
       <Name>ArkeCLR.Runtime</Name>
