@@ -1,7 +1,7 @@
-﻿using ArkeCLR.Runtime.Headers;
+﻿using ArkeCLR.Runtime.PeHeaders;
 using ArkeCLR.Utilities;
 
-namespace ArkeCLR.Runtime.Files {
+namespace ArkeCLR.Runtime.FileFormats {
     public class DosFile {
         public DosHeader DosHeader { get; }
 

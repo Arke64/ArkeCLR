@@ -1,8 +1,8 @@
-﻿using ArkeCLR.Runtime.Headers;
+﻿using ArkeCLR.Runtime.PeHeaders;
 using ArkeCLR.Utilities;
 using System.IO;
 
-namespace ArkeCLR.Runtime.Files {
+namespace ArkeCLR.Runtime.FileFormats {
     public class CliFile : PeFile {
         public CliHeader CliHeader { get; }
 

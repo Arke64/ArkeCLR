@@ -3,7 +3,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ArkeCLR.Runtime.Headers {
+namespace ArkeCLR.Runtime.PeHeaders {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct RvaAndSize {
         public uint Rva;

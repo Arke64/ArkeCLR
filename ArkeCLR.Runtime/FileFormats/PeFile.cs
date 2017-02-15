@@ -1,11 +1,11 @@
-﻿using ArkeCLR.Runtime.Headers;
+﻿using ArkeCLR.Runtime.PeHeaders;
 using ArkeCLR.Utilities;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace ArkeCLR.Runtime.Files {
+namespace ArkeCLR.Runtime.FileFormats {
     public class PeFile : DosFile {
         public NtHeader NtHeader { get; }
         public IReadOnlyList<RvaAndSize> DataDirectories { get; }
