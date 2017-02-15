@@ -115,6 +115,7 @@
     <Compile Include="IAssemblyResolver.cs" />
     <Compile Include="InvalidFileException.cs" />
     <Compile Include="Headers.cs" />
+    <Compile Include="DosFile.cs" />
     <Compile Include="PeFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -10,6 +10,8 @@ namespace ArkeCLR.Runtime.Headers {
         public uint Size;
 
         public bool IsZero => this.Rva == 0 && this.Size == 0;
+
+        public override string ToString() => $"RVA: 0x{this.Rva:X8} Size: 0x{this.Size:X8}";
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -48,9 +50,8 @@ namespace ArkeCLR.Runtime.Headers {
         public StandardFields StandardFields;
         public NtSpecificFields NtSpecificFields;
 
-        //TODO Don't verify multiple parts in one exception and make sure we verify all we can, particularly as ECMA335 specifies
         public void Verify() {
-            if (this.Signature != 0x00004550) throw new InvalidFileException(InvalidFilePart.Signature);
+            if (this.Signature != 0x00004550) throw new InvalidFileException(nameof(this.Signature));
 
             this.CoffHeader.Verify();
             this.StandardFields.Verify();
@@ -69,8 +70,7 @@ namespace ArkeCLR.Runtime.Headers {
         public CoffCharacteristics Characteristics;
 
         public void Verify() {
-            if (!this.Machine.IsValid() || this.PointerToSymbolTable != 0 || this.NumberOfSymbols != 0 || this.OptionalHeaderSize != 0xE0) throw new InvalidFileException(InvalidFilePart.FileHeader);
-            if (!this.Characteristics.HasFlag(CoffCharacteristics.ExecutableImage) || this.Characteristics.HasFlag(CoffCharacteristics.RelocsStripped)) throw new InvalidFileException(InvalidFilePart.FileHeader);
+            if (!this.Machine.IsValid()) throw new InvalidFileException(nameof(this.Machine));
         }
     }
 
@@ -87,7 +87,7 @@ namespace ArkeCLR.Runtime.Headers {
         public uint BaseOfData;
 
         public void Verify() {
-            if (this.MagicNumber != CoffMagicNumber.Pe32 /*|| this.MajorLinkerVersion != 6 || this.MinorLinkerVersion != 0*/) throw new InvalidFileException(InvalidFilePart.StandardFields);
+            if (this.MagicNumber != CoffMagicNumber.Pe32) throw new InvalidFileException("Only PE32 files supported.");
         }
     }
 
@@ -116,10 +116,10 @@ namespace ArkeCLR.Runtime.Headers {
         public uint NumberOfDataDirectories;
 
         public void Verify() {
-            if (this.ImageBase % 0x10000 != 0 || this.SectionAlignment <= this.FileAlignment || this.FileAlignment != 0x200 || this.HeaderSize % this.FileAlignment != 0) throw new InvalidFileException(InvalidFilePart.NtSpecificFields);
-            if (/*this.OsMajor != 5 || this.OsMinor != 0 ||*/ this.MajorUserVersion != 0 || this.MinorUserVersion != 0 || /*this.SubSystemMajor != 5 || this.SubSystemMinor != 0 ||*/ this.Win32Version != 0) throw new InvalidFileException(InvalidFilePart.NtSpecificFields);
-            if (this.FileChecksum != 0 || (this.SubSystem != NtSpecificSubSystem.Gui && this.SubSystem != NtSpecificSubSystem.Cui) || this.LoaderFlags != 0 || this.NumberOfDataDirectories != 0x10) throw new InvalidFileException(InvalidFilePart.NtSpecificFields);
-            if (this.StackReserveSize != 0x100000 || this.StackCommitSize != 0x1000 || this.HeapReserveSize != 0x100000 || this.HeapCommitSize != 0x1000) throw new InvalidFileException(InvalidFilePart.NtSpecificFields);
+            if (this.ImageBase % 0x10000 != 0) throw new InvalidFileException(nameof(this.ImageBase));
+            if (this.SectionAlignment <= this.FileAlignment) throw new InvalidFileException(nameof(this.SectionAlignment));
+            if (this.FileAlignment != 0x200) throw new InvalidFileException(nameof(this.FileAlignment));
+            if (this.HeaderSize % this.FileAlignment != 0) throw new InvalidFileException(nameof(this.HeaderSize));
         }
     }
 
@@ -138,6 +138,8 @@ namespace ArkeCLR.Runtime.Headers {
         public SectionCharacteristics Characteristics;
 
         public string Name => Encoding.ASCII.GetString(this.NameData, 0, 8).Replace("\0", "");
+
+        public override string ToString() => this.Name;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

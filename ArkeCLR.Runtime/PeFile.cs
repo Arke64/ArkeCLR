@@ -5,16 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace ArkeCLR.Runtime.Pe {
-    public class PeFile {
+namespace ArkeCLR.Runtime.Files {
+    public class PeFile : DosFile {
         public NtHeader NtHeader { get; }
         public IReadOnlyList<RvaAndSize> DataDirectories { get; }
         public IReadOnlyList<SectionHeader> SectionHeaders { get; }
         
-        public PeFile(ByteReader file) {
-            var dosHeader = file.ReadStruct<DosHeader>();
-
-            file.Seek(dosHeader.NewHeaderAddress, SeekOrigin.Begin);
+        public PeFile(ByteReader file) : base(file) {
+            file.Seek(this.DosHeader.NewHeaderAddress, SeekOrigin.Begin);
 
             this.NtHeader = file.ReadStruct<NtHeader>();
             this.NtHeader.Verify();
@@ -26,11 +24,11 @@ namespace ArkeCLR.Runtime.Pe {
             this.SectionHeaders = file.ReadStruct<SectionHeader>(this.NtHeader.CoffHeader.NumberOfSections).ToList();
         }
 
-        public (bool, RvaAndSize) GetDataDirectory(DataDirectoryType type) {
+        public RvaAndSize? GetDataDirectory(DataDirectoryType type) {
             if ((int)type >= this.NtHeader.NtSpecificFields.NumberOfDataDirectories)
-                return (false, default(RvaAndSize));
+                return default(RvaAndSize?);
 
-            return (true, this.DataDirectories[(int)type]);
+            return this.DataDirectories[(int)type];
         }
 
         public uint FindFileAddressForRva(uint rva) {
