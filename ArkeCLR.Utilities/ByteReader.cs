@@ -1,6 +1,10 @@
-﻿using System;
+﻿using ArkeCLR.Utilities.Helpers;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace ArkeCLR.Utilities {
     public class ByteReader {
@@ -47,6 +51,7 @@ namespace ArkeCLR.Utilities {
             }
         }
 
+        //TODO These need to check for reading beyond the end
         public byte ReadU8() => this.buffer[this.position++];
         public ushort ReadU16() => this.AdvanceAndReturn(BitConverter.ToUInt16(this.buffer, this.position), sizeof(ushort));
         public uint ReadU32() => this.AdvanceAndReturn(BitConverter.ToUInt32(this.buffer, this.position), sizeof(uint));
@@ -55,6 +60,73 @@ namespace ArkeCLR.Utilities {
         public short ReadI16() => this.AdvanceAndReturn(BitConverter.ToInt16(this.buffer, this.position), sizeof(short));
         public int ReadI32() => this.AdvanceAndReturn(BitConverter.ToInt32(this.buffer, this.position), sizeof(int));
         public long ReadI64() => this.AdvanceAndReturn(BitConverter.ToInt64(this.buffer, this.position), sizeof(long));
+
+        public string ReadStringFixed(Encoding encoding, uint length) => this.ReadStringFixed(encoding, (int)length);
+        public string ReadStringFixed(Encoding encoding, uint length, byte padder) => this.ReadStringFixed(encoding, (int)length, padder);
+
+        public string ReadStringFixed(Encoding encoding, int length) => encoding.GetString(this.ReadBytes(length));
+        public string ReadStringFixed(Encoding encoding, int length, byte padder) => encoding.GetString(this.ReadBytes(length).TakeWhile(b => b != padder).ToArray());
+
+        public string ReadStringAligned(Encoding encoding) => this.ReadStringAligned(encoding, 0, 1);
+        public string ReadStringAligned(Encoding encoding, byte padder) => this.ReadStringAligned(encoding, padder, 1);
+
+        public string ReadStringAligned(Encoding encoding, byte padder, int paddingMultiple) {
+            var bytes = new List<byte>();
+
+            while (true) {
+                var cur = this.ReadU8();
+
+                if (cur == padder)
+                    break;
+
+                bytes.Add(cur);
+            }
+
+            var diff = MathEx.RoundUpToNearestMultiple(this.position, paddingMultiple) - this.position;
+
+            this.CanRead(diff, true);
+
+            this.position += diff;
+
+            return encoding.GetString(bytes.ToArray());
+        }
+
+        public byte[] ReadBytes(uint length) => this.ReadBytes((int)length);
+
+        public byte[] ReadBytes(int length) {
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+
+            this.CanRead(length, true);
+
+            var buffer = new byte[length];
+
+            Array.Copy(this.buffer, this.position, buffer, 0, length);
+
+            this.position += length;
+
+            return buffer;
+        }
+
+        public T ReadCustom<T>() where T : struct, ICustomByteReader {
+            var result = new T();
+
+            result.Read(this);
+
+            return result;
+        }
+
+        public T[] ReadCustom<T>(uint count) where T : struct, ICustomByteReader => this.ReadStruct<T>((int)count);
+
+        public T[] ReadCustom<T>(int count) where T : struct, ICustomByteReader {
+            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+
+            var result = new T[count];
+
+            for (var i = 0; i < count; i++)
+                result[i] = this.ReadCustom<T>();
+
+            return result;
+        }
 
         public T ReadStruct<T>() where T : struct {
             var length = Marshal.SizeOf(default(T));
@@ -80,6 +152,8 @@ namespace ArkeCLR.Utilities {
         public T[] ReadStruct<T>(uint count) where T : struct => this.ReadStruct<T>((int)count);
 
         public T[] ReadStruct<T>(int count) where T : struct {
+            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+
             var result = new T[count];
 
             for (var i = 0; i < count; i++)
@@ -87,5 +161,9 @@ namespace ArkeCLR.Utilities {
 
             return result;
         }
+    }
+
+    public interface ICustomByteReader {
+        void Read(ByteReader reader);
     }
 }

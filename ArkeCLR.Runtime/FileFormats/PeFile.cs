@@ -31,6 +31,8 @@ namespace ArkeCLR.Runtime.FileFormats {
             return this.DataDirectories[(int)type];
         }
 
+        public uint FindFileAddressForRva(RvaAndSize rva) => this.FindFileAddressForRva(rva.Rva);
+
         public uint FindFileAddressForRva(uint rva) {
             var section = this.FindSectionHeaderForRva(rva);
 

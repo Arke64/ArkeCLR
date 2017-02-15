@@ -156,6 +156,10 @@ namespace ArkeCLR.Runtime.PeHeaders {
         public RvaAndSize VTableFixups;
         public ulong ExportAddressTableJumps;
         public ulong ManagedNativeHeader;
+
+        public void Verify() {
+            if (this.Metadata.IsZero) throw new InvalidFileException(nameof(this.Metadata));
+        }
     }
 
     public enum Machine : ushort {

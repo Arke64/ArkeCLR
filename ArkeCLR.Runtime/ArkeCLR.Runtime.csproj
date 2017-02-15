@@ -114,6 +114,7 @@
     <Compile Include="Host.cs" />
     <Compile Include="IAssemblyResolver.cs" />
     <Compile Include="InvalidFileException.cs" />
+    <Compile Include="Metadata.cs" />
     <Compile Include="PeHeaders.cs" />
     <Compile Include="FileFormats\DosFile.cs" />
     <Compile Include="FileFormats\PeFile.cs" />

@@ -109,6 +109,7 @@
   <ItemGroup>
     <Compile Include="ByteReader.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Helpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\ArkeCLR.Utilities.rd.xml" />
   </ItemGroup>
