@@ -1,4 +1,4 @@
-﻿using ArkeCLR.Runtime.PeHeaders;
+﻿using ArkeCLR.Runtime.Headers;
 using ArkeCLR.Utilities;
 using System.Collections.Generic;
 using System.IO;

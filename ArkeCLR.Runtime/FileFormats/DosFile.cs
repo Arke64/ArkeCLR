@@ -1,4 +1,4 @@
-﻿using ArkeCLR.Runtime.PeHeaders;
+﻿using ArkeCLR.Runtime.Headers;
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.FileFormats {
