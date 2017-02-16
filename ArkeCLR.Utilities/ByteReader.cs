@@ -9,23 +9,26 @@ using System.Text;
 namespace ArkeCLR.Utilities {
     public class ByteReader {
         private readonly byte[] buffer;
-        private int position;
+
+        public int Position { get; private set; }
+        public int Length => this.buffer.Length;
 
         public ByteReader(byte[] buffer) {
             if (!BitConverter.IsLittleEndian) throw new InvalidOperationException("Can only run on a little endian system.");
 
             this.buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
-            this.position = 0;
+
+            this.Position = 0;
         }
 
         private T AdvanceAndReturn<T>(T result, int amount) {
-            this.position += amount;
+            this.Position += amount;
 
             return result;
         }
 
         private bool CanRead(int length, bool throwIfCant) {
-            if (this.position + length > this.buffer.Length)
+            if (this.Position + length > this.Length)
                 return throwIfCant ? throw new IndexOutOfRangeException() : false;
 
             return true;
@@ -35,31 +38,41 @@ namespace ArkeCLR.Utilities {
 
         public void Seek(int position, SeekOrigin seekOrigin) {
             if (seekOrigin == SeekOrigin.Begin) {
-                if (position < 0 || position > this.buffer.Length) throw new IndexOutOfRangeException();
+                if (position < 0 || position > this.Length) throw new IndexOutOfRangeException();
 
-                this.position = position;
+                this.Position = position;
             }
             else if (seekOrigin == SeekOrigin.Current) {
-                var newPosition = this.position + position;
+                var newPosition = this.Position + position;
 
-                if (newPosition < 0 || newPosition > this.buffer.Length) throw new IndexOutOfRangeException();
+                if (newPosition < 0 || newPosition > this.Length) throw new IndexOutOfRangeException();
 
-                this.position = newPosition;
+                this.Position = newPosition;
             }
             else {
                 throw new NotSupportedException();
             }
         }
 
+        public ByteReader CreateView(uint offset, uint size) {
+            if (offset + size > this.Length) throw new IndexOutOfRangeException();
+
+            var buffer = new byte[size];
+
+            Array.Copy(this.buffer, (int)offset, buffer, 0, (int)size);
+
+            return new ByteReader(buffer);
+        }
+
         //TODO These need to check for reading beyond the end
-        public byte ReadU8() => this.buffer[this.position++];
-        public ushort ReadU16() => this.AdvanceAndReturn(BitConverter.ToUInt16(this.buffer, this.position), sizeof(ushort));
-        public uint ReadU32() => this.AdvanceAndReturn(BitConverter.ToUInt32(this.buffer, this.position), sizeof(uint));
-        public ulong ReadU64() => this.AdvanceAndReturn(BitConverter.ToUInt64(this.buffer, this.position), sizeof(ulong));
-        public sbyte ReadI8() => (sbyte)this.buffer[this.position++];
-        public short ReadI16() => this.AdvanceAndReturn(BitConverter.ToInt16(this.buffer, this.position), sizeof(short));
-        public int ReadI32() => this.AdvanceAndReturn(BitConverter.ToInt32(this.buffer, this.position), sizeof(int));
-        public long ReadI64() => this.AdvanceAndReturn(BitConverter.ToInt64(this.buffer, this.position), sizeof(long));
+        public byte ReadU8() => this.buffer[this.Position++];
+        public ushort ReadU16() => this.AdvanceAndReturn(BitConverter.ToUInt16(this.buffer, this.Position), sizeof(ushort));
+        public uint ReadU32() => this.AdvanceAndReturn(BitConverter.ToUInt32(this.buffer, this.Position), sizeof(uint));
+        public ulong ReadU64() => this.AdvanceAndReturn(BitConverter.ToUInt64(this.buffer, this.Position), sizeof(ulong));
+        public sbyte ReadI8() => (sbyte)this.buffer[this.Position++];
+        public short ReadI16() => this.AdvanceAndReturn(BitConverter.ToInt16(this.buffer, this.Position), sizeof(short));
+        public int ReadI32() => this.AdvanceAndReturn(BitConverter.ToInt32(this.buffer, this.Position), sizeof(int));
+        public long ReadI64() => this.AdvanceAndReturn(BitConverter.ToInt64(this.buffer, this.Position), sizeof(long));
 
         public string ReadStringFixed(Encoding encoding, uint length) => this.ReadStringFixed(encoding, (int)length);
         public string ReadStringFixed(Encoding encoding, uint length, byte padder) => this.ReadStringFixed(encoding, (int)length, padder);
@@ -82,11 +95,11 @@ namespace ArkeCLR.Utilities {
                 bytes.Add(cur);
             }
 
-            var diff = MathEx.RoundUpToNearestMultiple(this.position, paddingMultiple) - this.position;
+            var diff = MathEx.RoundUpToNearestMultiple(this.Position, paddingMultiple) - this.Position;
 
             this.CanRead(diff, true);
 
-            this.position += diff;
+            this.Position += diff;
 
             return encoding.GetString(bytes.ToArray());
         }
@@ -94,15 +107,15 @@ namespace ArkeCLR.Utilities {
         public byte[] ReadBytes(uint length) => this.ReadBytes((int)length);
 
         public byte[] ReadBytes(int length) {
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
 
             this.CanRead(length, true);
 
             var buffer = new byte[length];
 
-            Array.Copy(this.buffer, this.position, buffer, 0, length);
+            Array.Copy(this.buffer, this.Position, buffer, 0, length);
 
-            this.position += length;
+            this.Position += length;
 
             return buffer;
         }
@@ -137,9 +150,9 @@ namespace ArkeCLR.Utilities {
             try {
                 ptr = Marshal.AllocHGlobal(length);
 
-                Marshal.Copy(this.buffer, this.position, ptr, length);
+                Marshal.Copy(this.buffer, this.Position, ptr, length);
 
-                this.position += length;
+                this.Position += length;
 
                 return Marshal.PtrToStructure<T>(ptr);
             }
