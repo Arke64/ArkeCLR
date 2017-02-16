@@ -49,6 +49,9 @@ namespace ArkeCLR.Hosts.UAP {
             catch (CouldNotResolveAssemblyException ex) {
                 this.StatusField.Text = $"Could not find assembly '{ex.AssemblyName.FullName}'.";
             }
+            catch (Exception ex) {
+                this.StatusField.Text = ex.ToString();
+            }
 
             this.host = null;
 
