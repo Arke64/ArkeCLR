@@ -124,7 +124,7 @@ namespace ArkeCLR.Utilities {
             return result;
         }
 
-        public T[] ReadCustom<T>(uint count) where T : struct, ICustomByteReader => this.ReadStruct<T>((int)count);
+        public T[] ReadCustom<T>(uint count) where T : struct, ICustomByteReader => this.ReadCustom<T>((int)count);
 
         public T[] ReadCustom<T>(int count) where T : struct, ICustomByteReader {
             if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
@@ -133,6 +133,35 @@ namespace ArkeCLR.Utilities {
 
             for (var i = 0; i < count; i++)
                 result[i] = this.ReadCustom<T>();
+
+            return result;
+        }
+
+        public T ReadCustom<T, U>(U context) where T : struct, ICustomByteReader<U> {
+            var result = new T();
+
+            result.Read(this, context);
+
+            return result;
+        }
+
+        public T ReadCustom<T, U>(out T result, U context) where T : struct, ICustomByteReader<U> {
+            result = new T();
+
+            result.Read(this, context);
+
+            return result;
+        }
+
+        public T[] ReadCustom<T, U>(uint count, U context) where T : struct, ICustomByteReader<U> => this.ReadCustom<T, U>((int)count, context);
+
+        public T[] ReadCustom<T, U>(int count, U context) where T : struct, ICustomByteReader<U> {
+            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+
+            var result = new T[count];
+
+            for (var i = 0; i < count; i++)
+                result[i] = this.ReadCustom<T, U>(context);
 
             return result;
         }
@@ -174,5 +203,9 @@ namespace ArkeCLR.Utilities {
 
     public interface ICustomByteReader {
         void Read(ByteReader reader);
+    }
+
+    public interface ICustomByteReader<T> {
+        void Read(ByteReader reader, T context);
     }
 }

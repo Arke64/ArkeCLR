@@ -38,7 +38,9 @@ namespace ArkeCLR.Runtime.FileFormats {
             this.BlobStream = new BlobStream(this.FindViewFor(file, metadataStart, "#Blob"));
             this.UserStringsStream = new UserStringStream(this.FindViewFor(file, metadataStart, "#US"));
             this.GuidStream = new GuidStream(this.FindViewFor(file, metadataStart, "#GUID"));
-            this.TablesStream = new TableStream(this.FindViewFor(file, metadataStart, "#~"));
+            this.TablesStream = new TableStream(this, this.FindViewFor(file, metadataStart, "#~"));
+
+            this.TablesStream.ParseTables();
 
             var strings = this.StringsStream.ReadAll().ToList();
             var blobs = this.BlobStream.ReadAll().ToList();

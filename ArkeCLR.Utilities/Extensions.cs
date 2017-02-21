@@ -14,4 +14,11 @@ namespace ArkeCLR.Utilities.Extensions {
                 self.Add(r);
         }
     }
+
+    public static class IEnumerableExtensions {
+        public static void ForEach<T>(this IEnumerable<T> self, Action<T> action) {
+            foreach (var s in self)
+                action(s);
+        }
+    }
 }
