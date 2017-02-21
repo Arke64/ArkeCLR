@@ -14,9 +14,9 @@ namespace ArkeCLR.Runtime.Tables {
         public uint EncBaseIdIdx;
 
         public string Name => this.parent.StringsStream.GetAt(this.NameIdx);
-        public Guid Mvid => this.parent.GuidStream.GetAt(this.MvidIdx);
-        public Guid EncId => this.parent.GuidStream.GetAt(this.EncIdIdx);
-        public Guid EncBaseId => this.parent.GuidStream.GetAt(this.EncBaseIdIdx);
+        public Guid? Mvid => this.parent.GuidStream.GetAt(this.MvidIdx);
+        public Guid? EncId => this.parent.GuidStream.GetAt(this.EncIdIdx);
+        public Guid? EncBaseId => this.parent.GuidStream.GetAt(this.EncBaseIdIdx);
 
         public void Read(ByteReader reader, CliFile context) {
             this.parent = context;
