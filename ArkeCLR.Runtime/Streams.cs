@@ -1,4 +1,5 @@
-﻿using ArkeCLR.Utilities;
+﻿using ArkeCLR.Runtime.Headers;
+using ArkeCLR.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,12 +25,12 @@ namespace ArkeCLR.Runtime.Streams {
         }
 
         protected int ReadEncodedLength() {
-            var first = this.reader.ReadU8();
+            var first = this.reader.ReadU1();
 
             if ((first & 0b1000_0000) == 0b0000_0000) return first & 0b0111_1111;
-            if ((first & 0b1100_0000) == 0b1000_0000) return ((first & 0b0011_1111) << 8) + this.reader.ReadU8();
+            if ((first & 0b1100_0000) == 0b1000_0000) return ((first & 0b0011_1111) << 8) + this.reader.ReadU1();
 
-            return ((first & 0b0001_1111) << 24) + (this.reader.ReadU8() << 16) + (this.reader.ReadU8() << 8) + this.reader.ReadU8();
+            return ((first & 0b0001_1111) << 24) + (this.reader.ReadU1() << 16) + (this.reader.ReadU1() << 8) + this.reader.ReadU1();
         }
     }
 
@@ -42,7 +43,7 @@ namespace ArkeCLR.Runtime.Streams {
     public class BlobStream : Stream<byte[]> {
         public BlobStream(ByteReader reader) : base(reader) { }
 
-        protected override byte[] Get() => this.reader.ReadBytes(this.ReadEncodedLength());
+        protected override byte[] Get() => this.reader.ReadArray<byte>(this.ReadEncodedLength());
     }
 
     public class UserStringStream : Stream<string> {
@@ -54,7 +55,7 @@ namespace ArkeCLR.Runtime.Streams {
             if (length == 0)
                 return string.Empty;
 
-            var data = this.reader.ReadBytes(length);
+            var data = this.reader.ReadArray<byte>(length);
 
             //TODO Do we need to do anything? See II.24.2.4
             if (data[data.Length - 1] == 1) { }
@@ -66,12 +67,19 @@ namespace ArkeCLR.Runtime.Streams {
     public class GuidStream : Stream<Guid> {
         public GuidStream(ByteReader reader) : base(reader) { }
 
-        protected override Guid Get() => new Guid(this.reader.ReadBytes(16));
+        protected override Guid Get() => new Guid(this.reader.ReadArray<byte>(16));
     }
 
+    //TODO Keep heap and simple index sizes in mind. See II.24.2.6
     public class TableStream {
         private ByteReader reader;
 
-        public TableStream(ByteReader reader) => this.reader = reader;
+        public CilTableStreamHeader Header { get; }
+
+        public TableStream(ByteReader reader) {
+            this.reader = reader;
+
+            this.Header = reader.ReadCustom<CilTableStreamHeader>();
+        }
     }
 }

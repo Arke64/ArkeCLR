@@ -107,6 +107,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BitVector.cs" />
     <Compile Include="ByteReader.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Helpers.cs" />

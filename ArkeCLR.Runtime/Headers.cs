@@ -230,6 +230,40 @@ namespace ArkeCLR.Runtime.Headers {
         public override string ToString() => this.Name;
     }
 
+    public struct CilTableStreamHeader : ICustomByteReader {
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        private struct StreamHeader1 {
+            public uint Reserved1;
+            public byte MajorVersion;
+            public byte MinorVersion;
+            public byte HeapSizes;
+            public byte Reserved2;
+            public ulong Valid;
+            public ulong Sorted;
+        }
+
+        public uint Reserved1;
+        public byte MajorVersion;
+        public byte MinorVersion;
+        public BitVector HeapSizes;
+        public byte Reserved2;
+        public BitVector Valid;
+        public BitVector Sorted;
+        public uint[] Rows;
+
+        public void Read(ByteReader file) {
+            var header1 = file.ReadStruct<StreamHeader1>();
+            this.Reserved1 = header1.Reserved1;
+            this.MajorVersion = header1.MajorVersion;
+            this.MinorVersion = header1.MinorVersion;
+            this.HeapSizes = new BitVector(header1.HeapSizes);
+            this.Reserved2 = header1.Reserved2;
+            this.Valid = new BitVector(header1.Valid);
+            this.Sorted = new BitVector(header1.Sorted);
+            this.Rows = file.ReadArray<uint>(this.Valid.CountSet());
+        }
+    }
+
     public enum Machine : ushort {
         Unknown = 0x0000,
         Am33 = 0x01D3,
