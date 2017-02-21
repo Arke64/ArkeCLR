@@ -27,7 +27,7 @@ namespace ArkeCLR.Utilities {
             return result;
         }
 
-        private bool CanRead(int length, bool throwIfCant) => (this.Position + length < this.Length && length >= 0) || (throwIfCant ? throw new IndexOutOfRangeException() : false);
+        private bool CanRead(int length, bool throwIfCant) => (length == 0 || (this.Position + length <= this.Length && length > 0)) || (throwIfCant ? throw new IndexOutOfRangeException() : false);
 
         public void Seek(uint position, SeekOrigin seekOrigin) => this.Seek((int)position, seekOrigin);
 

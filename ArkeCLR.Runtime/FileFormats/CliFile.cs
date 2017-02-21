@@ -54,9 +54,5 @@ namespace ArkeCLR.Runtime.FileFormats {
 
             return file.CreateView(metadataStart + header.Offset, header.Size);
         }
-
-        private void ReadStreams(ByteReader file) {
-
-        }
     }
 }

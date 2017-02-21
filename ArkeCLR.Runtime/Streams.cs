@@ -7,14 +7,19 @@ using System.Text;
 
 namespace ArkeCLR.Runtime.Streams {
     public abstract class Stream<T> {
+        private Dictionary<int, T> cache = new Dictionary<int, T>();
+
         protected ByteReader reader;
 
         public Stream(ByteReader reader) => this.reader = reader;
 
         public T GetAt(int index) {
+            if (this.cache.TryGetValue(index, out var val))
+                return val;
+
             this.reader.Seek(index, SeekOrigin.Begin);
 
-            return this.Get();
+            return this.cache[index] = this.Get();
         }
 
         protected abstract T Get();
