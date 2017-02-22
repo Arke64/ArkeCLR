@@ -5,6 +5,7 @@ using ArkeCLR.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace ArkeCLR.Runtime.Streams {
@@ -87,11 +88,30 @@ namespace ArkeCLR.Runtime.Streams {
 
     //TODO Keep heap and simple index sizes in mind. See II.24.2.6
     public class TableStream {
+        private static Dictionary<CodedIndexType, TableType[]> TableMap;
+        private static Dictionary<CodedIndexType, int> SizeMap;
+        private static Dictionary<CodedIndexType, int> SizeMaskMap;
+        private static Dictionary<CodedIndexType, int> MaxRows;
+
         private readonly ByteReader reader;
         private readonly CliFile parent;
 
         public CilTableStreamHeader Header { get; }
         public IReadOnlyList<Module> Modules { get; private set; }
+        public IReadOnlyList<TypeRef> TypeRefs { get; private set; }
+
+        static TableStream() {
+            TableStream.TableMap = new Dictionary<CodedIndexType, TableType[]> {
+                [CodedIndexType.ResolutionScope] = new[] { TableType.Module, TableType.ModuleRef, TableType.AssemblyRef, TableType.TypeRef },
+            };
+
+            TableStream.SizeMap = SizeMap = new Dictionary<CodedIndexType, int> {
+                [CodedIndexType.ResolutionScope] = 2,
+            };
+
+            TableStream.SizeMaskMap = TableStream.SizeMap.ToDictionary(d => d.Key, d => (1 << d.Value) - 1);
+            TableStream.MaxRows = TableStream.SizeMap.ToDictionary(d => d.Key, d => (int)Math.Pow(2, 16 - d.Value));
+        }
 
         public TableStream(CliFile parent, ByteReader reader) {
             this.reader = reader;
@@ -104,18 +124,78 @@ namespace ArkeCLR.Runtime.Streams {
             IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<CliFile> => this.reader.ReadCustom<T, CliFile>(this.Header.Rows[(int)table], this.parent);
 
             this.Modules = read<Module>(TableType.Module);
+            this.TypeRefs = read<TypeRef>(TableType.TypeRef);
         }
 
-        public uint ReadHeapIndex(HeapType heap) => this.Header.HeapSizes[(int)heap] ? this.reader.ReadU4() : this.reader.ReadU2();
+        public uint ReadHeapIndex(HeapType type) => this.Header.HeapSizes[(int)type] ? this.reader.ReadU4() : this.reader.ReadU2();
+
+        public TableIndex ReadCodexIndex(CodedIndexType type) {
+            var idx = new TableIndex { Row = this.reader.ReadU2() };
+
+            idx.Table = TableStream.TableMap[type][idx.Row & TableStream.SizeMaskMap[type]];
+
+            idx.Row >>= TableStream.SizeMap[type];
+
+            if (this.Header.Rows[(int)idx.Table] >= TableStream.MaxRows[type])
+                idx.Row |= (ushort)(this.reader.ReadU2() << 16);
+
+            return idx;
+        }
+    }
+
+    public struct TableIndex {
+        public TableType Table;
+        public uint Row;
+    }
+
+    public enum CodedIndexType {
+        ResolutionScope
     }
 
     public enum HeapType {
         String = 0,
         Guid = 1,
         Blob = 2
-    } 
+    }
 
-    public enum TableType {
-        Module = 0
+    public enum TableType : byte {
+        Assembly = 0x20,
+        AssemblyOS = 0x22,
+        AssemblyProcessor = 0x21,
+        AssemblyRef = 0x23,
+        AssemblyRefOS = 0x25,
+        AssemblyRefProcessor = 0x24,
+        ClassLayout = 0x0F,
+        Constant = 0x0B,
+        CustomAttribute = 0x0C,
+        DeclSecurity = 0x0E,
+        EventMap = 0x12,
+        Event = 0x14,
+        ExportedType = 0x27,
+        Field = 0x04,
+        FieldLayout = 0x10,
+        FieldMarshal = 0x0D,
+        FieldRVA = 0x1D,
+        File = 0x26,
+        GenericParam = 0x2A,
+        GenericParamConstraint = 0x2C,
+        ImplMap = 0x1C,
+        InterfaceImpl = 0x09,
+        ManifestResource = 0x28,
+        MemberRef = 0x0A,
+        MethodDef = 0x06,
+        MethodImpl = 0x19,
+        MethodSemantics = 0x18,
+        MethodSpec = 0x2B,
+        Module = 0x00,
+        ModuleRef = 0x1A,
+        NestedClass = 0x29,
+        Param = 0x08,
+        Property = 0x17,
+        PropertyMap = 0x15,
+        StandAloneSig = 0x11,
+        TypeDef = 0x02,
+        TypeRef = 0x01,
+        TypeSpec = 0x1B
     }
 }

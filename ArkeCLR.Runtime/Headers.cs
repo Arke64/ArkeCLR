@@ -1,6 +1,8 @@
 ﻿using ArkeCLR.Utilities;
 using ArkeCLR.Utilities.Extensions;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -260,7 +262,11 @@ namespace ArkeCLR.Runtime.Headers {
             this.Reserved2 = header1.Reserved2;
             this.Valid = new BitVector(header1.Valid);
             this.Sorted = new BitVector(header1.Sorted);
-            this.Rows = file.ReadArray<uint>(this.Valid.CountSet());
+
+            var rows = file.ReadArray<uint>(this.Valid.CountSet());
+            var i = 0;
+
+            this.Rows = this.Valid.Select(v => v ? rows[i++] : 0).ToArray();
         }
     }
 
