@@ -128,11 +128,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArkeCLR.Runtime\ArkeCLR.Runtime.csproj">
-      <Project>{9c2de933-bec0-44e0-bc26-35f66b2802be}</Project>
+      <Project>{09c729ee-0097-4315-a406-040dd4b2aaf5}</Project>
       <Name>ArkeCLR.Runtime</Name>
     </ProjectReference>
     <ProjectReference Include="..\ArkeCLR.Utilities\ArkeCLR.Utilities.csproj">
-      <Project>{79938105-eb4a-4ed0-b61d-dfa7943fb6f1}</Project>
+      <Project>{694a348c-b404-413e-b1cb-57cc89e4b6ac}</Project>
       <Name>ArkeCLR.Utilities</Name>
     </ProjectReference>
   </ItemGroup>
