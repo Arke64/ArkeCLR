@@ -88,10 +88,10 @@ namespace ArkeCLR.Runtime.Streams {
 
     //TODO Keep heap and simple index sizes in mind. See II.24.2.6
     public class TableStream {
-        private static Dictionary<CodedIndexType, TableType[]> TableMap;
-        private static Dictionary<CodedIndexType, int> SizeMap;
-        private static Dictionary<CodedIndexType, int> SizeMaskMap;
-        private static Dictionary<CodedIndexType, int> MaxRows;
+        private static Dictionary<CodedIndexType, TableType[]> CodedIndexTableMap;
+        private static Dictionary<CodedIndexType, int> CodedIndexSizeMap;
+        private static Dictionary<CodedIndexType, int> CodedIndexSizeMaskMap;
+        private static Dictionary<CodedIndexType, int> CodedIndexMaxRows;
 
         private readonly ByteReader reader;
         private readonly CliFile parent;
@@ -99,18 +99,21 @@ namespace ArkeCLR.Runtime.Streams {
         public CilTableStreamHeader Header { get; }
         public IReadOnlyList<Module> Modules { get; private set; }
         public IReadOnlyList<TypeRef> TypeRefs { get; private set; }
+        public IReadOnlyList<TypeDef> TypeDefs { get; private set; }
 
         static TableStream() {
-            TableStream.TableMap = new Dictionary<CodedIndexType, TableType[]> {
+            TableStream.CodedIndexTableMap = new Dictionary<CodedIndexType, TableType[]> {
                 [CodedIndexType.ResolutionScope] = new[] { TableType.Module, TableType.ModuleRef, TableType.AssemblyRef, TableType.TypeRef },
+                [CodedIndexType.TypeDefOrRef] = new[] { TableType.TypeDef, TableType.TypeRef, TableType.TypeSpec },
             };
 
-            TableStream.SizeMap = SizeMap = new Dictionary<CodedIndexType, int> {
+            TableStream.CodedIndexSizeMap = new Dictionary<CodedIndexType, int> {
                 [CodedIndexType.ResolutionScope] = 2,
+                [CodedIndexType.TypeDefOrRef] = 2,
             };
 
-            TableStream.SizeMaskMap = TableStream.SizeMap.ToDictionary(d => d.Key, d => (1 << d.Value) - 1);
-            TableStream.MaxRows = TableStream.SizeMap.ToDictionary(d => d.Key, d => (int)Math.Pow(2, 16 - d.Value));
+            TableStream.CodedIndexSizeMaskMap = TableStream.CodedIndexSizeMap.ToDictionary(d => d.Key, d => (1 << d.Value) - 1);
+            TableStream.CodedIndexMaxRows = TableStream.CodedIndexSizeMap.ToDictionary(d => d.Key, d => (int)Math.Pow(2, 16 - d.Value));
         }
 
         public TableStream(CliFile parent, ByteReader reader) {
@@ -125,6 +128,7 @@ namespace ArkeCLR.Runtime.Streams {
 
             this.Modules = read<Module>(TableType.Module);
             this.TypeRefs = read<TypeRef>(TableType.TypeRef);
+            this.TypeDefs = read<TypeDef>(TableType.TypeDef);
         }
 
         public uint ReadHeapIndex(HeapType type) => this.Header.HeapSizes[(int)type] ? this.reader.ReadU4() : this.reader.ReadU2();
@@ -132,12 +136,21 @@ namespace ArkeCLR.Runtime.Streams {
         public TableIndex ReadCodexIndex(CodedIndexType type) {
             var idx = new TableIndex { Row = this.reader.ReadU2() };
 
-            idx.Table = TableStream.TableMap[type][idx.Row & TableStream.SizeMaskMap[type]];
+            idx.Table = TableStream.CodedIndexTableMap[type][idx.Row & TableStream.CodedIndexSizeMaskMap[type]];
 
-            idx.Row >>= TableStream.SizeMap[type];
+            idx.Row >>= TableStream.CodedIndexSizeMap[type];
 
-            if (this.Header.Rows[(int)idx.Table] >= TableStream.MaxRows[type])
-                idx.Row |= (ushort)(this.reader.ReadU2() << 16);
+            if (this.Header.Rows[(int)idx.Table] >= TableStream.CodedIndexMaxRows[type])
+                idx.Row |= (uint)(this.reader.ReadU2() << (16 - TableStream.CodedIndexSizeMap[type]));
+
+            return idx;
+        }
+
+        public TableIndex ReadIndex(TableType type) {
+            var idx = new TableIndex { Table = type, Row = this.reader.ReadU2() };
+
+            if (this.Header.Rows[(int)idx.Table] >= 65536)
+                idx.Row |= (uint)(this.reader.ReadU2() << 16);
 
             return idx;
         }
@@ -149,7 +162,8 @@ namespace ArkeCLR.Runtime.Streams {
     }
 
     public enum CodedIndexType {
-        ResolutionScope
+        ResolutionScope,
+        TypeDefOrRef
     }
 
     public enum HeapType {

@@ -119,6 +119,7 @@
     <Compile Include="FileFormats\DosFile.cs" />
     <Compile Include="FileFormats\PeFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tables\TypeDef.cs" />
     <Compile Include="Tables\TypeRef.cs" />
     <Compile Include="Tables\Module.cs" />
   </ItemGroup>
