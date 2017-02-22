@@ -1,22 +1,20 @@
 ﻿using ArkeCLR.Runtime.FileFormats;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace ArkeCLR.Runtime {
     public class Host {
-        private readonly AssemblyName entryAssemblyName;
         private readonly IAssemblyResolver assemblyResolver;
+        private CliFile entryAssembly;
 
-        public Host(AssemblyName entryAssemblyName, IAssemblyResolver assemblyResolver) {
-            this.entryAssemblyName = entryAssemblyName;
-            this.assemblyResolver = assemblyResolver;
+        public Host(IAssemblyResolver assemblyResolver) => this.assemblyResolver = assemblyResolver;
+
+        public void Resolve(string entryAssemblyPath) {
+            var name = new AssemblyName(Path.GetFileNameWithoutExtension(entryAssemblyPath), entryAssemblyPath);
+            var (found, reader) = this.assemblyResolver.Resolve(name);
+
+            this.entryAssembly = new CliFile(found ? reader : throw new CouldNotResolveAssemblyException(name));
         }
 
-        public async Task<int> StartAsync() {
-            var (found, reader) = await this.assemblyResolver.ResolveAsync(this.entryAssemblyName);
-
-            var file = new CliFile(found ? reader : throw new CouldNotResolveAssemblyException(this.entryAssemblyName));
-            
-            return 0;
-        }
+        public int Run() => 0;
     }
 }
