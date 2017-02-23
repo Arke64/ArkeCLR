@@ -1,8 +1,6 @@
 ﻿using ArkeCLR.Utilities.Helpers;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -11,92 +9,80 @@ namespace ArkeCLR.Utilities {
         private readonly byte[] buffer;
 
         public int Position { get; private set; }
-        public int Length => this.buffer.Length;
+        public int Length { get; }
 
-        public ByteReader(byte[] buffer) {
-            if (!BitConverter.IsLittleEndian) throw new InvalidOperationException("Can only run on a little endian system.");
+        public ByteReader(byte[] buffer) : this(buffer, 0, buffer?.Length ?? 0) { }
 
-            this.buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
+        public ByteReader(byte[] buffer, int offset, int size) {
+            if (buffer == null) throw new ArgumentNullException(nameof(buffer));
+            if (size <= 0 || offset + size > buffer.Length) throw new ArgumentOutOfRangeException(nameof(size));
 
+            this.buffer = new byte[size];
+
+            Array.Copy(buffer, offset, this.buffer, 0, size);
+
+            this.Length = size;
             this.Position = 0;
         }
-
-        private T AdvanceAndReturn<T>(T result, int amount) {
-            this.Position += amount;
-
-            return result;
-        }
-
-        private bool CanRead(int length, bool throwIfCant) => (length == 0 || (this.Position + length <= this.Length && length > 0)) || (throwIfCant ? throw new IndexOutOfRangeException() : false);
 
         public void Seek(uint position, SeekOrigin seekOrigin) => this.Seek((int)position, seekOrigin);
 
         public void Seek(int position, SeekOrigin seekOrigin) {
             if (seekOrigin == SeekOrigin.Begin) {
-                if (position < 0 || position > this.Length) throw new IndexOutOfRangeException();
-
                 this.Position = position;
             }
             else if (seekOrigin == SeekOrigin.Current) {
-                var newPosition = this.Position + position;
-
-                if (newPosition < 0 || newPosition > this.Length) throw new IndexOutOfRangeException();
-
-                this.Position = newPosition;
+                this.Position += position;
             }
-            else {
-                throw new NotSupportedException();
+            else if (seekOrigin == SeekOrigin.End) {
+                this.Position = this.Length + position;
             }
         }
 
-        public ByteReader CreateView(uint offset, uint size) {
-            if (offset + size > this.Length) throw new IndexOutOfRangeException();
+        public ByteReader CreateView(int offset, int size) => new ByteReader(this.buffer, offset, size);
+        public ByteReader CreateView(uint offset, uint size) => this.CreateView((int)offset, (int)size);
 
-            var buffer = new byte[size];
-
-            Array.Copy(this.buffer, (int)offset, buffer, 0, (int)size);
-
-            return new ByteReader(buffer);
-        }
-
-        //TODO These need to check for reading beyond the end
         public byte ReadU1() => this.buffer[this.Position++];
-        public ushort ReadU2() => this.AdvanceAndReturn(BitConverter.ToUInt16(this.buffer, this.Position), sizeof(ushort));
-        public uint ReadU4() => this.AdvanceAndReturn(BitConverter.ToUInt32(this.buffer, this.Position), sizeof(uint));
-        public ulong ReadU8() => this.AdvanceAndReturn(BitConverter.ToUInt64(this.buffer, this.Position), sizeof(ulong));
+        public ushort ReadU2() { var r = BitConverter.ToUInt16(this.buffer, this.Position); this.Position += sizeof(ushort); return r; }
+        public uint ReadU4() { var r = BitConverter.ToUInt32(this.buffer, this.Position); this.Position += sizeof(uint); return r; }
+        public ulong ReadU8() { var r = BitConverter.ToUInt64(this.buffer, this.Position); this.Position += sizeof(ulong); return r; }
         public sbyte ReadI1() => (sbyte)this.buffer[this.Position++];
-        public short ReadI2() => this.AdvanceAndReturn(BitConverter.ToInt16(this.buffer, this.Position), sizeof(short));
-        public int ReadI4() => this.AdvanceAndReturn(BitConverter.ToInt32(this.buffer, this.Position), sizeof(int));
-        public long ReadI8() => this.AdvanceAndReturn(BitConverter.ToInt64(this.buffer, this.Position), sizeof(long));
+        public short ReadI2() { var r = BitConverter.ToInt16(this.buffer, this.Position); this.Position += sizeof(short); return r; }
+        public int ReadI4() { var r = BitConverter.ToInt32(this.buffer, this.Position); this.Position += sizeof(int); return r; }
+        public long ReadI8() { var r = BitConverter.ToInt64(this.buffer, this.Position); this.Position += sizeof(long); return r; }
 
-        public string ReadStringFixed(Encoding encoding, uint length) => this.ReadStringFixed(encoding, (int)length);
-        public string ReadStringFixed(Encoding encoding, uint length, byte padder) => this.ReadStringFixed(encoding, (int)length, padder);
+        public string ReadString(Encoding encoding, uint length) => this.ReadString(encoding, (int)length, 0);
+        public string ReadString(Encoding encoding, uint maxLength, byte padder) => this.ReadString(encoding, (int)maxLength, padder);
 
-        public string ReadStringFixed(Encoding encoding, int length) => encoding.GetString(this.ReadArray<byte>(length));
-        public string ReadStringFixed(Encoding encoding, int length, byte padder) => encoding.GetString(this.ReadArray<byte>(length).TakeWhile(b => b != padder).ToArray());
+        public string ReadString(Encoding encoding, int length) => this.ReadString(encoding, length, 0);
 
-        public string ReadStringAligned(Encoding encoding) => this.ReadStringAligned(encoding, 0, 1);
-        public string ReadStringAligned(Encoding encoding, byte padder) => this.ReadStringAligned(encoding, padder, 1);
+        public string ReadString(Encoding encoding, int maxLength, byte padder) {
+            var end = this.Position + maxLength;
 
-        public string ReadStringAligned(Encoding encoding, byte padder, int paddingMultiple) {
-            var bytes = new List<byte>();
+            while (this.buffer[--end] == padder)
+                ;
 
-            while (true) {
-                var cur = this.ReadU1();
+            var result = encoding.GetString(this.buffer, this.Position, end + 1 - this.Position);
 
-                if (cur == padder)
-                    break;
+            this.Position += maxLength;
 
-                bytes.Add(cur);
-            }
+            return result;
+        }
 
-            var diff = MathEx.RoundUpToNearestMultiple(this.Position, paddingMultiple) - this.Position;
+        public string ReadStringTerminated(Encoding encoding) => this.ReadStringTerminated(encoding, 0, 1);
+        public string ReadStringTerminated(Encoding encoding, byte terminator) => this.ReadStringTerminated(encoding, terminator, 1);
 
-            this.CanRead(diff, true);
+        public string ReadStringTerminated(Encoding encoding, byte terminator, int paddingMultiple) {
+            var start = this.Position;
 
-            this.Position += diff;
+            while (this.buffer[this.Position++] != terminator)
+                ;
 
-            return encoding.GetString(bytes.ToArray());
+            var result = encoding.GetString(this.buffer, start, this.Position - 1 - start);
+
+            this.Position = MathEx.RoundUpToNearestMultiple(this.Position, paddingMultiple);
+
+            return result;
         }
 
         public T[] ReadArray<T>(uint count) => this.ReadArray<T>((int)count);
@@ -104,9 +90,6 @@ namespace ArkeCLR.Utilities {
         public T[] ReadArray<T>(int count) {
             var size = Marshal.SizeOf(default(T));
             var bytes = count * size;
-
-            this.CanRead(bytes, true);
-
             var buffer = new T[count];
 
             Buffer.BlockCopy(this.buffer, this.Position, buffer, 0, bytes);
@@ -145,14 +128,6 @@ namespace ArkeCLR.Utilities {
             return result;
         }
 
-        public T ReadCustom<T, U>(out T result, U context) where T : struct, ICustomByteReader<U> {
-            result = new T();
-
-            result.Read(this, context);
-
-            return result;
-        }
-
         public T[] ReadCustom<T, U>(uint count, U context) where T : struct, ICustomByteReader<U> => this.ReadCustom<T, U>((int)count, context);
 
         public T[] ReadCustom<T, U>(int count, U context) where T : struct, ICustomByteReader<U> {
@@ -169,8 +144,6 @@ namespace ArkeCLR.Utilities {
         public T ReadStruct<T>() where T : struct {
             var size = Marshal.SizeOf(default(T));
             var ptr = IntPtr.Zero;
-
-            this.CanRead(size, true);
 
             try {
                 ptr = Marshal.AllocHGlobal(size);

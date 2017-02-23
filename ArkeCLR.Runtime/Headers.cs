@@ -198,7 +198,7 @@ namespace ArkeCLR.Runtime.Headers {
             this.Reserved1 = root1.Reserved1;
             this.VersionLength = root1.VersionLength;
 
-            this.Version = file.ReadStringFixed(Encoding.UTF8, this.VersionLength, 0);
+            this.Version = file.ReadString(Encoding.UTF8, this.VersionLength, 0);
 
             var root2 = file.ReadStruct<RootHeader2>();
             this.Flags = root2.Flags;
@@ -226,7 +226,7 @@ namespace ArkeCLR.Runtime.Headers {
             this.Offset = header1.Offset;
             this.Size = header1.Size;
 
-            this.Name = file.ReadStringAligned(Encoding.ASCII, 0, 4);
+            this.Name = file.ReadStringTerminated(Encoding.ASCII, 0, 4);
         }
 
         public override string ToString() => this.Name;
