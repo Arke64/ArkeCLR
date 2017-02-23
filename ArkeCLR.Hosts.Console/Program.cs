@@ -28,7 +28,7 @@ namespace ArkeCLR.Hosts.Console {
                 log($"Exited with code {host.Run()}.");
             }
             catch (CouldNotResolveAssemblyException ex) {
-                log($"Could not find assembly '{ex.AssemblyName.FullName}'.");
+                log(ex.ToString());
 
                 Debugger.Break();
             }

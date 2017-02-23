@@ -2,7 +2,7 @@
 
 namespace ArkeCLR.Runtime {
     public class InvalidFileException : Exception {
-        public InvalidFileException(string message) : base(message, null) { }
-        public InvalidFileException(string message, Exception innerException) : base(message, innerException) { }
+        public InvalidFileException(string message) : base(message) { }
+        public InvalidFileException(string parent, string part) : base($"{parent}.{part}") { }
     }
 }

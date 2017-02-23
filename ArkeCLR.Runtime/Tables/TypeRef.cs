@@ -1,10 +1,10 @@
-﻿using ArkeCLR.Runtime.FileFormats;
-using ArkeCLR.Runtime.Streams;
+﻿using ArkeCLR.Runtime.Streams;
+using ArkeCLR.Runtime.TypeSystem;
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct TypeRef : ICustomByteReader<CliFile> {
-        private CliFile parent;
+    public struct TypeRef : ICustomByteReader<Assembly> {
+        private Assembly parent;
 
         public TableIndex ResolutionScopeIdx;
         public uint TypeNameIdx;
@@ -15,7 +15,7 @@ namespace ArkeCLR.Runtime.Tables {
 
         public override string ToString() => $"{this.TypeNamespace}.{this.TypeName}";
 
-        public void Read(ByteReader reader, CliFile context) {
+        public void Read(ByteReader reader, Assembly context) {
             this.parent = context;
 
             this.ResolutionScopeIdx = context.TablesStream.ReadCodexIndex(CodedIndexType.ResolutionScope);

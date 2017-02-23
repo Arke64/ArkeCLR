@@ -1,11 +1,11 @@
-﻿using ArkeCLR.Runtime.FileFormats;
-using ArkeCLR.Runtime.Streams;
+﻿using ArkeCLR.Runtime.Streams;
+using ArkeCLR.Runtime.TypeSystem;
 using ArkeCLR.Utilities;
 using System;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct TypeDef : ICustomByteReader<CliFile> {
-        private CliFile parent;
+    public struct TypeDef : ICustomByteReader<Assembly> {
+        private Assembly parent;
 
         //TODO Need to add the actual enum
         public uint Flags;
@@ -22,7 +22,7 @@ namespace ArkeCLR.Runtime.Tables {
 
         public override string ToString() => $"{this.TypeNamespace}.{this.TypeName}";
 
-        public void Read(ByteReader reader, CliFile context) {
+        public void Read(ByteReader reader, Assembly context) {
             this.parent = context;
 
             this.Flags = reader.ReadU4();

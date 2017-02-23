@@ -1,10 +1,10 @@
-﻿using ArkeCLR.Runtime.FileFormats;
+﻿using ArkeCLR.Runtime.TypeSystem;
 using System.IO;
 
 namespace ArkeCLR.Runtime {
     public class Host {
         private readonly IAssemblyResolver assemblyResolver;
-        private CliFile entryAssembly;
+        private Assembly entryAssembly;
 
         public Host(IAssemblyResolver assemblyResolver) => this.assemblyResolver = assemblyResolver;
 
@@ -12,7 +12,10 @@ namespace ArkeCLR.Runtime {
             var name = new AssemblyName(Path.GetFileNameWithoutExtension(entryAssemblyPath), entryAssemblyPath);
             var (found, reader) = this.assemblyResolver.Resolve(name);
 
-            this.entryAssembly = new CliFile(found ? reader : throw new CouldNotResolveAssemblyException(name));
+            if (!found)
+                throw new CouldNotResolveAssemblyException(name);
+
+            this.entryAssembly = new Assembly(reader, new PeFile(reader));
         }
 
         public int Run() => 0;

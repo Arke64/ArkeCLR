@@ -1,11 +1,11 @@
-﻿using ArkeCLR.Runtime.FileFormats;
-using ArkeCLR.Runtime.Streams;
+﻿using ArkeCLR.Runtime.Streams;
+using ArkeCLR.Runtime.TypeSystem;
 using ArkeCLR.Utilities;
 using System;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct Module : ICustomByteReader<CliFile> {
-        private CliFile parent;
+    public struct Module : ICustomByteReader<Assembly> {
+        private Assembly parent;
 
         public ushort Generation;
         public uint NameIdx;
@@ -20,7 +20,7 @@ namespace ArkeCLR.Runtime.Tables {
 
         public override string ToString() => this.Name;
 
-        public void Read(ByteReader reader, CliFile context) {
+        public void Read(ByteReader reader, Assembly context) {
             this.parent = context;
 
             this.Generation = reader.ReadU2();

@@ -1,6 +1,6 @@
-﻿using ArkeCLR.Runtime.FileFormats;
-using ArkeCLR.Runtime.Headers;
+﻿using ArkeCLR.Runtime.Headers;
 using ArkeCLR.Runtime.Tables;
+using ArkeCLR.Runtime.TypeSystem;
 using ArkeCLR.Utilities;
 using System;
 using System.Collections.Generic;
@@ -94,7 +94,7 @@ namespace ArkeCLR.Runtime.Streams {
         private static Dictionary<CodedIndexType, int> CodedIndexMaxRows;
 
         private readonly ByteReader reader;
-        private readonly CliFile parent;
+        private readonly Assembly parent;
 
         public CilTableStreamHeader Header { get; }
         public IReadOnlyList<Module> Modules { get; private set; }
@@ -116,7 +116,7 @@ namespace ArkeCLR.Runtime.Streams {
             TableStream.CodedIndexMaxRows = TableStream.CodedIndexSizeMap.ToDictionary(d => d.Key, d => (int)Math.Pow(2, 16 - d.Value));
         }
 
-        public TableStream(CliFile parent, ByteReader reader) {
+        public TableStream(Assembly parent, ByteReader reader) {
             this.reader = reader;
             this.parent = parent;
 
@@ -124,7 +124,7 @@ namespace ArkeCLR.Runtime.Streams {
         }
 
         public void ParseTables() {
-            IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<CliFile> => this.reader.ReadCustom<T, CliFile>(this.Header.Rows[(int)table], this.parent);
+            IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<Assembly> => this.reader.ReadCustom<T, Assembly>(this.Header.Rows[(int)table], this.parent);
 
             this.Modules = read<Module>(TableType.Module);
             this.TypeRefs = read<TypeRef>(TableType.TypeRef);
