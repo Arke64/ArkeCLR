@@ -1,11 +1,10 @@
 ﻿using ArkeCLR.Utilities;
-using ArkeCLR.Utilities.Extensions;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ArkeCLR.Runtime.Headers {
+namespace ArkeCLR.Runtime.Files {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct CliHeader {
         public uint HeaderSize;

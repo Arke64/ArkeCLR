@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace ArkeCLR.Utilities.Extensions {
     public static class EnumExtensions {
         public static bool IsValid<T>(this T self) => Enum.IsDefined(typeof(T), self);
+        public static bool IsInvalid<T>(this T self) => !Enum.IsDefined(typeof(T), self);
     }
 
     public static class ICollectionExtensions {

@@ -1,10 +1,12 @@
-﻿using ArkeCLR.Runtime.TypeSystem;
+﻿using ArkeCLR.Runtime.Files;
+using ArkeCLR.Utilities.Extensions;
+using System;
 using System.IO;
 
 namespace ArkeCLR.Runtime {
     public class Host {
         private readonly IAssemblyResolver assemblyResolver;
-        private Assembly entryAssembly;
+        private CliFile entryAssembly;
 
         public Host(IAssemblyResolver assemblyResolver) => this.assemblyResolver = assemblyResolver;
 
@@ -15,9 +17,20 @@ namespace ArkeCLR.Runtime {
             if (!found)
                 throw new CouldNotResolveAssemblyException(name);
 
-            this.entryAssembly = new Assembly(reader, new PeFile(reader));
+            this.entryAssembly = new CliFile(reader);
         }
 
-        public int Run() => 0;
+        public int Run() {
+            this.entryAssembly.StringStream.ReadAll().ForEach(s => Console.WriteLine(s));
+            this.entryAssembly.BlobStream.ReadAll().ForEach(s => Console.WriteLine(s));
+            this.entryAssembly.UserStringsStream.ReadAll().ForEach(s => Console.WriteLine(s));
+            this.entryAssembly.GuidStream.ReadAll().ForEach(s => Console.WriteLine(s));
+
+            this.entryAssembly.TableStream.Modules.ForEach(t => Console.WriteLine(t));
+            this.entryAssembly.TableStream.TypeDefs.ForEach(t => Console.WriteLine(t));
+            this.entryAssembly.TableStream.TypeRefs.ForEach(t => Console.WriteLine(t));
+
+            return 0;
+        }
     }
 }

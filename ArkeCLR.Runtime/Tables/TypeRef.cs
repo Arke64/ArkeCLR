@@ -1,26 +1,16 @@
 ﻿using ArkeCLR.Runtime.Streams;
-using ArkeCLR.Runtime.TypeSystem;
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct TypeRef : ICustomByteReader<Assembly> {
-        private Assembly parent;
+    public struct TypeRef : ICustomByteReader<TableStreamReader> {
+        public TableIndex ResolutionScope;
+        public uint TypeName;
+        public uint TypeNamespace;
 
-        public TableIndex ResolutionScopeIdx;
-        public uint TypeNameIdx;
-        public uint TypeNamespaceIdx;
-
-        public string TypeName => this.parent.StringsStream.GetAt(this.TypeNameIdx);
-        public string TypeNamespace => this.parent.StringsStream.GetAt(this.TypeNamespaceIdx);
-
-        public override string ToString() => $"{this.TypeNamespace}.{this.TypeName}";
-
-        public void Read(ByteReader reader, Assembly context) {
-            this.parent = context;
-
-            this.ResolutionScopeIdx = context.TablesStream.ReadCodexIndex(CodedIndexType.ResolutionScope);
-            this.TypeNameIdx = context.TablesStream.ReadHeapIndex(HeapType.String);
-            this.TypeNamespaceIdx = context.TablesStream.ReadHeapIndex(HeapType.String);
+        public void Read(TableStreamReader reader) {
+            this.ResolutionScope = reader.ReadCodedIndex(CodedIndexType.ResolutionScope);
+            this.TypeName = reader.ReadHeapIndex(HeapType.String);
+            this.TypeNamespace = reader.ReadHeapIndex(HeapType.String);
         }
     }
 }

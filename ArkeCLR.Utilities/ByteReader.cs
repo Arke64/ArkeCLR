@@ -1,15 +1,16 @@
-﻿using ArkeCLR.Utilities.Helpers;
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ArkeCLR.Utilities {
-    public class ByteReader {
+    public class ByteReader { 
         private readonly byte[] buffer;
 
         public int Position { get; private set; }
         public int Length { get; }
+
+        protected ByteReader(ByteReader reader) => this.buffer = reader.buffer;
 
         public ByteReader(byte[] buffer) : this(buffer, 0, buffer?.Length ?? 0) { }
 
@@ -80,7 +81,7 @@ namespace ArkeCLR.Utilities {
 
             var result = encoding.GetString(this.buffer, start, this.Position - 1 - start);
 
-            this.Position = MathEx.RoundUpToNearestMultiple(this.Position, paddingMultiple);
+            this.Position = paddingMultiple * ((this.Position + (paddingMultiple - 1)) / paddingMultiple);
 
             return result;
         }
@@ -99,44 +100,41 @@ namespace ArkeCLR.Utilities {
             return buffer;
         }
 
-        public T ReadCustom<T>() where T : struct, ICustomByteReader {
-            var result = new T();
+        //TODO Find some better way of doing this so we don't need to pass in the derived reader
+        public T[] ReadCustom<T>(uint count) where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(count, this);
+        public T[] ReadCustom<T>(int count) where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(count, this);
+        public T ReadCustom<T>() where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(this);
 
-            result.Read(this);
+        public T[] ReadCustom<T, U>(uint count, U reader) where T : struct, ICustomByteReader<U> => this.ReadCustom<T, U>((int)count, reader);
 
-            return result;
-        }
-
-        public T[] ReadCustom<T>(uint count) where T : struct, ICustomByteReader => this.ReadCustom<T>((int)count);
-
-        public T[] ReadCustom<T>(int count) where T : struct, ICustomByteReader {
+        public T[] ReadCustom<T, U>(int count, U reader) where T : struct, ICustomByteReader<U> {
             if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
 
             var result = new T[count];
 
             for (var i = 0; i < count; i++)
-                result[i] = this.ReadCustom<T>();
+                result[i] = this.ReadCustom<T, U>(reader);
 
             return result;
         }
 
-        public T ReadCustom<T, U>(U context) where T : struct, ICustomByteReader<U> {
+        public T ReadCustom<T, U>(U reader) where T : struct, ICustomByteReader<U> {
             var result = new T();
 
-            result.Read(this, context);
+            result.Read(reader);
 
             return result;
         }
 
-        public T[] ReadCustom<T, U>(uint count, U context) where T : struct, ICustomByteReader<U> => this.ReadCustom<T, U>((int)count, context);
+        public T[] ReadStruct<T>(uint count) where T : struct => this.ReadStruct<T>((int)count);
 
-        public T[] ReadCustom<T, U>(int count, U context) where T : struct, ICustomByteReader<U> {
+        public T[] ReadStruct<T>(int count) where T : struct {
             if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
 
             var result = new T[count];
 
             for (var i = 0; i < count; i++)
-                result[i] = this.ReadCustom<T, U>(context);
+                result[i] = this.ReadStruct<T>();
 
             return result;
         }
@@ -159,26 +157,11 @@ namespace ArkeCLR.Utilities {
                     Marshal.FreeHGlobal(ptr);
             }
         }
-
-        public T[] ReadStruct<T>(uint count) where T : struct => this.ReadStruct<T>((int)count);
-
-        public T[] ReadStruct<T>(int count) where T : struct {
-            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-
-            var result = new T[count];
-
-            for (var i = 0; i < count; i++)
-                result[i] = this.ReadStruct<T>();
-
-            return result;
-        }
     }
 
-    public interface ICustomByteReader {
-        void Read(ByteReader reader);
-    }
+    public interface ICustomByteReader : ICustomByteReader<ByteReader> { }
 
     public interface ICustomByteReader<T> {
-        void Read(ByteReader reader, T context);
+        void Read(T reader);
     }
 }
