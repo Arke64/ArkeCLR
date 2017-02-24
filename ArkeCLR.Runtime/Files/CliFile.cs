@@ -1,6 +1,5 @@
 ﻿using ArkeCLR.Runtime.Streams;
 using ArkeCLR.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,13 +25,13 @@ namespace ArkeCLR.Runtime.Files {
             if (this.CliHeader.Metadata.IsZero) throw new InvalidFileException("Not a managed assembly.");
             if (this.CliMetadataRootHeader.Signature != 0x424A5342) throw new InvalidFileException("Invalid metadata signature.");
 
-            T read<T>(string name, Func<ByteReader, T> creator) => this.StreamHeaders.TryGetValue(name, out var val) ? creator(metadata.CreateView(val.Offset, val.Size)) : default(T);
+            T read<T>() where T : Stream, new() { var res = new T(); if (this.StreamHeaders.TryGetValue(res.Name, out var val)) res.Initialize(metadata.CreateView(val.Offset, val.Size)); return res; }
 
-            this.StringStream = read("#Strings", m => new StringStream(m));
-            this.BlobStream = read("#Blob", m => new BlobStream(m));
-            this.UserStringsStream = read("#US", m => new UserStringStream(m));
-            this.GuidStream = read("#GUID", m => new GuidStream(m));
-            this.TableStream = read("#~", m => new TableStream(this, m));
+            this.StringStream = read<StringStream>();
+            this.BlobStream = read<BlobStream>();
+            this.UserStringsStream = read<UserStringStream>();
+            this.GuidStream = read<GuidStream>();
+            this.TableStream = read<TableStream>();
         }
     }
 }

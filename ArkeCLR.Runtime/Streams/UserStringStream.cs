@@ -1,9 +1,8 @@
-﻿using ArkeCLR.Utilities;
-using System.Text;
+﻿using System.Text;
 
 namespace ArkeCLR.Runtime.Streams {
     public class UserStringStream : Stream<string> {
-        public UserStringStream(ByteReader reader) : base(reader, 0) { }
+        public override string Name => "#US";
 
         protected override string Get() {
             var length = this.ReadEncodedLength();

@@ -7,13 +7,15 @@ using System.Linq;
 
 namespace ArkeCLR.Runtime.Streams {
     //TODO Keep heap and simple index sizes in mind. See II.24.2.6
-    public class TableStream {
-        public CilTableStreamHeader Header { get; }
+    public class TableStream : Stream {
+        public override string Name => "#~";
+
+        public CilTableStreamHeader Header { get; private set; }
         public IReadOnlyList<Module> Modules { get; private set; }
         public IReadOnlyList<TypeRef> TypeRefs { get; private set; }
         public IReadOnlyList<TypeDef> TypeDefs { get; private set; }
 
-        public TableStream(CliFile parent, ByteReader byteReader) {
+        public override void Initialize(ByteReader byteReader) {
             var reader = new TableStreamReader(this, byteReader);
 
             IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<TableStreamReader> => reader.ReadCustom<T, TableStreamReader>(this.Header.Rows[(int)table], reader);

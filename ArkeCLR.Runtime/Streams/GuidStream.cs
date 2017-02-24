@@ -1,10 +1,10 @@
-﻿using ArkeCLR.Utilities;
-using System;
+﻿using System;
 
 namespace ArkeCLR.Runtime.Streams {
-    public class GuidStream : Stream<Guid?> {
-        public GuidStream(ByteReader reader) : base(reader, 1) { }
+    //TODO Need to scale index by 16 and offset it by 1
+    public class GuidStream : Stream<Guid> {
+        public override string Name => "#GUID";
 
-        protected override Guid? Get() => new Guid(this.reader.ReadArray<byte>(16));
+        protected override Guid Get() => new Guid(this.reader.ReadArray<byte>(16));
     }
 }

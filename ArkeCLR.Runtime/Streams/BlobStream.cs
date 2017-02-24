@@ -1,8 +1,6 @@
-﻿using ArkeCLR.Utilities;
-
-namespace ArkeCLR.Runtime.Streams {
+﻿namespace ArkeCLR.Runtime.Streams {
     public class BlobStream : Stream<byte[]> {
-        public BlobStream(ByteReader reader) : base(reader, 0) { }
+        public override string Name => "#Blob";
 
         protected override byte[] Get() => this.reader.ReadArray<byte>(this.ReadEncodedLength());
     }
