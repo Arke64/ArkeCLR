@@ -74,6 +74,10 @@ namespace ArkeCLR.Runtime.Streams {
 
             return idx;
         }
+
+        public void Read(ref uint value, HeapType type) => value = this.ReadIndex(type);
+        public void Read(ref TableIndex value, CodedIndexType type) => value = this.ReadIndex(type);
+        public void Read(ref TableIndex value, TableType type) => value = this.ReadIndex(type);
     }
 
     public struct TableIndex {

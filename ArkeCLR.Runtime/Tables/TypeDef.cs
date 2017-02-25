@@ -12,12 +12,12 @@ namespace ArkeCLR.Runtime.Tables {
         public TableIndex MethodList;
 
         public void Read(TableStreamReader reader) {
-            this.Flags = reader.ReadU4();
-            this.TypeName = reader.ReadIndex(HeapType.String);
-            this.TypeNamespace = reader.ReadIndex(HeapType.String);
-            this.Extends = reader.ReadIndex(CodedIndexType.TypeDefOrRef);
-            this.FieldList = reader.ReadIndex(TableType.Field);
-            this.MethodList = reader.ReadIndex(TableType.MethodDef);
+            reader.Read(ref this.Flags);
+            reader.Read(ref this.TypeName, HeapType.String);
+            reader.Read(ref this.TypeNamespace, HeapType.String);
+            reader.Read(ref this.Extends, CodedIndexType.TypeDefOrRef);
+            reader.Read(ref this.FieldList, TableType.Field);
+            reader.Read(ref this.MethodList, TableType.MethodDef);
         }
     }
 }
