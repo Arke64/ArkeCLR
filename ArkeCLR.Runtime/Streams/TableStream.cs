@@ -14,6 +14,41 @@ namespace ArkeCLR.Runtime.Streams {
         public IReadOnlyList<Module> Modules { get; private set; }
         public IReadOnlyList<TypeRef> TypeRefs { get; private set; }
         public IReadOnlyList<TypeDef> TypeDefs { get; private set; }
+        public IReadOnlyList<Field> Fields { get; private set; }
+        public IReadOnlyList<MethodDef> MethodDefs { get; private set; }
+        public IReadOnlyList<Param> Params { get; private set; }
+        public IReadOnlyList<InterfaceImpl> InterfaceImpls { get; private set; }
+        public IReadOnlyList<MemberRef> MemberRefs { get; private set; }
+        public IReadOnlyList<Constant> Constants { get; private set; }
+        public IReadOnlyList<CustomAttribute> CustomAttributes { get; private set; }
+        public IReadOnlyList<FieldMarshal> FieldMarshals { get; private set; }
+        public IReadOnlyList<DeclSecurity> DeclSecurities { get; private set; }
+        public IReadOnlyList<ClassLayout> ClassLayouts { get; private set; }
+        public IReadOnlyList<FieldLayout> FieldLayouts { get; private set; }
+        public IReadOnlyList<StandAloneSig> StandAloneSigs { get; private set; }
+        public IReadOnlyList<EventMap> EventMaps { get; private set; }
+        public IReadOnlyList<Event> Events { get; private set; }
+        public IReadOnlyList<PropertyMap> PropertyMaps { get; private set; }
+        public IReadOnlyList<Property> Properties { get; private set; }
+        public IReadOnlyList<MethodSemantics> MethodSemantics { get; private set; }
+        public IReadOnlyList<MethodImpl> MethodImpls { get; private set; }
+        public IReadOnlyList<ModuleRef> ModuleRefs { get; private set; }
+        public IReadOnlyList<TypeSpec> TypeSpecs { get; private set; }
+        public IReadOnlyList<ImplMap> ImplMaps { get; private set; }
+        public IReadOnlyList<FieldRVA> FieldRVAs { get; private set; }
+        public IReadOnlyList<Assembly> Assemblies { get; private set; }
+        public IReadOnlyList<AssemblyProcessor> AssemblyProcessors { get; private set; }
+        public IReadOnlyList<AssemblyOS> AssemblyOSs { get; private set; }
+        public IReadOnlyList<AssemblyRef> AssemblyRefs { get; private set; }
+        public IReadOnlyList<AssemblyRefProcessor> AssemblyRefProcessors { get; private set; }
+        public IReadOnlyList<AssemblyRefOS> AssemblyRefOSs { get; private set; }
+        public IReadOnlyList<File> Files { get; private set; }
+        public IReadOnlyList<ExportedType> ExportedTypes { get; private set; }
+        public IReadOnlyList<ManifestResource> ManifestResources { get; private set; }
+        public IReadOnlyList<NestedClass> NestedClasses { get; private set; }
+        public IReadOnlyList<GenericParam> GenericParams { get; private set; }
+        public IReadOnlyList<MethodSpec> MethodSpecs { get; private set; }
+        public IReadOnlyList<GenericParamConstraint> GenericParamConstraints { get; private set; }
 
         public override void Initialize(ByteReader byteReader) {
             var reader = new TableStreamReader(this, byteReader);
@@ -28,6 +63,41 @@ namespace ArkeCLR.Runtime.Streams {
             this.Modules = read<Module>(TableType.Module);
             this.TypeRefs = read<TypeRef>(TableType.TypeRef);
             this.TypeDefs = read<TypeDef>(TableType.TypeDef);
+            this.Fields = read<Field>(TableType.Field);
+            this.MethodDefs = read<MethodDef>(TableType.MethodDef);
+            this.Params = read<Param>(TableType.Param);
+            this.InterfaceImpls = read<InterfaceImpl>(TableType.InterfaceImpl);
+            this.MemberRefs = read<MemberRef>(TableType.MemberRef);
+            this.Constants = read<Constant>(TableType.Constant);
+            this.CustomAttributes = read<CustomAttribute>(TableType.CustomAttribute);
+            this.FieldMarshals = read<FieldMarshal>(TableType.FieldMarshal);
+            this.DeclSecurities = read<DeclSecurity>(TableType.DeclSecurity);
+            this.ClassLayouts = read<ClassLayout>(TableType.ClassLayout);
+            this.FieldLayouts = read<FieldLayout>(TableType.FieldLayout);
+            this.StandAloneSigs = read<StandAloneSig>(TableType.StandAloneSig);
+            this.EventMaps = read<EventMap>(TableType.EventMap);
+            this.Events = read<Event>(TableType.Event);
+            this.PropertyMaps = read<PropertyMap>(TableType.PropertyMap);
+            this.Properties = read<Property>(TableType.Property);
+            this.MethodSemantics = read<MethodSemantics>(TableType.MethodSemantics);
+            this.MethodImpls = read<MethodImpl>(TableType.MethodImpl);
+            this.ModuleRefs = read<ModuleRef>(TableType.ModuleRef);
+            this.TypeSpecs = read<TypeSpec>(TableType.TypeSpec);
+            this.ImplMaps = read<ImplMap>(TableType.ImplMap);
+            this.FieldRVAs = read<FieldRVA>(TableType.FieldRVA);
+            this.Assemblies = read<Assembly>(TableType.Assembly);
+            this.AssemblyProcessors = read<AssemblyProcessor>(TableType.AssemblyProcessor);
+            this.AssemblyOSs = read<AssemblyOS>(TableType.AssemblyOS);
+            this.AssemblyRefs = read<AssemblyRef>(TableType.AssemblyRef);
+            this.AssemblyRefProcessors = read<AssemblyRefProcessor>(TableType.AssemblyRefProcessor);
+            this.AssemblyRefOSs = read<AssemblyRefOS>(TableType.AssemblyRefOS);
+            this.Files = read<File>(TableType.File);
+            this.ExportedTypes = read<ExportedType>(TableType.ExportedType);
+            this.ManifestResources = read<ManifestResource>(TableType.ManifestResource);
+            this.NestedClasses = read<NestedClass>(TableType.NestedClass);
+            this.GenericParams = read<GenericParam>(TableType.GenericParam);
+            this.MethodSpecs = read<MethodSpec>(TableType.MethodSpec);
+            this.GenericParamConstraints = read<GenericParamConstraint>(TableType.GenericParamConstraint);
         }
     }
 
