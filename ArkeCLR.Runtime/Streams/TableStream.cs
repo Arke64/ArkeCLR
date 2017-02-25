@@ -1,6 +1,7 @@
 ﻿using ArkeCLR.Runtime.Files;
 using ArkeCLR.Runtime.Tables;
 using ArkeCLR.Utilities;
+using ArkeCLR.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,9 +18,13 @@ namespace ArkeCLR.Runtime.Streams {
         public override void Initialize(ByteReader byteReader) {
             var reader = new TableStreamReader(this, byteReader);
 
-            IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<TableStreamReader> => reader.ReadCustom<T, TableStreamReader>(this.Header.Rows[(int)table]);
-
             this.Header = reader.ReadCustom<CilTableStreamHeader>();
+
+            for (var i = 0; i < this.Header.Valid.Count; i++)
+                if (this.Header.Valid[i] && ((TableType)i).IsInvalid())
+                    throw new NotSupportedException($"Table index '0x{i:X}' is not supported.");
+
+            IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<TableStreamReader> => reader.ReadCustom<T, TableStreamReader>(this.Header.Rows[(int)table]);
             this.Modules = read<Module>(TableType.Module);
             this.TypeRefs = read<TypeRef>(TableType.TypeRef);
             this.TypeDefs = read<TypeDef>(TableType.TypeDef);
