@@ -12,10 +12,10 @@ namespace ArkeCLR.Runtime.Tables {
         public void Read(TableStreamReader reader) {
             this.Generation = reader.ReadU2();
 
-            this.Name = reader.ReadHeapIndex(HeapType.String);
-            this.Mvid = reader.ReadHeapIndex(HeapType.Guid);
-            this.EncId = reader.ReadHeapIndex(HeapType.Guid);
-            this.EncBaseId = reader.ReadHeapIndex(HeapType.Guid);
+            this.Name = reader.ReadIndex(HeapType.String);
+            this.Mvid = reader.ReadIndex(HeapType.Guid);
+            this.EncId = reader.ReadIndex(HeapType.Guid);
+            this.EncBaseId = reader.ReadIndex(HeapType.Guid);
         }
     }
 }

@@ -13,9 +13,9 @@ namespace ArkeCLR.Runtime.Tables {
 
         public void Read(TableStreamReader reader) {
             this.Flags = reader.ReadU4();
-            this.TypeName = reader.ReadHeapIndex(HeapType.String);
-            this.TypeNamespace = reader.ReadHeapIndex(HeapType.String);
-            this.Extends = reader.ReadCodedIndex(CodedIndexType.TypeDefOrRef);
+            this.TypeName = reader.ReadIndex(HeapType.String);
+            this.TypeNamespace = reader.ReadIndex(HeapType.String);
+            this.Extends = reader.ReadIndex(CodedIndexType.TypeDefOrRef);
             this.FieldList = reader.ReadIndex(TableType.Field);
             this.MethodList = reader.ReadIndex(TableType.MethodDef);
         }

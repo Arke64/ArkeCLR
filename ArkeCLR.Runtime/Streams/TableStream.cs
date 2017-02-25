@@ -51,9 +51,9 @@ namespace ArkeCLR.Runtime.Streams {
 
         public TableStreamReader(TableStream stream, ByteReader reader) : base(reader) => this.stream = stream;
 
-        public uint ReadHeapIndex(HeapType type) => this.stream.Header.HeapSizes[(int)type] ? this.ReadU4() : this.ReadU2();
+        public uint ReadIndex(HeapType type) => this.stream.Header.HeapSizes[(int)type] ? this.ReadU4() : this.ReadU2();
 
-        public TableIndex ReadCodedIndex(CodedIndexType type) {
+        public TableIndex ReadIndex(CodedIndexType type) {
             var idx = new TableIndex { Row = this.ReadU2() };
 
             idx.Table = TableStreamReader.CodedIndexTableMap[type][idx.Row & TableStreamReader.CodedIndexSizeMaskMap[type]];
