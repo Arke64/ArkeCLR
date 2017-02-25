@@ -10,7 +10,7 @@ namespace ArkeCLR.Utilities {
         public int Position { get; private set; }
         public int Length { get; }
 
-        protected ByteReader(ByteReader reader) => this.buffer = reader.buffer;
+        protected ByteReader(ByteReader reader) : this(reader.buffer) { }
 
         public ByteReader(byte[] buffer) : this(buffer, 0, buffer?.Length ?? 0) { }
 
@@ -100,28 +100,27 @@ namespace ArkeCLR.Utilities {
             return buffer;
         }
 
-        //TODO Find some better way of doing this so we don't need to pass in the derived reader
-        public T[] ReadCustom<T>(uint count) where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(count, this);
-        public T[] ReadCustom<T>(int count) where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(count, this);
-        public T ReadCustom<T>() where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(this);
+        public T[] ReadCustom<T>(uint count) where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(count);
+        public T[] ReadCustom<T>(int count) where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(count);
+        public T ReadCustom<T>() where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>();
 
-        public T[] ReadCustom<T, U>(uint count, U reader) where T : struct, ICustomByteReader<U> => this.ReadCustom<T, U>((int)count, reader);
+        public T[] ReadCustom<T, U>(uint count) where T : struct, ICustomByteReader<U> where U : ByteReader => this.ReadCustom<T, U>((int)count);
 
-        public T[] ReadCustom<T, U>(int count, U reader) where T : struct, ICustomByteReader<U> {
+        public T[] ReadCustom<T, U>(int count) where T : struct, ICustomByteReader<U> where U : ByteReader {
             if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
 
             var result = new T[count];
 
             for (var i = 0; i < count; i++)
-                result[i] = this.ReadCustom<T, U>(reader);
+                result[i] = this.ReadCustom<T, U>();
 
             return result;
         }
 
-        public T ReadCustom<T, U>(U reader) where T : struct, ICustomByteReader<U> {
+        public T ReadCustom<T, U>() where T : struct, ICustomByteReader<U> where U : ByteReader {
             var result = new T();
 
-            result.Read(reader);
+            result.Read((U)this);
 
             return result;
         }

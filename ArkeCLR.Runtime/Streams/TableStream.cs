@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace ArkeCLR.Runtime.Streams {
-    //TODO Keep heap and simple index sizes in mind. See II.24.2.6
     public class TableStream : Stream {
         public override string Name => "#~";
 
@@ -18,7 +17,7 @@ namespace ArkeCLR.Runtime.Streams {
         public override void Initialize(ByteReader byteReader) {
             var reader = new TableStreamReader(this, byteReader);
 
-            IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<TableStreamReader> => reader.ReadCustom<T, TableStreamReader>(this.Header.Rows[(int)table], reader);
+            IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<TableStreamReader> => reader.ReadCustom<T, TableStreamReader>(this.Header.Rows[(int)table]);
 
             this.Header = reader.ReadCustom<CilTableStreamHeader>();
             this.Modules = read<Module>(TableType.Module);
