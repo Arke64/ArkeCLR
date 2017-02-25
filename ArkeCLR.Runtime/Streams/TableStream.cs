@@ -27,22 +27,29 @@ namespace ArkeCLR.Runtime.Streams {
     }
 
     public class TableStreamReader : ByteReader {
-        private static IReadOnlyDictionary<CodedIndexType, TableType[]> CodedIndexTableMap { get; }
+        private static IReadOnlyDictionary<CodedIndexType, IReadOnlyList<TableType>> CodedIndexTableMap { get; }
         private static IReadOnlyDictionary<CodedIndexType, int> CodedIndexSizeMap { get; }
         private static IReadOnlyDictionary<CodedIndexType, int> CodedIndexSizeMaskMap { get; }
         private static IReadOnlyDictionary<CodedIndexType, int> CodedIndexMaxRows { get; }
 
         static TableStreamReader() {
-            TableStreamReader.CodedIndexTableMap = new Dictionary<CodedIndexType, TableType[]> {
-                [CodedIndexType.ResolutionScope] = new[] { TableType.Module, TableType.ModuleRef, TableType.AssemblyRef, TableType.TypeRef },
+            TableStreamReader.CodedIndexTableMap = new Dictionary<CodedIndexType, IReadOnlyList<TableType>> {
                 [CodedIndexType.TypeDefOrRef] = new[] { TableType.TypeDef, TableType.TypeRef, TableType.TypeSpec },
+                [CodedIndexType.HasConstant] = new[] { TableType.Field, TableType.Param, TableType.Property },
+                [CodedIndexType.HasCustomAttribute] = new[] { TableType.MethodDef, TableType.Field, TableType.TypeRef, TableType.TypeDef, TableType.Param, TableType.InterfaceImpl, TableType.MemberRef, TableType.Module, (TableType)0xFF /*Permission*/, TableType.Property, TableType.Event, TableType.StandAloneSig, TableType.ModuleRef, TableType.TypeSpec, TableType.Assembly, TableType.AssemblyRef, TableType.File, TableType.ExportedType, TableType.ManifestResource, TableType.GenericParam, TableType.GenericParamConstraint, TableType.MethodSpec },
+                [CodedIndexType.HasFieldMarshall] = new[] { TableType.Field, TableType.Param },
+                [CodedIndexType.HasDeclSecurity] = new[] { TableType.TypeDef, TableType.MethodDef, TableType.Assembly },
+                [CodedIndexType.MemberRefParent] = new[] { TableType.TypeDef, TableType.TypeRef, TableType.ModuleRef, TableType.MethodDef, TableType.TypeSpec },
+                [CodedIndexType.HasSemantics] = new[] { TableType.Event, TableType.Property },
+                [CodedIndexType.MethodDefOrRef] = new[] { TableType.MethodDef, TableType.MemberRef },
+                [CodedIndexType.MemberForwarded] = new[] { TableType.Field, TableType.MethodDef },
+                [CodedIndexType.Implementation] = new[] { TableType.File, TableType.AssemblyRef, TableType.ExportedType },
+                [CodedIndexType.CustomAttributeType] = new[] { (TableType)0xFF /*Not defined*/, (TableType)0xFF /*Not defined*/, TableType.MethodDef, TableType.MemberRef, (TableType)0xFF /*Not defined*/ },
+                [CodedIndexType.ResolutionScope] = new[] { TableType.Module, TableType.ModuleRef, TableType.AssemblyRef, TableType.TypeRef },
+                [CodedIndexType.TypeOfMethodDef] = new[] { TableType.TypeDef, TableType.MethodDef },
             };
 
-            TableStreamReader.CodedIndexSizeMap = new Dictionary<CodedIndexType, int> {
-                [CodedIndexType.ResolutionScope] = 2,
-                [CodedIndexType.TypeDefOrRef] = 2,
-            };
-
+            TableStreamReader.CodedIndexSizeMap = TableStreamReader.CodedIndexTableMap.ToDictionary(d => d.Key, d => (int)Math.Ceiling(Math.Log(d.Value.Count, 2)));
             TableStreamReader.CodedIndexSizeMaskMap = TableStreamReader.CodedIndexSizeMap.ToDictionary(d => d.Key, d => (1 << d.Value) - 1);
             TableStreamReader.CodedIndexMaxRows = TableStreamReader.CodedIndexSizeMap.ToDictionary(d => d.Key, d => (int)Math.Pow(2, 16 - d.Value));
         }
@@ -56,7 +63,7 @@ namespace ArkeCLR.Runtime.Streams {
         public TableIndex ReadIndex(CodedIndexType type) {
             var idx = new TableIndex { Row = this.ReadU2() };
 
-            idx.Table = TableStreamReader.CodedIndexTableMap[type][idx.Row & TableStreamReader.CodedIndexSizeMaskMap[type]];
+            idx.Table = TableStreamReader.CodedIndexTableMap[type][(int)(idx.Row & TableStreamReader.CodedIndexSizeMaskMap[type])];
 
             idx.Row >>= TableStreamReader.CodedIndexSizeMap[type];
 
@@ -86,8 +93,19 @@ namespace ArkeCLR.Runtime.Streams {
     }
 
     public enum CodedIndexType {
+        TypeDefOrRef,
+        HasConstant,
+        HasCustomAttribute,
+        HasFieldMarshall,
+        HasDeclSecurity,
+        MemberRefParent,
+        HasSemantics,
+        MethodDefOrRef,
+        MemberForwarded,
+        Implementation,
+        CustomAttributeType,
         ResolutionScope,
-        TypeDefOrRef
+        TypeOfMethodDef
     }
 
     public enum HeapType {
@@ -97,43 +115,43 @@ namespace ArkeCLR.Runtime.Streams {
     }
 
     public enum TableType : byte {
-        Assembly = 0x20,
-        AssemblyOS = 0x22,
-        AssemblyProcessor = 0x21,
-        AssemblyRef = 0x23,
-        AssemblyRefOS = 0x25,
-        AssemblyRefProcessor = 0x24,
-        ClassLayout = 0x0F,
+        Module = 0x00,
+        TypeRef = 0x01,
+        TypeDef = 0x02,
+        Field = 0x04,
+        MethodDef = 0x06,
+        Param = 0x08,
+        InterfaceImpl = 0x09,
+        MemberRef = 0x0A,
         Constant = 0x0B,
         CustomAttribute = 0x0C,
+        FieldMarshal = 0x0D,
         DeclSecurity = 0x0E,
+        ClassLayout = 0x0F,
+        FieldLayout = 0x10,
+        StandAloneSig = 0x11,
         EventMap = 0x12,
         Event = 0x14,
-        ExportedType = 0x27,
-        Field = 0x04,
-        FieldLayout = 0x10,
-        FieldMarshal = 0x0D,
-        FieldRVA = 0x1D,
-        File = 0x26,
-        GenericParam = 0x2A,
-        GenericParamConstraint = 0x2C,
-        ImplMap = 0x1C,
-        InterfaceImpl = 0x09,
-        ManifestResource = 0x28,
-        MemberRef = 0x0A,
-        MethodDef = 0x06,
-        MethodImpl = 0x19,
-        MethodSemantics = 0x18,
-        MethodSpec = 0x2B,
-        Module = 0x00,
-        ModuleRef = 0x1A,
-        NestedClass = 0x29,
-        Param = 0x08,
-        Property = 0x17,
         PropertyMap = 0x15,
-        StandAloneSig = 0x11,
-        TypeDef = 0x02,
-        TypeRef = 0x01,
-        TypeSpec = 0x1B
+        Property = 0x17,
+        MethodSemantics = 0x18,
+        MethodImpl = 0x19,
+        ModuleRef = 0x1A,
+        TypeSpec = 0x1B,
+        ImplMap = 0x1C,
+        FieldRVA = 0x1D,
+        Assembly = 0x20,
+        AssemblyProcessor = 0x21,
+        AssemblyOS = 0x22,
+        AssemblyRef = 0x23,
+        AssemblyRefProcessor = 0x24,
+        AssemblyRefOS = 0x25,
+        File = 0x26,
+        ExportedType = 0x27,
+        ManifestResource = 0x28,
+        NestedClass = 0x29,
+        GenericParam = 0x2A,
+        MethodSpec = 0x2B,
+        GenericParamConstraint = 0x2C,
     }
 }
