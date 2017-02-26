@@ -52,6 +52,20 @@ namespace ArkeCLR.Utilities {
         public int ReadI4() { var r = BitConverter.ToInt32(this.buffer, this.Position); this.Position += sizeof(int); return r; }
         public long ReadI8() { var r = BitConverter.ToInt64(this.buffer, this.Position); this.Position += sizeof(long); return r; }
 
+        public T ReadEnum<T>() {
+            var type = Enum.GetUnderlyingType(typeof(T));
+
+            if (type == typeof(byte)) return (T)(object)this.ReadU1();
+            else if (type == typeof(ushort)) return (T)(object)this.ReadU2();
+            else if (type == typeof(uint)) return (T)(object)this.ReadU4();
+            else if (type == typeof(ulong)) return (T)(object)this.ReadU8();
+            else if (type == typeof(sbyte)) return (T)(object)this.ReadI1();
+            else if (type == typeof(short)) return (T)(object)this.ReadI2();
+            else if (type == typeof(int)) return (T)(object)this.ReadI4();
+            else if (type == typeof(long)) return (T)(object)this.ReadI8();
+            else throw new ArgumentException();
+        }
+
         public void Read(ref byte value) => value = this.ReadU1();
         public void Read(ref ushort value) => value = this.ReadU2();
         public void Read(ref uint value) => value = this.ReadU4();
@@ -60,20 +74,7 @@ namespace ArkeCLR.Utilities {
         public void Read(ref short value) => value = this.ReadI2();
         public void Read(ref int value) => value = this.ReadI4();
         public void Read(ref long value) => value = this.ReadI8();
-
-        public void ReadEnum<T>(ref T value) {
-            var type = Enum.GetUnderlyingType(typeof(T));
-
-            if (type == typeof(byte)) value = (T)(object)this.ReadU1();
-            else if (type == typeof(ushort)) value = (T)(object)this.ReadU2();
-            else if (type == typeof(uint)) value = (T)(object)this.ReadU4();
-            else if (type == typeof(ulong)) value = (T)(object)this.ReadU8();
-            else if (type == typeof(sbyte)) value = (T)(object)this.ReadI1();
-            else if (type == typeof(short)) value = (T)(object)this.ReadI2();
-            else if (type == typeof(int)) value = (T)(object)this.ReadI4();
-            else if (type == typeof(long)) value = (T)(object)this.ReadI8();
-            else throw new ArgumentException();
-        }
+        public void ReadEnum<T>(ref T value) => value = this.ReadEnum<T>();
 
         public string ReadString(Encoding encoding, uint length) => this.ReadString(encoding, (int)length, 0);
         public string ReadString(Encoding encoding, uint maxLength, byte padder) => this.ReadString(encoding, (int)maxLength, padder);

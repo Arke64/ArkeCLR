@@ -1,6 +1,6 @@
-namespace ArkeCLR.Runtime.Flags.Metadata {
+namespace ArkeCLR.Runtime.Signatures {
     public enum ElementType : byte {
-        None = 0x00,
+        End = 0x00,
         Void = 0x01,
         Boolean = 0x02,
         Char = 0x03,
