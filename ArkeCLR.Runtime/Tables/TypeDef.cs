@@ -1,10 +1,10 @@
-﻿using ArkeCLR.Runtime.Streams;
+﻿using ArkeCLR.Runtime.Flags;
+using ArkeCLR.Runtime.Streams;
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Tables {
     public struct TypeDef : ICustomByteReader<TableStreamReader> {
-        //TODO Need to add the actual enum
-        public uint Flags;
+        public TypeAttributes Flags;
         public uint TypeName;
         public uint TypeNamespace;
         public TableIndex Extends;
@@ -12,7 +12,7 @@ namespace ArkeCLR.Runtime.Tables {
         public TableIndex MethodList;
 
         public void Read(TableStreamReader reader) {
-            reader.Read(ref this.Flags);
+            reader.ReadEnum(ref this.Flags);
             reader.Read(ref this.TypeName, HeapType.String);
             reader.Read(ref this.TypeNamespace, HeapType.String);
             reader.Read(ref this.Extends, CodedIndexType.TypeDefOrRef);

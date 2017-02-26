@@ -61,6 +61,20 @@ namespace ArkeCLR.Utilities {
         public void Read(ref int value) => value = this.ReadI4();
         public void Read(ref long value) => value = this.ReadI8();
 
+        public void ReadEnum<T>(ref T value) {
+            var type = Enum.GetUnderlyingType(typeof(T));
+
+            if (type == typeof(byte)) value = (T)(object)this.ReadU1();
+            else if (type == typeof(ushort)) value = (T)(object)this.ReadU2();
+            else if (type == typeof(uint)) value = (T)(object)this.ReadU4();
+            else if (type == typeof(ulong)) value = (T)(object)this.ReadU8();
+            else if (type == typeof(sbyte)) value = (T)(object)this.ReadI1();
+            else if (type == typeof(short)) value = (T)(object)this.ReadI2();
+            else if (type == typeof(int)) value = (T)(object)this.ReadI4();
+            else if (type == typeof(long)) value = (T)(object)this.ReadI8();
+            else throw new ArgumentException();
+        }
+
         public string ReadString(Encoding encoding, uint length) => this.ReadString(encoding, (int)length, 0);
         public string ReadString(Encoding encoding, uint maxLength, byte padder) => this.ReadString(encoding, (int)maxLength, padder);
 
