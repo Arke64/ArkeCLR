@@ -4,8 +4,8 @@ using ArkeCLR.Utilities;
 namespace ArkeCLR.Runtime.Tables {
     public struct TypeRef : ICustomByteReader<TableStreamReader> {
         public TableIndex ResolutionScope;
-        public uint TypeName;
-        public uint TypeNamespace;
+        public HeapIndex TypeName;
+        public HeapIndex TypeNamespace;
 
         public void Read(TableStreamReader reader) {
             reader.Read(ref this.ResolutionScope, CodedIndexType.ResolutionScope);

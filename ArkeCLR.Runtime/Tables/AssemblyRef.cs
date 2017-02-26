@@ -9,10 +9,10 @@ namespace ArkeCLR.Runtime.Tables {
         public ushort BuildNumber;
         public ushort RevisionNumber;
         public AssemblyFlags Flags;
-        public uint PublicKeyOrToken;
-        public uint Name;
-        public uint Culture;
-        public uint HashValue;
+        public HeapIndex PublicKeyOrToken;
+        public HeapIndex Name;
+        public HeapIndex Culture;
+        public HeapIndex HashValue;
 
         public void Read(TableStreamReader reader) {
             reader.Read(ref this.MajorVersion);

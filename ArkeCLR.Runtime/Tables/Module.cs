@@ -4,10 +4,10 @@ using ArkeCLR.Utilities;
 namespace ArkeCLR.Runtime.Tables {
     public struct Module : ICustomByteReader<TableStreamReader> {
         public ushort Generation;
-        public uint Name;
-        public uint Mvid;
-        public uint EncId;
-        public uint EncBaseId;
+        public HeapIndex Name;
+        public HeapIndex Mvid;
+        public HeapIndex EncId;
+        public HeapIndex EncBaseId;
 
         public void Read(TableStreamReader reader) {
             reader.Read(ref this.Generation);

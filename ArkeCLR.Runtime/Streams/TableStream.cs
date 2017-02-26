@@ -133,7 +133,7 @@ namespace ArkeCLR.Runtime.Streams {
 
         public TableStreamReader(TableStream stream, ByteReader reader) : base(reader) => this.stream = stream;
 
-        public uint ReadIndex(HeapType type) => this.stream.Header.HeapSizes[(int)type] ? this.ReadU4() : this.ReadU2();
+        public HeapIndex ReadIndex(HeapType type) => new HeapIndex { Heap = type, Offset = this.stream.Header.HeapSizes[(int)type] ? this.ReadU4() : this.ReadU2() };
 
         public TableIndex ReadIndex(CodedIndexType type) {
             var idx = new TableIndex { Row = this.ReadU2() };
@@ -157,7 +157,7 @@ namespace ArkeCLR.Runtime.Streams {
             return idx;
         }
 
-        public void Read(ref uint value, HeapType type) => value = this.ReadIndex(type);
+        public void Read(ref HeapIndex value, HeapType type) => value = this.ReadIndex(type);
         public void Read(ref TableIndex value, CodedIndexType type) => value = this.ReadIndex(type);
         public void Read(ref TableIndex value, TableType type) => value = this.ReadIndex(type);
     }
@@ -165,6 +165,11 @@ namespace ArkeCLR.Runtime.Streams {
     public struct TableIndex {
         public TableType Table;
         public uint Row;
+    }
+
+    public struct HeapIndex {
+        public HeapType Heap;
+        public uint Offset;
     }
 
     public enum CodedIndexType {

@@ -7,8 +7,8 @@ namespace ArkeCLR.Runtime.Tables {
         public uint RVA;
         public MethodImplAttributes ImplFlags;
         public MethodAttributes Flags;
-        public uint Name;
-        public uint Signature;
+        public HeapIndex Name;
+        public HeapIndex Signature;
         public TableIndex ParamList;
 
         public void Read(TableStreamReader reader) {

@@ -5,8 +5,8 @@ using ArkeCLR.Utilities;
 namespace ArkeCLR.Runtime.Tables {
     public struct TypeDef : ICustomByteReader<TableStreamReader> {
         public TypeAttributes Flags;
-        public uint TypeName;
-        public uint TypeNamespace;
+        public HeapIndex TypeName;
+        public HeapIndex TypeNamespace;
         public TableIndex Extends;
         public TableIndex FieldList;
         public TableIndex MethodList;

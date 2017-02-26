@@ -6,7 +6,7 @@ namespace ArkeCLR.Runtime.Tables {
     public struct Param : ICustomByteReader<TableStreamReader> {
         public ParamAttributes Flags;
         public ushort Sequence;
-        public uint Name;
+        public HeapIndex Name;
 
         public void Read(TableStreamReader reader) {
             reader.ReadEnum(ref this.Flags);
