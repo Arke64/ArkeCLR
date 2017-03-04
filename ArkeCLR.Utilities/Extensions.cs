@@ -24,6 +24,7 @@ namespace ArkeCLR.Utilities.Extensions {
         }
 
         public static List<U> ToList<T, U>(this IEnumerable<T> self, Func<T, U> selector) => self.Select(s => selector(s)).ToList();
+        public static List<U> ToList<T, U>(this IEnumerable<T> self, Func<T, int, U> selector) => self.Select((s, i) => selector(s, i)).ToList();
     }
 
     public static class ArrayExtensions {

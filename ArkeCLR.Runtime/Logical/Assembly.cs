@@ -6,13 +6,13 @@ using System.Linq;
 namespace ArkeCLR.Runtime.Logical {
     public class Assembly {
         public string Name { get; }
-        public IReadOnlyCollection<Method> Methods { get; }
+        public IReadOnlyCollection<Type> Types { get; }
 
         public Assembly(CliFile file) {
             var def = file.TableStream.Assemblies.Single();
 
             this.Name = file.StringStream.GetAt(def.Name);
-            this.Methods = file.TableStream.MethodDefs.ToList(d => new Method(file, d));
+            this.Types = file.TableStream.TypeDefs.ToList((d, i) => new Type(file, d, i));
         }
     }
 }

@@ -7,9 +7,9 @@ namespace ArkeCLR.Runtime.Logical {
         public string Name { get; }
         public MethodDefSig Signature { get; }
 
-        public Method(CliFile file, MethodDef methodDef) {
-            this.Name = file.StringStream.GetAt(methodDef.Name);
-            this.Signature = file.BlobStream.GetAt<MethodDefSig>(methodDef.Signature);
+        public Method(CliFile file, MethodDef def) {
+            this.Name = file.StringStream.GetAt(def.Name);
+            this.Signature = file.BlobStream.GetAt<MethodDefSig>(def.Signature);
         }
     }
 }
