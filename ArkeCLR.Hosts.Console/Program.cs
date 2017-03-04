@@ -14,21 +14,10 @@ namespace ArkeCLR.Hosts.Console {
                 return;
             }
 
-            if (!File.Exists(args[0])) {
-                log("The provided entry assembly cannot be found.");
-
-                return;
-            }
-
-            var host = new Host(new AssemblyResolver(Path.GetDirectoryName(args[0])));
+            var host = new Host(new AssemblyResolver(Path.GetDirectoryName(args[0])), log);
 
             try {
                 log($"Exited with code {host.Run(args[0])}.");
-            }
-            catch (CouldNotResolveAssemblyException ex) {
-                log(ex.ToString());
-
-                Debugger.Break();
             }
             catch (Exception ex) {
                 log(ex.ToString());

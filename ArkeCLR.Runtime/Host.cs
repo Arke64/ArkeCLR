@@ -2,11 +2,14 @@
 using ArkeCLR.Runtime.Logical;
 using ArkeCLR.Utilities;
 using System.IO;
+using System;
 
 namespace ArkeCLR.Runtime {
-    //TODO Signatures, attributes, tables, method bodies, logical layout
     public class Host {
         private readonly IAssemblyResolver assemblyResolver;
+        private readonly Action<string> logger;
+
+        public Host(IAssemblyResolver assemblyResolver, Action<string> logger) => (this.assemblyResolver, this.logger) = (assemblyResolver, logger);
 
         private Assembly Resolve(AssemblyName name) {
             var (found, data) = this.assemblyResolver.Resolve(name);
@@ -16,8 +19,6 @@ namespace ArkeCLR.Runtime {
 
             return new Assembly(new CliFile(new ByteReader(data)));
         }
-
-        public Host(IAssemblyResolver assemblyResolver) => this.assemblyResolver = assemblyResolver;
 
         public int Run(string entryAssemblyPath) {
             var entryAssembly = this.Resolve(new AssemblyName(Path.GetFileNameWithoutExtension(entryAssemblyPath), entryAssemblyPath));
