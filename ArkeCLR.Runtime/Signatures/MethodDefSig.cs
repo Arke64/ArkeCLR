@@ -1,4 +1,5 @@
 ﻿using ArkeCLR.Utilities;
+using ArkeCLR.Utilities.Extensions;
 
 namespace ArkeCLR.Runtime.Signatures {
     public struct MethodDefSig : ICustomByteReader {
@@ -28,5 +29,7 @@ namespace ArkeCLR.Runtime.Signatures {
             for (var i = 0; i < this.ParamCount; i++)
                 this.Params[i].Read(reader);
         }
+
+        public override string ToString() => $"{(this.ExplicitThis ? "explicit " : string.Empty)}{(this.HasThis ? "this " : string.Empty)}{this.CallingConvention.ToString().ToLower()} {this.RetType} {this.Params.ToString(", ", "(", ")", false)}";
     }
 }

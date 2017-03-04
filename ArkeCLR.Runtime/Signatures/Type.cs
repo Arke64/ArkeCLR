@@ -22,5 +22,20 @@ namespace ArkeCLR.Runtime.Signatures {
                 case ElementType.Var: throw new NotImplementedException();
             }
         }
+
+        public override string ToString() {
+            switch (this.ElementType) {
+                case ElementType.Array: throw new NotImplementedException();
+                case ElementType.Class: throw new NotImplementedException();
+                case ElementType.FnPtr: throw new NotImplementedException();
+                case ElementType.GenericInst: throw new NotImplementedException();
+                case ElementType.MVar: throw new NotImplementedException();
+                case ElementType.Ptr: throw new NotImplementedException();
+                case ElementType.SzArray: return this.SzArray.ToString();
+                case ElementType.ValueType: throw new NotImplementedException();
+                case ElementType.Var: throw new NotImplementedException();
+                default: return this.ElementType.ToString();
+            }
+        }
     }
 }

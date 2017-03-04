@@ -1,4 +1,5 @@
 ﻿using ArkeCLR.Utilities;
+using ArkeCLR.Utilities.Extensions;
 
 namespace ArkeCLR.Runtime.Signatures.Types {
     public class SzArrayType {
@@ -12,5 +13,7 @@ namespace ArkeCLR.Runtime.Signatures.Types {
 
             this.Type.Read(cur, reader);
         }
+
+        public override string ToString() => $"{this.CustomMods.ToString(", ", "[", "] ", true)}{this.Type}[]";
     }
 }

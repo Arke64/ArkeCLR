@@ -13,5 +13,7 @@ namespace ArkeCLR.Runtime.Signatures {
             this.Table = table == 0 ? TableType.TypeDef : (table == 1 ? TableType.TypeRef : TableType.TypeSpec);
             this.Row = (table & ~0x03U) >> 2;
         }
+
+        public override string ToString() => $"{this.Table}->0x{this.Row:X8}";
     }
 }
