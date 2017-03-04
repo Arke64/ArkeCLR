@@ -41,14 +41,5 @@ namespace ArkeCLR.Runtime.Streams {
             while (this.reader.Position < this.reader.Length)
                 yield return this.GetAt(this.reader.Position / this.Scale + this.Offset);
         }
-
-        protected int ReadEncodedLength() {
-            var first = this.reader.ReadU1();
-
-            if ((first & 0b1000_0000) == 0b0000_0000) return first & 0b0111_1111;
-            if ((first & 0b1100_0000) == 0b1000_0000) return ((first & 0b0011_1111) << 8) + this.reader.ReadU1();
-
-            return ((first & 0b0001_1111) << 24) + (this.reader.ReadU1() << 16) + (this.reader.ReadU1() << 8) + this.reader.ReadU1();
-        }
     }
 }

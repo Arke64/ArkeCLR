@@ -5,7 +5,7 @@ namespace ArkeCLR.Runtime.Streams {
         public override string Name => "#US";
 
         protected override string Get() {
-            var length = this.ReadEncodedLength();
+            var length = this.reader.ReadCompressedU4();
 
             if (length == 0)
                 return string.Empty;

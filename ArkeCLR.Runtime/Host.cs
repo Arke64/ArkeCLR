@@ -4,7 +4,7 @@ using System;
 using System.IO;
 
 namespace ArkeCLR.Runtime {
-    //TODO Signatures, methods code, rest of tables, logical format
+    //TODO Signatures, attributes, tables, method bodies, logical layout
     public class Host {
         private readonly IAssemblyResolver assemblyResolver;
         private CliFile entryAssembly;

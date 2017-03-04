@@ -52,6 +52,26 @@ namespace ArkeCLR.Utilities {
         public int ReadI4() { var r = BitConverter.ToInt32(this.buffer, this.Position); this.Position += sizeof(int); return r; }
         public long ReadI8() { var r = BitConverter.ToInt64(this.buffer, this.Position); this.Position += sizeof(long); return r; }
 
+        public uint ReadCompressedU4() {
+            var first = this.ReadU1();
+
+            if ((first & 0b1000_0000) == 0b0000_0000) return first & 0b0111_1111U;
+            if ((first & 0b1100_0000) == 0b1000_0000) return ((first & 0b0011_1111U) << 8) + this.ReadU1();
+
+            return ((first & 0b0001_1111U) << 24) + ((uint)this.ReadU1() << 16) + ((uint)this.ReadU1() << 8) + this.ReadU1();
+        }
+
+        public int ReadCompressedI4() {
+            var size = this.buffer[this.Position] & 0xC0;
+            var unsigned = (int)this.ReadCompressedU4();
+            var shifted = unsigned >> 1;
+
+            if ((unsigned & 1) == 0)
+                return shifted;
+
+            return shifted - (size == 0x00 || size == 0x40 ? 0x40 : (size == 0x80 ? 0x2000 : 0x10000000));
+        }
+
         public T ReadEnum<T>() {
             var type = Enum.GetUnderlyingType(typeof(T));
 
