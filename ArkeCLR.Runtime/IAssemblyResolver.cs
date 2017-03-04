@@ -1,7 +1,5 @@
-﻿using ArkeCLR.Utilities;
-
-namespace ArkeCLR.Runtime {
+﻿namespace ArkeCLR.Runtime {
     public interface IAssemblyResolver {
-        (bool, ByteReader) Resolve(AssemblyName assemblyName);
+        (bool, byte[]) Resolve(AssemblyName assemblyName);
     }
 }

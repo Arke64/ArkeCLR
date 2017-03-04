@@ -23,9 +23,7 @@ namespace ArkeCLR.Hosts.Console {
             var host = new Host(new AssemblyResolver(Path.GetDirectoryName(args[0])));
 
             try {
-                host.Resolve(args[0]);
-
-                log($"Exited with code {host.Run()}.");
+                log($"Exited with code {host.Run(args[0])}.");
             }
             catch (CouldNotResolveAssemblyException ex) {
                 log(ex.ToString());

@@ -1,5 +1,4 @@
 ﻿using ArkeCLR.Runtime;
-using ArkeCLR.Utilities;
 using System.IO;
 
 namespace ArkeCLR.Hosts.Console {
@@ -8,7 +7,7 @@ namespace ArkeCLR.Hosts.Console {
 
         public AssemblyResolver(string currentDirectory) => this.currentDirectory = currentDirectory;
 
-        public (bool, ByteReader) Resolve(AssemblyName assemblyName) {
+        public (bool, byte[]) Resolve(AssemblyName assemblyName) {
             var path = default(string);
             var root = Path.Combine(this.currentDirectory, assemblyName.Name);
 
@@ -22,7 +21,7 @@ namespace ArkeCLR.Hosts.Console {
                 path = root + ".exe";
             }
 
-            return path != default(string) ? (true, new ByteReader(File.ReadAllBytes(path))) : (false, default(ByteReader));
+            return path != default(string) ? (true, File.ReadAllBytes(path)) : (false, null);
         }
     }
 }
