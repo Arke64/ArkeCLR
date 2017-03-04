@@ -1,7 +1,7 @@
 ﻿using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Signatures {
-    public struct MethodDefSig {
+    public struct MethodDefSig : ICustomByteReader {
         public bool HasThis;
         public bool ExplicitThis;
         public CallingConvention CallingConvention;

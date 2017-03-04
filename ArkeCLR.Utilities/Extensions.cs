@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ArkeCLR.Utilities.Extensions {
     public static class EnumExtensions {
@@ -21,5 +22,7 @@ namespace ArkeCLR.Utilities.Extensions {
             foreach (var s in self)
                 action(s);
         }
+
+        public static List<U> ToList<T, U>(this IEnumerable<T> self, Func<T, U> selector) => self.Select(s => selector(s)).ToList();
     }
 }

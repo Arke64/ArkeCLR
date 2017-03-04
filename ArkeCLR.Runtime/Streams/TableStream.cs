@@ -11,44 +11,44 @@ namespace ArkeCLR.Runtime.Streams {
         public override string Name => "#~";
 
         public CilTableStreamHeader Header { get; private set; }
-        public IReadOnlyList<Module> Modules { get; private set; }
-        public IReadOnlyList<TypeRef> TypeRefs { get; private set; }
-        public IReadOnlyList<TypeDef> TypeDefs { get; private set; }
-        public IReadOnlyList<Field> Fields { get; private set; }
-        public IReadOnlyList<MethodDef> MethodDefs { get; private set; }
-        public IReadOnlyList<Param> Params { get; private set; }
-        public IReadOnlyList<InterfaceImpl> InterfaceImpls { get; private set; }
-        public IReadOnlyList<MemberRef> MemberRefs { get; private set; }
-        public IReadOnlyList<Constant> Constants { get; private set; }
-        public IReadOnlyList<CustomAttribute> CustomAttributes { get; private set; }
-        public IReadOnlyList<FieldMarshal> FieldMarshals { get; private set; }
-        public IReadOnlyList<DeclSecurity> DeclSecurities { get; private set; }
-        public IReadOnlyList<ClassLayout> ClassLayouts { get; private set; }
-        public IReadOnlyList<FieldLayout> FieldLayouts { get; private set; }
-        public IReadOnlyList<StandAloneSig> StandAloneSigs { get; private set; }
-        public IReadOnlyList<EventMap> EventMaps { get; private set; }
-        public IReadOnlyList<Event> Events { get; private set; }
-        public IReadOnlyList<PropertyMap> PropertyMaps { get; private set; }
-        public IReadOnlyList<Property> Properties { get; private set; }
-        public IReadOnlyList<MethodSemantics> MethodSemantics { get; private set; }
-        public IReadOnlyList<MethodImpl> MethodImpls { get; private set; }
-        public IReadOnlyList<ModuleRef> ModuleRefs { get; private set; }
-        public IReadOnlyList<TypeSpec> TypeSpecs { get; private set; }
-        public IReadOnlyList<ImplMap> ImplMaps { get; private set; }
-        public IReadOnlyList<FieldRVA> FieldRVAs { get; private set; }
-        public IReadOnlyList<Assembly> Assemblies { get; private set; }
-        public IReadOnlyList<AssemblyProcessor> AssemblyProcessors { get; private set; }
-        public IReadOnlyList<AssemblyOS> AssemblyOSs { get; private set; }
-        public IReadOnlyList<AssemblyRef> AssemblyRefs { get; private set; }
-        public IReadOnlyList<AssemblyRefProcessor> AssemblyRefProcessors { get; private set; }
-        public IReadOnlyList<AssemblyRefOS> AssemblyRefOSs { get; private set; }
-        public IReadOnlyList<File> Files { get; private set; }
-        public IReadOnlyList<ExportedType> ExportedTypes { get; private set; }
-        public IReadOnlyList<ManifestResource> ManifestResources { get; private set; }
-        public IReadOnlyList<NestedClass> NestedClasses { get; private set; }
-        public IReadOnlyList<GenericParam> GenericParams { get; private set; }
-        public IReadOnlyList<MethodSpec> MethodSpecs { get; private set; }
-        public IReadOnlyList<GenericParamConstraint> GenericParamConstraints { get; private set; }
+        public IReadOnlyCollection<Module> Modules { get; private set; }
+        public IReadOnlyCollection<TypeRef> TypeRefs { get; private set; }
+        public IReadOnlyCollection<TypeDef> TypeDefs { get; private set; }
+        public IReadOnlyCollection<Field> Fields { get; private set; }
+        public IReadOnlyCollection<MethodDef> MethodDefs { get; private set; }
+        public IReadOnlyCollection<Param> Params { get; private set; }
+        public IReadOnlyCollection<InterfaceImpl> InterfaceImpls { get; private set; }
+        public IReadOnlyCollection<MemberRef> MemberRefs { get; private set; }
+        public IReadOnlyCollection<Constant> Constants { get; private set; }
+        public IReadOnlyCollection<CustomAttribute> CustomAttributes { get; private set; }
+        public IReadOnlyCollection<FieldMarshal> FieldMarshals { get; private set; }
+        public IReadOnlyCollection<DeclSecurity> DeclSecurities { get; private set; }
+        public IReadOnlyCollection<ClassLayout> ClassLayouts { get; private set; }
+        public IReadOnlyCollection<FieldLayout> FieldLayouts { get; private set; }
+        public IReadOnlyCollection<StandAloneSig> StandAloneSigs { get; private set; }
+        public IReadOnlyCollection<EventMap> EventMaps { get; private set; }
+        public IReadOnlyCollection<Event> Events { get; private set; }
+        public IReadOnlyCollection<PropertyMap> PropertyMaps { get; private set; }
+        public IReadOnlyCollection<Property> Properties { get; private set; }
+        public IReadOnlyCollection<MethodSemantics> MethodSemantics { get; private set; }
+        public IReadOnlyCollection<MethodImpl> MethodImpls { get; private set; }
+        public IReadOnlyCollection<ModuleRef> ModuleRefs { get; private set; }
+        public IReadOnlyCollection<TypeSpec> TypeSpecs { get; private set; }
+        public IReadOnlyCollection<ImplMap> ImplMaps { get; private set; }
+        public IReadOnlyCollection<FieldRVA> FieldRVAs { get; private set; }
+        public IReadOnlyCollection<Assembly> Assemblies { get; private set; }
+        public IReadOnlyCollection<AssemblyProcessor> AssemblyProcessors { get; private set; }
+        public IReadOnlyCollection<AssemblyOS> AssemblyOSs { get; private set; }
+        public IReadOnlyCollection<AssemblyRef> AssemblyRefs { get; private set; }
+        public IReadOnlyCollection<AssemblyRefProcessor> AssemblyRefProcessors { get; private set; }
+        public IReadOnlyCollection<AssemblyRefOS> AssemblyRefOSs { get; private set; }
+        public IReadOnlyCollection<File> Files { get; private set; }
+        public IReadOnlyCollection<ExportedType> ExportedTypes { get; private set; }
+        public IReadOnlyCollection<ManifestResource> ManifestResources { get; private set; }
+        public IReadOnlyCollection<NestedClass> NestedClasses { get; private set; }
+        public IReadOnlyCollection<GenericParam> GenericParams { get; private set; }
+        public IReadOnlyCollection<MethodSpec> MethodSpecs { get; private set; }
+        public IReadOnlyCollection<GenericParamConstraint> GenericParamConstraints { get; private set; }
 
         public override void Initialize(ByteReader byteReader) {
             var reader = new TableStreamReader(this, byteReader);
@@ -59,7 +59,7 @@ namespace ArkeCLR.Runtime.Streams {
                 if (this.Header.Valid[i] && ((TableType)i).IsInvalid())
                     throw new NotSupportedException($"Table index '0x{i:X}' is not supported.");
 
-            IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<TableStreamReader> => reader.ReadCustom<T, TableStreamReader>(this.Header.Rows[(int)table]);
+            IReadOnlyCollection<T> read<T>(TableType table) where T : struct, ICustomByteReader<TableStreamReader> => reader.ReadCustom<T, TableStreamReader>(this.Header.Rows[(int)table]);
             this.Modules = read<Module>(TableType.Module);
             this.TypeRefs = read<TypeRef>(TableType.TypeRef);
             this.TypeDefs = read<TypeDef>(TableType.TypeDef);
@@ -191,7 +191,8 @@ namespace ArkeCLR.Runtime.Streams {
     public enum HeapType {
         String = 0,
         Guid = 1,
-        Blob = 2
+        Blob = 2,
+        UserString = 3
     }
 
     public enum TableType : byte {

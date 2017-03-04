@@ -1,12 +1,12 @@
 ﻿using ArkeCLR.Runtime.Files;
-using System;
+using ArkeCLR.Runtime.Logical;
 using System.IO;
 
 namespace ArkeCLR.Runtime {
     //TODO Signatures, attributes, tables, method bodies, logical layout
     public class Host {
         private readonly IAssemblyResolver assemblyResolver;
-        private CliFile entryAssembly;
+        private Assembly entryAssembly;
 
         public Host(IAssemblyResolver assemblyResolver) => this.assemblyResolver = assemblyResolver;
 
@@ -17,12 +17,10 @@ namespace ArkeCLR.Runtime {
             if (!found)
                 throw new CouldNotResolveAssemblyException(name);
 
-            this.entryAssembly = new CliFile(reader);
+            this.entryAssembly = new Assembly(new CliFile(reader));
         }
 
         public int Run() {
-            Console.WriteLine(this.entryAssembly);
-
             return 0;
         }
     }

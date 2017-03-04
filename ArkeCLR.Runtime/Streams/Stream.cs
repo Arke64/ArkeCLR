@@ -1,4 +1,5 @@
 ﻿using ArkeCLR.Utilities;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -17,9 +18,17 @@ namespace ArkeCLR.Runtime.Streams {
         protected virtual int Offset => 0;
         protected virtual int Scale => 1;
 
+        public abstract HeapType Type { get; }
+
         public override void Initialize(ByteReader reader) => this.reader = reader;
 
         protected abstract T Get();
+
+        public T GetAt(HeapIndex index) {
+            if (index.Heap != this.Type) throw new ArgumentException("Invalid index type.", nameof(index));
+
+            return this.GetAt(index.Offset);
+        }
 
         public T GetAt(uint index) => this.GetAt((int)index);
 

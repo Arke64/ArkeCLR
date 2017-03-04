@@ -3,6 +3,7 @@
 namespace ArkeCLR.Runtime.Streams {
     public class UserStringStream : Stream<string> {
         public override string Name => "#US";
+        public override HeapType Type => HeapType.UserString;
 
         protected override string Get() {
             var length = this.reader.ReadCompressedU4();
