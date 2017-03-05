@@ -5,11 +5,11 @@ using System.IO;
 using System;
 
 namespace ArkeCLR.Runtime {
-    public class Host {
+    public class ExecutionEngine {
         private readonly IAssemblyResolver assemblyResolver;
         private readonly Action<string> logger;
 
-        public Host(IAssemblyResolver assemblyResolver, Action<string> logger) => (this.assemblyResolver, this.logger) = (assemblyResolver, logger);
+        public ExecutionEngine(IAssemblyResolver assemblyResolver, Action<string> logger) => (this.assemblyResolver, this.logger) = (assemblyResolver, logger);
 
         private Assembly Resolve(AssemblyName name) {
             var (found, data) = this.assemblyResolver.Resolve(name);

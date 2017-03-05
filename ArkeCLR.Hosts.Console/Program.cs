@@ -14,10 +14,10 @@ namespace ArkeCLR.Hosts.Console {
                 return;
             }
 
-            var host = new Host(new AssemblyResolver(Path.GetDirectoryName(args[0])), log);
+            var engine = new ExecutionEngine(new AssemblyResolver(Path.GetDirectoryName(args[0])), log);
 
             try {
-                log($"Exited with code {host.Run(args[0])}.");
+                log($"Exited with code {engine.Run(args[0])}.");
             }
             catch (Exception ex) {
                 log(ex.ToString());

@@ -150,6 +150,7 @@ namespace ArkeCLR.Runtime.Files {
 
                 this.Flags = (MethodFlags)(first & 0b11);
                 this.CodeSize = first & 0b1111_1100U;
+                this.MaxStack = 8;
             }
 
             this.Body = file.ReadArray<byte>(this.CodeSize);
