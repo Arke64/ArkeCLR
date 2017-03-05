@@ -1,4 +1,5 @@
-﻿using ArkeCLR.Utilities;
+﻿using ArkeCLR.Runtime.Streams;
+using ArkeCLR.Utilities;
 using ArkeCLR.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
@@ -149,7 +150,7 @@ namespace ArkeCLR.Runtime.Files {
                 var first = file.ReadU1();
 
                 this.Flags = (MethodFlags)(first & 0b11);
-                this.CodeSize = first & 0b1111_1100U;
+                this.CodeSize = (first & 0b1111_1100U) >> 2;
                 this.MaxStack = 8;
             }
 
