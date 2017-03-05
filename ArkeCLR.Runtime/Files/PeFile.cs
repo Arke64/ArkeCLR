@@ -14,6 +14,8 @@ namespace ArkeCLR.Runtime.Files {
         public IReadOnlyList<RvaAndSize> DataDirectories { get; }
         public IReadOnlyList<SectionHeader> SectionHeaders { get; }
 
+        private uint RvaToFileAddress(uint rva) => this.SectionHeaders.Where(s => rva > s.VirtualAddress && rva < s.VirtualAddress + s.SizeOfRawData).Select(s => rva - s.VirtualAddress + s.PointerToRawData).Single();
+
         public PeFile(ByteReader image)  {
             this.image = image;
 
@@ -46,10 +48,12 @@ namespace ArkeCLR.Runtime.Files {
             return !rva.IsZero ? this.ReadRva(rva) : throw new ArgumentException($"The data directory {type} is not present.", nameof(type));
         }
 
-        public ByteReader ReadRva(RvaAndSize rva) {
-            var section = this.SectionHeaders.Where(s => rva.Rva > s.VirtualAddress && rva.Rva < s.VirtualAddress + s.SizeOfRawData).Single();
+        public ByteReader ReadRva(RvaAndSize rva) => this.image.CreateView(this.RvaToFileAddress(rva.Rva), rva.Size);
 
-            return this.image.CreateView(rva.Rva - section.VirtualAddress + section.PointerToRawData, rva.Size);
+        public T ReadCustom<T>(uint rva) where T : struct, ICustomByteReader {
+            this.image.Seek(this.RvaToFileAddress(rva), SeekOrigin.Begin);
+
+            return this.image.ReadCustom<T>();
         }
     }
 }

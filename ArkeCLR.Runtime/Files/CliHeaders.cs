@@ -1,5 +1,7 @@
 ﻿using ArkeCLR.Utilities;
+using ArkeCLR.Utilities.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -122,6 +124,104 @@ namespace ArkeCLR.Runtime.Files {
         }
     }
 
+    public struct MethodHeader : ICustomByteReader {
+        public MethodFlags Flags;
+        public byte Size;
+        public ushort MaxStack;
+        public uint CodeSize;
+        public uint LocalVarSigTok;
+
+        public byte[] Body;
+        public MethodDataSectionHeader[] DataSections;
+
+        public void Read(ByteReader file) {
+            if (((MethodFlags)file.PeekU1()).FlagSet(MethodFlags.FatFormat)) {
+                var first = file.ReadU2();
+
+                this.Flags = (MethodFlags)((first >> 4) & 0b1111_1111_1111);
+                this.Size = (byte)(first & 0b1111);
+
+                file.Read(ref this.MaxStack);
+                file.Read(ref this.CodeSize);
+                file.Read(ref this.LocalVarSigTok);
+            }
+            else {
+                var first = file.ReadU1();
+
+                this.Flags = (MethodFlags)(first & 0b11);
+                this.CodeSize = first & 0b1111_1100U;
+            }
+
+            this.Body = file.ReadArray<byte>(this.CodeSize);
+
+            var sects = new List<MethodDataSectionHeader>();
+
+            if (this.Flags.FlagSet(MethodFlags.MoreSects)) {
+                file.SeekToMultiple(4);
+
+                var sect = default(MethodDataSectionHeader);
+
+                do {
+                    sects.Add(sect = file.ReadCustom<MethodDataSectionHeader>());
+                } while (sect.Kind.FlagSet(MethodDataSectionFlags.MoreSects));
+            }
+
+            this.DataSections = sects.ToArray();
+        }
+    }
+
+    public struct MethodDataSectionHeader : ICustomByteReader {
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        private struct TinyExceptionHandlingClause {
+            public ushort Flags;
+            public ushort TryOffset;
+            public byte TryLength;
+            public ushort HandlerOffset;
+            public byte HandlerLength;
+            public uint ClassToken;
+            public uint FilterOffset;
+
+            public ExceptionHandlingClause Expand() => new ExceptionHandlingClause {
+                Flags = (ExceptionClauseFlags)this.Flags,
+                TryOffset = this.TryOffset,
+                TryLength = this.TryLength,
+                HandlerOffset = this.HandlerOffset,
+                HandlerLength = this.HandlerLength,
+                ClassToken = this.ClassToken,
+                FilterOffset = this.FilterOffset,
+            };
+        }
+
+        public MethodDataSectionFlags Kind;
+        public uint DataSize;
+        public ExceptionHandlingClause[] Clauses;
+
+        public void Read(ByteReader file) {
+            file.ReadEnum(ref this.Kind);
+            file.Read(ref this.DataSize);
+
+            if (!this.Kind.FlagSet(MethodDataSectionFlags.FatFormat)) {
+                this.DataSize >>= 16;
+
+                this.Clauses = file.ReadArray<TinyExceptionHandlingClause>((this.DataSize - 4) / 12).ToArray(c => c.Expand());
+            }
+            else {
+                this.Clauses = file.ReadArray<ExceptionHandlingClause>((this.DataSize - 4) / 24);
+            }
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct ExceptionHandlingClause {
+        public ExceptionClauseFlags Flags;
+        public uint TryOffset;
+        public uint TryLength;
+        public uint HandlerOffset;
+        public uint HandlerLength;
+        public uint ClassToken;
+        public uint FilterOffset;
+    }
+
     [Flags]
     public enum CliRuntimeFlags : uint {
         IlOnly = 0x00000001,
@@ -130,5 +230,29 @@ namespace ArkeCLR.Runtime.Files {
         NativeEntryPointer = 0x00000010,
         TrackDebugData = 0x00010000,
         Prefer32Bit = 0x00020000,
+    }
+
+    [Flags]
+    public enum MethodFlags : ushort {
+        TinyFormat = 0x02,
+        FatFormat = 0x03,
+        MoreSects = 0x08,
+        InitLocals = 0x10
+    }
+
+    [Flags]
+    public enum MethodDataSectionFlags : uint {
+        EHTable = 0x01,
+        OptILTable = 0x02,
+        FatFormat = 0x40,
+        MoreSects = 0x80
+    }
+
+    [Flags]
+    public enum ExceptionClauseFlags : uint {
+        Exception = 0x00,
+        Filter = 0x01,
+        Finally = 0x02,
+        Fault = 0x04
     }
 }

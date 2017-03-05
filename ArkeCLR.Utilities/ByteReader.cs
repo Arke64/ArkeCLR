@@ -40,8 +40,19 @@ namespace ArkeCLR.Utilities {
             }
         }
 
+        public void SeekToMultiple(int multiple) => this.Position += multiple - this.Position % multiple;
+
         public ByteReader CreateView(int offset, int size) => new ByteReader(this.buffer, offset, size);
         public ByteReader CreateView(uint offset, uint size) => this.CreateView((int)offset, (int)size);
+
+        public byte PeekU1() => this.buffer[this.Position];
+        public ushort PeekU2() => BitConverter.ToUInt16(this.buffer, this.Position);
+        public uint PeekU4() => BitConverter.ToUInt32(this.buffer, this.Position);
+        public ulong PeekU8() => BitConverter.ToUInt64(this.buffer, this.Position);
+        public sbyte PeekI1() => (sbyte)this.buffer[this.Position];
+        public short PeekI2() => BitConverter.ToInt16(this.buffer, this.Position);
+        public int PeekI4() => BitConverter.ToInt32(this.buffer, this.Position);
+        public long PeekI8() => BitConverter.ToInt64(this.buffer, this.Position);
 
         public byte ReadU1() => this.buffer[this.Position++];
         public ushort ReadU2() { var r = BitConverter.ToUInt16(this.buffer, this.Position); this.Position += sizeof(ushort); return r; }
