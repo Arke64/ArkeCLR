@@ -11,13 +11,5 @@ namespace ArkeCLR.Runtime.Logical {
             if (this.Type == InstructionType.extended)
                 body.ReadEnum(ref this.ExtendedType);
         }
-
-        public void Execute(ExecutionEngine engine, ref int ip) {
-            switch (this.Type) {
-                case InstructionType.nop: break;
-                case InstructionType.ldc_i4_2: engine.PushI4(2); break;
-                case InstructionType.ret: ip = int.MaxValue; break;
-            }
-        }
     }
 }

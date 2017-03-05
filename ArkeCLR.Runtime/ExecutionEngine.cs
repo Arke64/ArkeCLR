@@ -4,13 +4,15 @@ using ArkeCLR.Utilities;
 using System.IO;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ArkeCLR.Runtime {
     public class ExecutionEngine {
         private readonly IAssemblyResolver assemblyResolver;
         private readonly Action<string> logger;
         private readonly List<Assembly> assemblies = new List<Assembly>();
-        private readonly Stack<ulong> stack = new Stack<ulong>();
+        private readonly Stack<ulong> evaluationStack = new Stack<ulong>();
+        private readonly Stack<(Method, int)> methodStack = new Stack<(Method, int)>();
 
         public ExecutionEngine(IAssemblyResolver assemblyResolver, Action<string> logger) => (this.assemblyResolver, this.logger) = (assemblyResolver, logger);
 
@@ -30,7 +32,9 @@ namespace ArkeCLR.Runtime {
         public int Run(string entryAssemblyPath) {
             var entryAssembly = this.Resolve(new AssemblyName(Path.GetFileNameWithoutExtension(entryAssemblyPath), entryAssemblyPath));
 
-            entryAssembly.EntryPoint.Execute(this);
+            this.methodStack.Push((entryAssembly.EntryPoint, 0));
+
+            this.Run();
 
             if (entryAssembly.EntryPoint.Signature.RetType.IsVoid) {
                 return 0;
@@ -40,22 +44,38 @@ namespace ArkeCLR.Runtime {
             }
         }
 
-        public byte PopU1() => (byte)this.stack.Pop();
-        public ushort PopU2() => (ushort)this.stack.Pop();
-        public uint PopU4() => (uint)this.stack.Pop();
-        public ulong PopU8() => this.stack.Pop();
-        public sbyte PopI1() => (sbyte)this.stack.Pop();
-        public short PopI2() => (short)this.stack.Pop();
-        public int PopI4() => (int)this.stack.Pop();
-        public long PopI8() => (long)this.stack.Pop();
+        private byte PopU1() => (byte)this.evaluationStack.Pop();
+        private ushort PopU2() => (ushort)this.evaluationStack.Pop();
+        private uint PopU4() => (uint)this.evaluationStack.Pop();
+        private ulong PopU8() => this.evaluationStack.Pop();
+        private sbyte PopI1() => (sbyte)this.evaluationStack.Pop();
+        private short PopI2() => (short)this.evaluationStack.Pop();
+        private int PopI4() => (int)this.evaluationStack.Pop();
+        private long PopI8() => (long)this.evaluationStack.Pop();
 
-        public void PushU1(byte value) => this.stack.Push(value);
-        public void PushU2(ushort value) => this.stack.Push(value);
-        public void PushU3(uint value) => this.stack.Push(value);
-        public void PushU4(ulong value) => this.stack.Push(value);
-        public void PushI1(sbyte value) => this.stack.Push((ulong)value);
-        public void PushI2(short value) => this.stack.Push((ulong)value);
-        public void PushI3(int value) => this.stack.Push((ulong)value);
-        public void PushI4(long value) => this.stack.Push((ulong)value);
+        private void PushU1(byte value) => this.evaluationStack.Push(value);
+        private void PushU2(ushort value) => this.evaluationStack.Push(value);
+        private void PushU3(uint value) => this.evaluationStack.Push(value);
+        private void PushU4(ulong value) => this.evaluationStack.Push(value);
+        private void PushI1(sbyte value) => this.evaluationStack.Push((ulong)value);
+        private void PushI2(short value) => this.evaluationStack.Push((ulong)value);
+        private void PushI3(int value) => this.evaluationStack.Push((ulong)value);
+        private void PushI4(long value) => this.evaluationStack.Push((ulong)value);
+
+        private void Run() {
+            do {
+                var (method, ip) = this.methodStack.Pop();
+
+                while (ip < method.Instructions.Count) {
+                    var inst = method.Instructions[ip++];
+
+                    switch (inst.Type) {
+                        case InstructionType.nop: break;
+                        case InstructionType.ldc_i4_2: this.PushI4(2); break;
+                        case InstructionType.ret: ip = int.MaxValue; break;
+                    }
+                }
+            } while (this.methodStack.Any());
+        }
     }
 }

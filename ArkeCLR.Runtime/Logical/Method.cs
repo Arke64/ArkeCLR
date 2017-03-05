@@ -29,10 +29,5 @@ namespace ArkeCLR.Runtime.Logical {
 
             this.Instructions = this.ReadInstructions(new ByteReader(this.Header.Body)).ToList();
         }
-
-        public void Execute(ExecutionEngine engine) {
-            for (var i = 0; i < this.Instructions.Count; i++)
-                this.Instructions[i].Execute(engine, ref i);
-        }
     }
 }
