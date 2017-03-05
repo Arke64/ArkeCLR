@@ -5,6 +5,7 @@ using ArkeCLR.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace ArkeCLR.Runtime.Streams {
     public class TableStream : Stream {
@@ -100,15 +101,15 @@ namespace ArkeCLR.Runtime.Streams {
             this.GenericParamConstraints = read<GenericParamConstraint>(TableType.GenericParamConstraint);
         }
 
-        public IEnumerable<MethodDef> ExtractMethodList(TypeDef parent, int index) => TableStream.FindRun(this.MethodDefs, this.TypeDefs, p => p.MethodList.Row, parent, index);
+        public IEnumerable<(MethodDef def, uint row)> ExtractMethodList(TypeDef parent, uint parentIndex) => TableStream.FindRun(this.MethodDefs, this.TypeDefs, p => p.MethodList.Row, parent, parentIndex);
 
-        private static IEnumerable<T> FindRun<T, U>(IReadOnlyCollection<T> source, IReadOnlyList<U> parentSource, Func<U, uint> parentRowSelector, U parent, int parentIndex) {
+        private static IEnumerable<(T, uint)> FindRun<T, U>(IReadOnlyCollection<T> source, IReadOnlyList<U> parentSource, Func<U, uint> parentRowSelector, U parent, uint parentIndex) {
             parentIndex += 1;
 
-            var end = parentIndex < parentSource.Count ? (int)parentRowSelector(parentSource[parentIndex]) - 1 : source.Count;
+            var end = parentIndex < parentSource.Count ? (int)parentRowSelector(parentSource[(int)parentIndex]) - 1 : source.Count;
             var start = (int)parentRowSelector(parent) - 1;
 
-            return source.Skip(start).Take(end - start);
+            return source.Skip(start).Take(end - start).Select((s, i) => (s, (uint)(start + i)));
         }
     }
 
@@ -176,11 +177,15 @@ namespace ArkeCLR.Runtime.Streams {
     public struct TableIndex {
         public TableType Table;
         public uint Row;
+
+        public static TableIndex From(uint value) => new TableIndex { Table = (TableType)(value >> 24), Row = value & 0xFFFFFF };
     }
 
     public struct HeapIndex {
         public HeapType Heap;
         public uint Offset;
+
+        public static HeapIndex From(uint value) => new HeapIndex { Heap = (HeapType)(value >> 24), Offset = value & 0xFFFFFF };
     }
 
     public enum CodedIndexType {
