@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace ArkeCLR.Runtime {
+namespace ArkeCLR.Runtime.Execution {
     public struct AssemblyName {
         public string Name { get; }
         public Version Version { get; }

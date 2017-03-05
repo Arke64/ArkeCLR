@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ArkeCLR.Runtime {
+namespace ArkeCLR.Runtime.Execution {
     public class CouldNotResolveAssemblyException : Exception {
         public AssemblyName AssemblyName { get; }
 
