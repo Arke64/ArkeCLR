@@ -13,14 +13,23 @@ namespace ArkeCLR.Runtime.Execution {
 
             do {
                 var (method, ip) = this.methodStack.Pop();
+                var cont = true;
 
-                while (ip < method.Instructions.Count) {
+                while (ip < method.Instructions.Count && cont) {
                     var inst = method.Instructions[ip++];
 
                     switch (inst.Type) {
                         case InstructionType.nop: break;
                         case InstructionType.ldc_i4_2: this.PushI4(2); break;
-                        case InstructionType.ret: ip = int.MaxValue; break;
+                        case InstructionType.ret: cont = false; break;
+
+                        case InstructionType.call:
+                            this.methodStack.Push((method, ip));
+                            this.methodStack.Push((method.Type.Assembly.FindMethod(inst.TableIndexOperand), 0));
+                            cont = false;
+                            break;
+
+                        default: throw new NotImplementedException();
                     }
                 }
             } while (this.methodStack.Any());
