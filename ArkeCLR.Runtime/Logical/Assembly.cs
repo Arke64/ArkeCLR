@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace ArkeCLR.Runtime.Logical {
     public class Assembly {
+        public CliFile File { get; }
         public string Name { get; }
         public Method EntryPoint { get; }
         public IReadOnlyList<Type> Types { get; }
@@ -14,6 +15,7 @@ namespace ArkeCLR.Runtime.Logical {
         public Assembly(CliFile file) {
             var def = file.TableStream.Assemblies.Single();
 
+            this.File = file;
             this.Name = file.StringStream.GetAt(def.Name);
             this.Types = file.TableStream.TypeDefs.ToList((d, i) => new Type(file, this, d, (uint)i));
 
