@@ -4,35 +4,41 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace ArkeCLR.Runtime.Execution {
+    public class CallFrame {
+        public Method Method;
+        public int InstructionPointer;
+
+        public CallFrame(Method method, int instructionPointer) {
+            this.Method = method;
+            this.InstructionPointer = instructionPointer;
+        }
+    }
+
     public class Interpreter : IExecutionEngine {
         private readonly Stack<ulong> evaluationStack = new Stack<ulong>();
-        private readonly Stack<(Method, int)> methodStack = new Stack<(Method, int)>();
+        private readonly Stack<CallFrame> callStack = new Stack<CallFrame>();
 
         public int Run(Assembly entryAssembly, IReadOnlyCollection<Assembly> references, Action<string> logger) {
-            this.methodStack.Push((entryAssembly.EntryPoint, 0));
+            this.callStack.Push(new CallFrame(entryAssembly.EntryPoint, 0));
 
             do {
-                var (method, ip) = this.methodStack.Pop();
-                var cont = true;
+                var frame = this.callStack.Peek();
 
-                while (ip < method.Instructions.Count && cont) {
-                    var inst = method.Instructions[ip++];
+                while (frame.InstructionPointer < frame.Method.Instructions.Count) {
+                    var inst = frame.Method.Instructions[frame.InstructionPointer++];
 
                     switch (inst.Type) {
                         case InstructionType.nop: break;
                         case InstructionType.ldc_i4_2: this.PushI4(2); break;
-                        case InstructionType.ret: cont = false; break;
-
-                        case InstructionType.call:
-                            this.methodStack.Push((method, ip));
-                            this.methodStack.Push((method.Type.Assembly.FindMethod(inst.TableIndexOperand), 0));
-                            cont = false;
-                            break;
-
+                        case InstructionType.ret: this.callStack.Pop(); goto end;
+                        case InstructionType.call: this.callStack.Push(new CallFrame(frame.Method.Type.Assembly.FindMethod(inst.TableIndexOperand), 0)); goto end;
                         default: throw new NotImplementedException();
                     }
                 }
-            } while (this.methodStack.Any());
+
+            end:
+                ;
+            } while (this.callStack.Any());
 
             if (entryAssembly.EntryPoint.Signature.RetType.IsVoid) {
                 return 0;
