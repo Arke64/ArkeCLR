@@ -18,7 +18,7 @@ namespace ArkeCLR.Runtime.Logical {
             this.Types = file.TableStream.TypeDefs.ToList((d, i) => new Type(file, this, d, (uint)i));
 
             this.Methods = this.Types.SelectMany(t => t.Methods).OrderBy(m => m.Row).ToList();
-            this.EntryPoint = this.FindMethod(TableIndex.From(file.CliHeader.EntryPointToken));
+            this.EntryPoint = this.FindMethod(new TableIndex(file.CliHeader.EntryPointToken));
         }
 
         public Method FindMethod(TableIndex index) => this.Methods[(int)index.Row - 1];

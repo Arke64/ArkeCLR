@@ -9,9 +9,9 @@ namespace ArkeCLR.Runtime.Tables {
         public HeapIndex Name;
 
         public void Read(TableStreamReader reader) {
-            reader.ReadEnum(ref this.Flags);
-            reader.Read(ref this.Sequence);
-            reader.Read(ref this.Name, HeapType.String);
+            reader.ReadEnum(out this.Flags);
+            reader.Read(out this.Sequence);
+            reader.Read(out this.Name, HeapType.String);
         }
     }
 }

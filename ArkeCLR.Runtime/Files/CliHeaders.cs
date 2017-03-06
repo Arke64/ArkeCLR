@@ -142,9 +142,9 @@ namespace ArkeCLR.Runtime.Files {
                 this.Flags = (MethodFlags)((first >> 4) & 0b1111_1111_1111);
                 this.Size = (byte)(first & 0b1111);
 
-                file.Read(ref this.MaxStack);
-                file.Read(ref this.CodeSize);
-                file.Read(ref this.LocalVarSigTok);
+                file.Read(out this.MaxStack);
+                file.Read(out this.CodeSize);
+                file.Read(out this.LocalVarSigTok);
             }
             else {
                 var first = file.ReadU1();
@@ -199,8 +199,8 @@ namespace ArkeCLR.Runtime.Files {
         public ExceptionHandlingClause[] Clauses;
 
         public void Read(ByteReader file) {
-            file.ReadEnum(ref this.Kind);
-            file.Read(ref this.DataSize);
+            file.ReadEnum(out this.Kind);
+            file.Read(out this.DataSize);
 
             if (!this.Kind.FlagSet(MethodDataSectionFlags.FatFormat)) {
                 this.DataSize >>= 16;

@@ -146,6 +146,7 @@ namespace ArkeCLR.Runtime.Streams {
         public TableStreamReader(TableStream stream, ByteReader reader) : base(reader) => this.stream = stream;
 
         public HeapIndex ReadIndex(HeapType type) => new HeapIndex { Heap = type, Offset = this.stream.Header.HeapSizes[(int)type] ? this.ReadU4() : this.ReadU2() };
+        public TableIndex ReadIndex(TableType type) => new TableIndex { Table = type, Row = this.stream.Header.Rows[(int)type] >= 65536 ? this.ReadU4() : this.ReadU2() };
 
         public TableIndex ReadIndex(CodedIndexType type) {
             var idx = new TableIndex { Row = this.ReadU2() };
@@ -160,32 +161,37 @@ namespace ArkeCLR.Runtime.Streams {
             return idx;
         }
 
-        public TableIndex ReadIndex(TableType type) {
-            var idx = new TableIndex { Table = type, Row = this.ReadU2() };
-
-            if (this.stream.Header.Rows[(int)idx.Table] >= 65536)
-                idx.Row |= (uint)(this.ReadU2() << 16);
-
-            return idx;
-        }
-
-        public void Read(ref HeapIndex value, HeapType type) => value = this.ReadIndex(type);
-        public void Read(ref TableIndex value, CodedIndexType type) => value = this.ReadIndex(type);
-        public void Read(ref TableIndex value, TableType type) => value = this.ReadIndex(type);
+        public void Read(out HeapIndex value, HeapType type) => value = this.ReadIndex(type);
+        public void Read(out TableIndex value, TableType type) => value = this.ReadIndex(type);
+        public void Read(out TableIndex value, CodedIndexType type) => value = this.ReadIndex(type);
     }
 
-    public struct TableIndex {
+    public struct TableIndex : ICustomByteReader {
         public TableType Table;
         public uint Row;
 
-        public static TableIndex From(uint value) => new TableIndex { Table = (TableType)(value >> 24), Row = value & 0xFFFFFF };
+        public void Read(ByteReader reader) => this = new TableIndex(reader.ReadU4());
+
+        public TableIndex(uint value) {
+            this.Table = (TableType)(value >> 24);
+            this.Row = value & 0xFFFFFF;
+        }
+
+        public override string ToString() => $"{this.Table.ToString()}@{this.Row}";
     }
 
-    public struct HeapIndex {
+    public struct HeapIndex : ICustomByteReader {
         public HeapType Heap;
         public uint Offset;
 
-        public static HeapIndex From(uint value) => new HeapIndex { Heap = (HeapType)(value >> 24), Offset = value & 0xFFFFFF };
+        public void Read(ByteReader reader) => this = new HeapIndex(reader.ReadU4());
+
+        public HeapIndex(uint value) {
+            this.Heap = (HeapType)(value >> 24);
+            this.Offset = value & 0xFFFFFF;
+        }
+
+        public override string ToString() => $"{this.Heap.ToString()}@{this.Offset}";
     }
 
     public enum CodedIndexType {
@@ -250,5 +256,6 @@ namespace ArkeCLR.Runtime.Streams {
         GenericParam = 0x2A,
         MethodSpec = 0x2B,
         GenericParamConstraint = 0x2C,
+        UserStringHeap = 0x70
     }
 }

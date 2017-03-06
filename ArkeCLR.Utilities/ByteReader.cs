@@ -97,15 +97,15 @@ namespace ArkeCLR.Utilities {
             else throw new ArgumentException();
         }
 
-        public void Read(ref byte value) => value = this.ReadU1();
-        public void Read(ref ushort value) => value = this.ReadU2();
-        public void Read(ref uint value) => value = this.ReadU4();
-        public void Read(ref ulong value) => value = this.ReadU8();
-        public void Read(ref sbyte value) => value = this.ReadI1();
-        public void Read(ref short value) => value = this.ReadI2();
-        public void Read(ref int value) => value = this.ReadI4();
-        public void Read(ref long value) => value = this.ReadI8();
-        public void ReadEnum<T>(ref T value) => value = this.ReadEnum<T>();
+        public void Read(out byte value) => value = this.ReadU1();
+        public void Read(out ushort value) => value = this.ReadU2();
+        public void Read(out uint value) => value = this.ReadU4();
+        public void Read(out ulong value) => value = this.ReadU8();
+        public void Read(out sbyte value) => value = this.ReadI1();
+        public void Read(out short value) => value = this.ReadI2();
+        public void Read(out int value) => value = this.ReadI4();
+        public void Read(out long value) => value = this.ReadI8();
+        public void ReadEnum<T>(out T value) => value = this.ReadEnum<T>();
 
         public string ReadString(Encoding encoding, uint length) => this.ReadString(encoding, (int)length, 0);
         public string ReadString(Encoding encoding, uint maxLength, byte padder) => this.ReadString(encoding, (int)maxLength, padder);
@@ -154,6 +154,14 @@ namespace ArkeCLR.Utilities {
 
             return buffer;
         }
+
+        public void ReadCustom<T>(uint count, out T[] values) where T : struct, ICustomByteReader => values = this.ReadCustom<T>(count);
+        public void ReadCustom<T>(int count, out T[] values) where T : struct, ICustomByteReader => values = this.ReadCustom<T>(count);
+        public void ReadCustom<T>(out T value) where T : struct, ICustomByteReader => value = this.ReadCustom<T>();
+
+        public void ReadCustom<T, U>(uint count, out T[] values) where T : struct, ICustomByteReader<U> where U : ByteReader => values = this.ReadCustom<T, U>(count);
+        public void ReadCustom<T, U>(int count, out T[] values) where T : struct, ICustomByteReader<U> where U : ByteReader => values = this.ReadCustom<T, U>(count);
+        public void ReadCustom<T, U>(out T value) where T : struct, ICustomByteReader<U> where U : ByteReader => value = this.ReadCustom<T, U>();
 
         public T[] ReadCustom<T>(uint count) where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(count);
         public T[] ReadCustom<T>(int count) where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(count);

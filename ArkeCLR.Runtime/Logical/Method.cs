@@ -15,9 +15,9 @@ namespace ArkeCLR.Runtime.Logical {
         public MethodHeader Header { get; }
         public IReadOnlyList<Instruction> Instructions { get; }
 
-        private IEnumerable<Instruction> ReadInstructions(ByteReader reader) {
+        private IEnumerable<Instruction> ReadInstructions(CliFile file, ByteReader reader) {
             while (reader.Position < reader.Length)
-                yield return reader.ReadCustom<Instruction>();
+                yield return new Instruction(file, reader);
         }
 
         public Method(CliFile file, Type type, MethodDef def, uint row) {
@@ -27,7 +27,7 @@ namespace ArkeCLR.Runtime.Logical {
             this.Signature = file.BlobStream.GetAt<MethodDefSig>(def.Signature);
             this.Header = file.ReadCustom<MethodHeader>(def.RVA);
 
-            this.Instructions = this.ReadInstructions(new ByteReader(this.Header.Body)).ToList();
+            this.Instructions = this.ReadInstructions(file, new ByteReader(this.Header.Body)).ToList();
         }
     }
 }

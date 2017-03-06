@@ -15,15 +15,15 @@ namespace ArkeCLR.Runtime.Tables {
         public HeapIndex HashValue;
 
         public void Read(TableStreamReader reader) {
-            reader.Read(ref this.MajorVersion);
-            reader.Read(ref this.MinorVersion);
-            reader.Read(ref this.BuildNumber);
-            reader.Read(ref this.RevisionNumber);
-            reader.ReadEnum(ref this.Flags);
-            reader.Read(ref this.PublicKeyOrToken, HeapType.Blob);
-            reader.Read(ref this.Name, HeapType.String);
-            reader.Read(ref this.Culture, HeapType.String);
-            reader.Read(ref this.HashValue, HeapType.Blob);
+            reader.Read(out this.MajorVersion);
+            reader.Read(out this.MinorVersion);
+            reader.Read(out this.BuildNumber);
+            reader.Read(out this.RevisionNumber);
+            reader.ReadEnum(out this.Flags);
+            reader.Read(out this.PublicKeyOrToken, HeapType.Blob);
+            reader.Read(out this.Name, HeapType.String);
+            reader.Read(out this.Culture, HeapType.String);
+            reader.Read(out this.HashValue, HeapType.Blob);
         }
     }
 }
