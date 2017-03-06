@@ -58,7 +58,7 @@ namespace ArkeCLR.Runtime.Streams {
 
             for (var i = 0; i < this.Header.Valid.Count; i++)
                 if (this.Header.Valid[i] && ((TableType)i).IsInvalid())
-                    throw new NotSupportedException($"Table index '0x{i:X}' is not supported.");
+                    throw new NotSupportedException($"Table index '0x{i:X2}' is not supported.");
 
             IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<TableStreamReader> => reader.ReadCustom<T, TableStreamReader>(this.Header.Rows[(int)table]);
             this.Modules = read<Module>(TableType.Module);
@@ -177,7 +177,7 @@ namespace ArkeCLR.Runtime.Streams {
             this.Row = value & 0xFFFFFF;
         }
 
-        public override string ToString() => $"{this.Table.ToString()}@{this.Row}";
+        public override string ToString() => $"{this.Table.ToString()}@0x{this.Row:X8}";
     }
 
     public struct HeapIndex : ICustomByteReader {
@@ -191,7 +191,7 @@ namespace ArkeCLR.Runtime.Streams {
             this.Offset = value & 0xFFFFFF;
         }
 
-        public override string ToString() => $"{this.Heap.ToString()}@{this.Offset}";
+        public override string ToString() => $"{this.Heap.ToString()}@0x{this.Offset:X8}";
     }
 
     public enum CodedIndexType {
