@@ -2,10 +2,10 @@
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct MethodSemantics : ICustomByteReader<TableStreamReader> {
+    public struct MethodSemantics : ICustomByteReader<IndexByteReader> {
 
 
-        public void Read(TableStreamReader reader) {
+        public void Read(IndexByteReader reader) {
 
         }
     }

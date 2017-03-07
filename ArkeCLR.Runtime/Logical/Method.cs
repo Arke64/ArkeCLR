@@ -15,7 +15,7 @@ namespace ArkeCLR.Runtime.Logical {
         public MethodHeader Header { get; }
         public IReadOnlyList<Instruction> Instructions { get; }
 
-        private IEnumerable<Instruction> ReadInstructions(CliFile file, TableStreamReader reader) {
+        private IEnumerable<Instruction> ReadInstructions(CliFile file, IndexByteReader reader) {
             while (reader.Position < reader.Length)
                 yield return new Instruction(file, reader);
         }
@@ -33,7 +33,7 @@ namespace ArkeCLR.Runtime.Logical {
                 var bar = file.BlobStream.GetAt(foo.Signature);
             }
 
-            this.Instructions = this.ReadInstructions(file, new TableStreamReader(file.TableStream, this.Header.Body)).ToList();
+            this.Instructions = this.ReadInstructions(file, new IndexByteReader(file.TableStream, this.Header.Body)).ToList();
         }
     }
 }

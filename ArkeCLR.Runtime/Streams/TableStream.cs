@@ -51,7 +51,7 @@ namespace ArkeCLR.Runtime.Streams {
         public IReadOnlyList<GenericParamConstraint> GenericParamConstraints { get; private set; }
 
         public override void Initialize(ByteReader byteReader) {
-            var reader = new TableStreamReader(this, byteReader);
+            var reader = new IndexByteReader(this, byteReader);
 
             this.Header = reader.ReadCustom<CilTableStreamHeader>();
 
@@ -59,7 +59,7 @@ namespace ArkeCLR.Runtime.Streams {
                 if (this.Header.Valid[i] && ((TableType)i).IsInvalid())
                     throw new NotSupportedException($"Table index '0x{i:X2}' is not supported.");
 
-            IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<TableStreamReader> => reader.ReadCustom<T, TableStreamReader>(this.Header.Rows[(int)table]);
+            IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<IndexByteReader> => reader.ReadCustom<T, IndexByteReader>(this.Header.Rows[(int)table]);
             this.Modules = read<Module>(TableType.Module);
             this.TypeRefs = read<TypeRef>(TableType.TypeRef);
             this.TypeDefs = read<TypeDef>(TableType.TypeDef);
@@ -112,14 +112,14 @@ namespace ArkeCLR.Runtime.Streams {
         }
     }
 
-    public class TableStreamReader : ByteReader {
+    public class IndexByteReader : ByteReader {
         private static IReadOnlyDictionary<CodedIndexType, IReadOnlyList<TableType>> CodedIndexTableMap { get; }
         private static IReadOnlyDictionary<CodedIndexType, int> CodedIndexSizeMap { get; }
         private static IReadOnlyDictionary<CodedIndexType, int> CodedIndexSizeMaskMap { get; }
         private static IReadOnlyDictionary<CodedIndexType, int> CodedIndexMaxRows { get; }
 
-        static TableStreamReader() {
-            TableStreamReader.CodedIndexTableMap = new Dictionary<CodedIndexType, IReadOnlyList<TableType>> {
+        static IndexByteReader() {
+            IndexByteReader.CodedIndexTableMap = new Dictionary<CodedIndexType, IReadOnlyList<TableType>> {
                 [CodedIndexType.TypeDefOrRef] = new[] { TableType.TypeDef, TableType.TypeRef, TableType.TypeSpec },
                 [CodedIndexType.HasConstant] = new[] { TableType.Field, TableType.Param, TableType.Property },
                 [CodedIndexType.HasCustomAttribute] = new[] { TableType.MethodDef, TableType.Field, TableType.TypeRef, TableType.TypeDef, TableType.Param, TableType.InterfaceImpl, TableType.MemberRef, TableType.Module, (TableType)0xFF /*Permission*/, TableType.Property, TableType.Event, TableType.StandAloneSig, TableType.ModuleRef, TableType.TypeSpec, TableType.Assembly, TableType.AssemblyRef, TableType.File, TableType.ExportedType, TableType.ManifestResource, TableType.GenericParam, TableType.GenericParamConstraint, TableType.MethodSpec },
@@ -135,15 +135,15 @@ namespace ArkeCLR.Runtime.Streams {
                 [CodedIndexType.TypeOfMethodDef] = new[] { TableType.TypeDef, TableType.MethodDef },
             };
 
-            TableStreamReader.CodedIndexSizeMap = TableStreamReader.CodedIndexTableMap.ToDictionary(d => d.Key, d => (int)Math.Ceiling(Math.Log(d.Value.Count, 2)));
-            TableStreamReader.CodedIndexSizeMaskMap = TableStreamReader.CodedIndexSizeMap.ToDictionary(d => d.Key, d => (1 << d.Value) - 1);
-            TableStreamReader.CodedIndexMaxRows = TableStreamReader.CodedIndexSizeMap.ToDictionary(d => d.Key, d => (int)Math.Pow(2, 16 - d.Value));
+            IndexByteReader.CodedIndexSizeMap = IndexByteReader.CodedIndexTableMap.ToDictionary(d => d.Key, d => (int)Math.Ceiling(Math.Log(d.Value.Count, 2)));
+            IndexByteReader.CodedIndexSizeMaskMap = IndexByteReader.CodedIndexSizeMap.ToDictionary(d => d.Key, d => (1 << d.Value) - 1);
+            IndexByteReader.CodedIndexMaxRows = IndexByteReader.CodedIndexSizeMap.ToDictionary(d => d.Key, d => (int)Math.Pow(2, 16 - d.Value));
         }
 
         private readonly TableStream stream;
 
-        public TableStreamReader(TableStream stream, ByteReader reader) : base(reader) => this.stream = stream;
-        public TableStreamReader(TableStream stream, byte[] buffer) : base(buffer) => this.stream = stream;
+        public IndexByteReader(TableStream stream, ByteReader reader) : base(reader) => this.stream = stream;
+        public IndexByteReader(TableStream stream, byte[] buffer) : base(buffer) => this.stream = stream;
 
         public HeapIndex ReadIndex(HeapType type) => new HeapIndex { Heap = type, Offset = this.stream.Header.HeapSizes[(int)type] ? this.ReadU4() : this.ReadU2() };
         public TableIndex ReadIndex(TableType type) => new TableIndex { Table = type, Row = this.stream.Header.Rows[(int)type] >= 65536 ? this.ReadU4() : this.ReadU2() };
@@ -151,12 +151,12 @@ namespace ArkeCLR.Runtime.Streams {
         public TableIndex ReadIndex(CodedIndexType type) {
             var idx = new TableIndex { Row = this.ReadU2() };
 
-            idx.Table = TableStreamReader.CodedIndexTableMap[type][(int)(idx.Row & TableStreamReader.CodedIndexSizeMaskMap[type])];
+            idx.Table = IndexByteReader.CodedIndexTableMap[type][(int)(idx.Row & IndexByteReader.CodedIndexSizeMaskMap[type])];
 
-            idx.Row >>= TableStreamReader.CodedIndexSizeMap[type];
+            idx.Row >>= IndexByteReader.CodedIndexSizeMap[type];
 
-            if (this.stream.Header.Rows[(int)idx.Table] >= TableStreamReader.CodedIndexMaxRows[type])
-                idx.Row |= (uint)(this.ReadU2() << (16 - TableStreamReader.CodedIndexSizeMap[type]));
+            if (this.stream.Header.Rows[(int)idx.Table] >= IndexByteReader.CodedIndexMaxRows[type])
+                idx.Row |= (uint)(this.ReadU2() << (16 - IndexByteReader.CodedIndexSizeMap[type]));
 
             return idx;
         }

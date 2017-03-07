@@ -7,7 +7,7 @@ namespace ArkeCLR.Runtime.Logical {
         public ExtendedInstructionType ExtendedType;
         public TableIndex TableIndexOperand;
 
-        public Instruction(CliFile file, TableStreamReader body) : this() {
+        public Instruction(CliFile file, IndexByteReader body) : this() {
             body.ReadEnum(out this.Type);
 
             if (this.Type == InstructionType.extended)

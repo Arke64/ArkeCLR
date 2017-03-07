@@ -2,14 +2,14 @@
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct Module : ICustomByteReader<TableStreamReader> {
+    public struct Module : ICustomByteReader<IndexByteReader> {
         public ushort Generation;
         public HeapIndex Name;
         public HeapIndex Mvid;
         public HeapIndex EncId;
         public HeapIndex EncBaseId;
 
-        public void Read(TableStreamReader reader) {
+        public void Read(IndexByteReader reader) {
             reader.Read(out this.Generation);
             reader.Read(out this.Name, HeapType.String);
             reader.Read(out this.Mvid, HeapType.Guid);

@@ -2,9 +2,9 @@
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct StandAloneSig : ICustomByteReader<TableStreamReader> {
+    public struct StandAloneSig : ICustomByteReader<IndexByteReader> {
         public HeapIndex Signature;
 
-        public void Read(TableStreamReader reader) => reader.Read(out this.Signature, HeapType.Blob);
+        public void Read(IndexByteReader reader) => reader.Read(out this.Signature, HeapType.Blob);
     }
 }
