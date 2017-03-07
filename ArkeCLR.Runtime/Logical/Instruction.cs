@@ -1,6 +1,5 @@
 ﻿using ArkeCLR.Runtime.Files;
 using ArkeCLR.Runtime.Streams;
-using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Logical {
     public struct Instruction {
@@ -8,7 +7,7 @@ namespace ArkeCLR.Runtime.Logical {
         public ExtendedInstructionType ExtendedType;
         public TableIndex TableIndexOperand;
 
-        public Instruction(CliFile file, ByteReader body) : this() {
+        public Instruction(CliFile file, TableStreamReader body) : this() {
             body.ReadEnum(out this.Type);
 
             if (this.Type == InstructionType.extended)
@@ -17,7 +16,7 @@ namespace ArkeCLR.Runtime.Logical {
             switch (this.Type) {
                 case InstructionType.ldstr:
                 case InstructionType.call:
-                    body.ReadCustom(out this.TableIndexOperand); break;
+                    body.Read(out this.TableIndexOperand); break;
             }
         }
 

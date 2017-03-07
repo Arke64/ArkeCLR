@@ -5,7 +5,6 @@ using ArkeCLR.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace ArkeCLR.Runtime.Streams {
     public class TableStream : Stream {
@@ -144,6 +143,7 @@ namespace ArkeCLR.Runtime.Streams {
         private readonly TableStream stream;
 
         public TableStreamReader(TableStream stream, ByteReader reader) : base(reader) => this.stream = stream;
+        public TableStreamReader(TableStream stream, byte[] buffer) : base(buffer) => this.stream = stream;
 
         public HeapIndex ReadIndex(HeapType type) => new HeapIndex { Heap = type, Offset = this.stream.Header.HeapSizes[(int)type] ? this.ReadU4() : this.ReadU2() };
         public TableIndex ReadIndex(TableType type) => new TableIndex { Table = type, Row = this.stream.Header.Rows[(int)type] >= 65536 ? this.ReadU4() : this.ReadU2() };
@@ -164,32 +164,29 @@ namespace ArkeCLR.Runtime.Streams {
         public void Read(out HeapIndex value, HeapType type) => value = this.ReadIndex(type);
         public void Read(out TableIndex value, TableType type) => value = this.ReadIndex(type);
         public void Read(out TableIndex value, CodedIndexType type) => value = this.ReadIndex(type);
+
+        public void Read(out TableIndex value) => value = new TableIndex(this.ReadU4());
     }
 
-    public struct TableIndex : ICustomByteReader {
+    public struct TableIndex {
         public TableType Table;
         public uint Row;
 
-        public void Read(ByteReader reader) => this = new TableIndex(reader.ReadU4());
-
+        //TODO Should we get rid of these
+        public TableIndex(int value) : this((uint) value) {}
         public TableIndex(uint value) {
             this.Table = (TableType)(value >> 24);
             this.Row = value & 0xFFFFFF;
         }
 
+        public bool IsZero => this.Row == 0;
+
         public override string ToString() => $"{this.Table.ToString()}@0x{this.Row:X8}";
     }
 
-    public struct HeapIndex : ICustomByteReader {
+    public struct HeapIndex {
         public HeapType Heap;
         public uint Offset;
-
-        public void Read(ByteReader reader) => this = new HeapIndex(reader.ReadU4());
-
-        public HeapIndex(uint value) {
-            this.Heap = (HeapType)(value >> 24);
-            this.Offset = value & 0xFFFFFF;
-        }
 
         public override string ToString() => $"{this.Heap.ToString()}@0x{this.Offset:X8}";
     }

@@ -130,7 +130,7 @@ namespace ArkeCLR.Runtime.Files {
         public byte Size;
         public ushort MaxStack;
         public uint CodeSize;
-        public TableIndex LocalVarSigTok;
+        public uint LocalVarSigTok;
 
         public byte[] Body;
         public MethodDataSectionHeader[] DataSections;
@@ -144,7 +144,7 @@ namespace ArkeCLR.Runtime.Files {
 
                 file.Read(out this.MaxStack);
                 file.Read(out this.CodeSize);
-                file.ReadCustom(out this.LocalVarSigTok);
+                file.Read(out this.LocalVarSigTok);
             }
             else {
                 var first = file.ReadU1();
