@@ -19,9 +19,13 @@ namespace ArkeCLR.Utilities.Extensions {
     }
 
     public static class IEnumerableExtensions {
-        public static void ForEach<T>(this IEnumerable<T> self, Action<T> action) {
+        public static void ForEach<T>(this IEnumerable<T> self, Action<T> action) => self.ForEach((i, s) => action(s));
+
+        public static void ForEach<T>(this IEnumerable<T> self, Action<int, T> action) {
+            var i = 0;
+
             foreach (var s in self)
-                action(s);
+                action(i++, s);
         }
 
         public static List<U> ToList<T, U>(this IEnumerable<T> self, Func<T, U> selector) => self.Select(s => selector(s)).ToList();
