@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ArkeCLR.Utilities {
-    public class ByteReader { 
+    public class ByteReader {
         private readonly byte[] buffer;
 
         public int Position { get; private set; }
@@ -105,6 +105,8 @@ namespace ArkeCLR.Utilities {
         public void Read(out short value) => value = this.ReadI2();
         public void Read(out int value) => value = this.ReadI4();
         public void Read(out long value) => value = this.ReadI8();
+        public void ReadCompressed(out uint value) => value = this.ReadCompressedU4();
+        public void ReadCompressed(out int value) => value = this.ReadCompressedI4();
         public void ReadEnum<T>(out T value) => value = this.ReadEnum<T>();
 
         public string ReadString(Encoding encoding, uint length) => this.ReadString(encoding, (int)length, 0);
