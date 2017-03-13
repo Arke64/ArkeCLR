@@ -13,6 +13,7 @@ namespace ArkeCLR.Runtime.Logical {
         public string Name { get; }
         public MethodDefSig Signature { get; }
         public MethodHeader Header { get; }
+        public LocalVarSig LocalVariablesSignature { get; }
         public IReadOnlyList<Instruction> Instructions { get; }
 
         private IEnumerable<Instruction> ReadInstructions(CliFile file, IndexByteReader reader) {
@@ -27,11 +28,9 @@ namespace ArkeCLR.Runtime.Logical {
             this.Signature = file.BlobStream.GetAt<MethodDefSig>(def.Signature);
             this.Header = file.ReadCustom<MethodHeader>(def.RVA);
 
-            var idx = new TableIndex(this.Header.LocalVarSigTok);
-            if (!idx.IsZero) {
-                var foo = file.TableStream.StandAloneSigs[(int)(idx.Row) - 1];
-                var bar = file.BlobStream.GetAt(foo.Signature);
-            }
+            var sigIndex = new TableIndex(this.Header.LocalVarSigTok);
+            if (!sigIndex.IsZero)
+                this.LocalVariablesSignature = file.BlobStream.GetAt<LocalVarSig>(file.TableStream.StandAloneSigs[(int)(sigIndex.Row) - 1].Signature);
 
             this.Instructions = this.ReadInstructions(file, new IndexByteReader(file.TableStream, this.Header.Body)).ToList();
         }
