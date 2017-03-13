@@ -11,6 +11,8 @@ namespace ArkeCLR.Runtime.Streams {
         public override string Name => "#~";
 
         public CilTableStreamHeader Header { get; private set; }
+
+        //TODO Do these need to be public
         public IReadOnlyList<Module> Modules { get; private set; }
         public IReadOnlyList<TypeRef> TypeRefs { get; private set; }
         public IReadOnlyList<TypeDef> TypeDefs { get; private set; }
@@ -59,6 +61,7 @@ namespace ArkeCLR.Runtime.Streams {
                 if (this.Header.Valid[i] && ((TableType)i).IsInvalid())
                     throw new NotSupportedException($"Table index '0x{i:X2}' is not supported.");
 
+            //TODO Make the first entry null so we don't need to subtract off one
             IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<IndexByteReader> => reader.ReadCustom<T, IndexByteReader>(this.Header.Rows[(int)table]);
             this.Modules = read<Module>(TableType.Module);
             this.TypeRefs = read<TypeRef>(TableType.TypeRef);
@@ -99,6 +102,9 @@ namespace ArkeCLR.Runtime.Streams {
             this.MethodSpecs = read<MethodSpec>(TableType.MethodSpec);
             this.GenericParamConstraints = read<GenericParamConstraint>(TableType.GenericParamConstraint);
         }
+
+        //TODO Verify table type in the index
+        public StandAloneSig GetStandAloneSig(TableIndex index) => this.StandAloneSigs[(int)(index.Row) - 1];
 
         public IEnumerable<(MethodDef def, uint row)> ExtractMethodList(TypeDef parent, uint parentIndex) => TableStream.FindRun(this.MethodDefs, this.TypeDefs, p => p.MethodList.Row, parent, parentIndex);
 
