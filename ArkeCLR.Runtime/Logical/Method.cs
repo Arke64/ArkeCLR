@@ -33,6 +33,8 @@ namespace ArkeCLR.Runtime.Logical {
                 this.LocalVariablesSignature = file.BlobStream.GetAt<LocalVarSig>(file.TableStream.StandAloneSigs[(int)(sigIndex.Row) - 1].Signature);
 
             this.Instructions = this.ReadInstructions(file, new IndexByteReader(file.TableStream, this.Header.Body)).ToList();
+
+            this.Instructions.ForEach((idx, inst) => inst.FixUp(idx, this.Instructions));
         }
     }
 }
