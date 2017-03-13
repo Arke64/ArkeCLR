@@ -7,6 +7,8 @@ namespace ArkeCLR.Runtime.Streams {
 
         protected override byte[] Get() => this.reader.ReadArray<byte>(this.reader.ReadCompressedU4());
 
+        public void GetAt<T>(HeapIndex index, out T value) where T : struct, ICustomByteReader => value = this.GetAt<T>(index);
+
         public T GetAt<T>(HeapIndex index) where T : struct, ICustomByteReader {
             var obj = new T();
 
