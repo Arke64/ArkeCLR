@@ -21,9 +21,31 @@ namespace ArkeCLR.Runtime.Execution {
         private readonly Stack<TypeRecord> evaluationStack = new Stack<TypeRecord>();
         private readonly Stack<CallFrame> callStack = new Stack<CallFrame>();
 
-        public int Run(Assembly entryAssembly, IReadOnlyCollection<Assembly> references, Action<string> logger) {
+        public long Run(Assembly entryAssembly, IReadOnlyCollection<Assembly> references, Action<string> logger) {
+            //TODO Need to handle the optional string[] args
             this.callStack.Push(new CallFrame(entryAssembly.EntryPoint, 0));
 
+            this.RunInterpreter();
+
+            var returnCode = 0L;
+
+            if (entryAssembly.EntryPoint.Signature.RetType.Type == new Signatures.Type(ElementType.I4)) {
+                returnCode = this.Pop(ElementType.I4).I4;
+            }
+            else if (entryAssembly.EntryPoint.Signature.RetType.Type == new Signatures.Type(ElementType.U4)) {
+                returnCode = this.Pop(ElementType.U4).U4;
+            }
+            else if (!entryAssembly.EntryPoint.Signature.RetType.IsVoid) {
+                throw new ExecutionEngineException("Invalid entry point return type.");
+            }
+
+            if (this.evaluationStack.Any())
+                throw new ExecutionEngineException("Expected empty stack.");
+
+            return returnCode;
+        }
+
+        private void RunInterpreter() {
             do {
                 var frame = this.callStack.Peek();
 
@@ -57,6 +79,7 @@ namespace ArkeCLR.Runtime.Execution {
 
                         case InstructionType.br_s: frame.InstructionPointer = inst.BranchInstruction; break;
 
+                        //TODO Need to verify what is on the eval stack before and after a call
                         case InstructionType.ret: this.callStack.Pop(); goto end;
                         case InstructionType.call: this.callStack.Push(new CallFrame(frame.Method.Type.Assembly.FindMethod(inst.TableIndexOperand), 0)); goto end;
 
@@ -72,8 +95,6 @@ namespace ArkeCLR.Runtime.Execution {
             end:
                 ;
             } while (this.callStack.Any());
-
-            return !entryAssembly.EntryPoint.Signature.RetType.IsVoid ? this.Pop(ElementType.I4).I4 : 0; //TODO What are the valid entry point return types
         }
 
         private TypeRecord Pop() => this.evaluationStack.Pop();
