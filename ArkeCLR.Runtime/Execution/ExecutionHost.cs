@@ -27,6 +27,6 @@ namespace ArkeCLR.Runtime.Execution {
             return assm;
         }
 
-        public int Run(string entryAssemblyPath) => this.engine.Run(this.Resolve(new AssemblyName(Path.GetFileNameWithoutExtension(entryAssemblyPath), entryAssemblyPath)), this.assemblies, this.logger);
+        public long Run(string entryAssemblyPath) => this.engine.Run(this.Resolve(new AssemblyName(Path.GetFileNameWithoutExtension(entryAssemblyPath), entryAssemblyPath)), this.assemblies, this.logger);
     }
 }

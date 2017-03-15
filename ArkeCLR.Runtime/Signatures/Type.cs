@@ -7,7 +7,7 @@ namespace ArkeCLR.Runtime.Signatures {
         public ElementType ElementType;
         public SzArrayType SzArray;
 
-        public Type(ElementType elementType) => this.ElementType = elementType;
+        public Type(ElementType elementType) : this() => this.ElementType = elementType;
 
         public void Read(ElementType type, ByteReader reader) {
             this.ElementType = type;
@@ -40,7 +40,8 @@ namespace ArkeCLR.Runtime.Signatures {
             }
         }
 
-        public override bool Equals(object obj) => ((Type)obj) == this;
+        public bool Equals(Type obj) => obj == this;
+        public override bool Equals(object obj) => obj != null && this.Equals((Type)obj);
         public override int GetHashCode() => this.ElementType.GetHashCode();
 
         public static bool operator !=(Type self, Type other) => !(self.ElementType == other.ElementType);
