@@ -22,6 +22,8 @@ namespace ArkeCLR.Runtime.Logical {
             switch (this.Type) {
                 case InstructionType.ldstr:
                 case InstructionType.call:
+                case InstructionType.callvirt:
+                case InstructionType.newobj:
                     body.Read(out this.TableIndexOperand); break;
 
                 case InstructionType.br_s: this.BranchInstruction = body.ReadI1(); break;
@@ -36,6 +38,8 @@ namespace ArkeCLR.Runtime.Logical {
             switch (this.Type) {
                 case InstructionType.ldstr:
                 case InstructionType.call:
+                case InstructionType.callvirt:
+                case InstructionType.newobj:
                     operand = this.TableIndexOperand.ToString(); break;
 
                 case InstructionType.br_s:
