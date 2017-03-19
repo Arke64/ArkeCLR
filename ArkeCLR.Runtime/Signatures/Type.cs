@@ -5,7 +5,8 @@ using System;
 namespace ArkeCLR.Runtime.Signatures {
     public struct Type {
         public ElementType ElementType;
-        public SzArrayType SzArray;
+        public SzArray SzArray;
+        public Class Class;
 
         public Type(ElementType elementType) : this() => this.ElementType = elementType;
 
@@ -14,12 +15,12 @@ namespace ArkeCLR.Runtime.Signatures {
 
             switch (this.ElementType) {
                 case ElementType.Array: throw new NotImplementedException();
-                case ElementType.Class: throw new NotImplementedException();
+                case ElementType.Class: this.Class = new Class(reader); break;
                 case ElementType.FnPtr: throw new NotImplementedException();
                 case ElementType.GenericInst: throw new NotImplementedException();
                 case ElementType.MVar: throw new NotImplementedException();
                 case ElementType.Ptr: throw new NotImplementedException();
-                case ElementType.SzArray: this.SzArray = new SzArrayType(reader); break;
+                case ElementType.SzArray: this.SzArray = new SzArray(reader); break;
                 case ElementType.ValueType: throw new NotImplementedException();
                 case ElementType.Var: throw new NotImplementedException();
             }
@@ -28,7 +29,7 @@ namespace ArkeCLR.Runtime.Signatures {
         public override string ToString() {
             switch (this.ElementType) {
                 case ElementType.Array: throw new NotImplementedException();
-                case ElementType.Class: throw new NotImplementedException();
+                case ElementType.Class: return this.Class.ToString();
                 case ElementType.FnPtr: throw new NotImplementedException();
                 case ElementType.GenericInst: throw new NotImplementedException();
                 case ElementType.MVar: throw new NotImplementedException();

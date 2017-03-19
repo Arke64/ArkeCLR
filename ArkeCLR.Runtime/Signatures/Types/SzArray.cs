@@ -2,11 +2,11 @@
 using ArkeCLR.Utilities.Extensions;
 
 namespace ArkeCLR.Runtime.Signatures.Types {
-    public class SzArrayType {
+    public class SzArray {
         public CustomMod[] CustomMods;
         public Type Type;
 
-        public SzArrayType(ByteReader reader) {
+        public SzArray(ByteReader reader) {
             var cur = reader.ReadEnum<ElementType>();
 
             this.CustomMods = CustomMod.ReadCustomMods(reader, ref cur);

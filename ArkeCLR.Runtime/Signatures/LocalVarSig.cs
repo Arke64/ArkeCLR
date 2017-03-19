@@ -2,6 +2,7 @@
 using ArkeCLR.Utilities;
 using System.Linq;
 using System.Collections.Generic;
+using ArkeCLR.Utilities.Extensions;
 
 namespace ArkeCLR.Runtime.Signatures {
     public struct LocalVarSig : ICustomByteReader {
@@ -74,8 +75,10 @@ namespace ArkeCLR.Runtime.Signatures {
 
                 this.CustomMods = mods.ToArray();
             }
+
+            public override string ToString() => $"{this.CustomMods.ToString(", ", "[", "] ", true)}{(!this.IsTypedByRef ? this.Type.ToString() : "typedref")}{(this.IsByRef ? "&" : string.Empty)}";
         }
 
-        public override string ToString() => string.Join(string.Empty, this.Locals.Select(t => t.ToString()));
+        public override string ToString() => $"<{string.Join(" ", this.Locals.Select(t => t.ToString()))}>";
     }
 }

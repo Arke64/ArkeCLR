@@ -8,10 +8,12 @@ namespace ArkeCLR.Runtime.Signatures {
 
         public void Read(ByteReader reader) {
             var uncompressed = reader.ReadCompressedU4();
-            var table = uncompressed & 0x03;
 
-            this.Table = table == 0 ? TableType.TypeDef : (table == 1 ? TableType.TypeRef : TableType.TypeSpec);
-            this.Row = (table & ~0x03U) >> 2;
+            this.Row = uncompressed >> 2;
+
+            uncompressed &= 0x03;
+
+            this.Table = uncompressed == 0 ? TableType.TypeDef : (uncompressed == 1 ? TableType.TypeRef : TableType.TypeSpec);
         }
 
         public override string ToString() => $"{this.Table}->0x{this.Row:X8}";
