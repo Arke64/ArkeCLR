@@ -23,6 +23,6 @@ namespace ArkeCLR.Runtime.Logical {
             this.EntryPoint = this.FindMethod(new TableIndex(file.CliHeader.EntryPointToken));
         }
 
-        public Method FindMethod(TableIndex index) => this.Methods[(int)index.Row - 1];
+        public Method FindMethod(TableIndex index) => index.Table == TableType.MethodDef ? this.Methods[(int)index.Row - 1] : null; //TODO Need to handle methodref
     }
 }
