@@ -16,7 +16,7 @@ namespace ArkeCLR.Utilities {
 
         public ByteReader(byte[] buffer, int offset, int size) {
             if (buffer == null) throw new ArgumentNullException(nameof(buffer));
-            if (size <= 0 || offset + size > buffer.Length) throw new ArgumentOutOfRangeException(nameof(size));
+            if (size <= 0 || checked(offset + size) > buffer.Length) throw new ArgumentOutOfRangeException(nameof(size));
 
             this.buffer = new byte[size];
 
@@ -26,7 +26,11 @@ namespace ArkeCLR.Utilities {
             this.Position = 0;
         }
 
-        public void Seek(uint position, SeekOrigin seekOrigin) => this.Seek((int)position, seekOrigin);
+        public void Seek(uint position, SeekOrigin seekOrigin) {
+            if (position > int.MaxValue) throw new ArgumentOutOfRangeException(nameof(position));
+
+            this.Seek((int)position, seekOrigin);
+        }
 
         public void Seek(int position, SeekOrigin seekOrigin) {
             switch (seekOrigin) {
@@ -39,7 +43,13 @@ namespace ArkeCLR.Utilities {
         public void SeekToMultiple(int multiple) => this.Position += multiple - this.Position % multiple;
 
         public ByteReader CreateView(int offset, int size) => new ByteReader(this.buffer, offset, size);
-        public ByteReader CreateView(uint offset, uint size) => this.CreateView((int)offset, (int)size);
+
+        public ByteReader CreateView(uint offset, uint size) {
+            if (offset > int.MaxValue) throw new ArgumentOutOfRangeException(nameof(offset));
+            if (size > int.MaxValue) throw new ArgumentOutOfRangeException(nameof(size));
+
+            return this.CreateView((int)offset, (int)size);
+        }
 
         public byte PeekU1() => this.buffer[this.Position];
         public ushort PeekU2() => BitConverter.ToUInt16(this.buffer, this.Position);
@@ -105,17 +115,22 @@ namespace ArkeCLR.Utilities {
         public void ReadCompressed(out int value) => value = this.ReadCompressedI4();
         public void ReadEnum<T>(out T value) => value = this.ReadEnum<T>();
 
-        public string ReadString(Encoding encoding, uint length) => this.ReadString(encoding, (int)length);
+        public string ReadString(Encoding encoding, uint length) {
+            if (length > int.MaxValue) throw new ArgumentOutOfRangeException(nameof(length));
 
-        public string ReadString(Encoding encoding, int maxLength) {
-            var end = this.Position + maxLength;
+            return this.ReadString(encoding, (int)length);
+        }
 
-            while (this.buffer[--end] == 0)
-                ;
+        public string ReadString(Encoding encoding, int length) {
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+
+            var end = this.Position + length;
+
+            while (this.buffer[--end] == 0) { }
 
             var result = encoding.GetString(this.buffer, this.Position, end + 1 - this.Position);
 
-            this.Position += maxLength;
+            this.Position += length;
 
             return result;
         }
@@ -126,8 +141,7 @@ namespace ArkeCLR.Utilities {
         public string ReadStringTerminated(Encoding encoding, byte terminator, int paddingMultiple) {
             var start = this.Position;
 
-            while (this.buffer[this.Position++] != terminator)
-                ;
+            while (this.buffer[this.Position++] != terminator) { }
 
             var result = encoding.GetString(this.buffer, start, this.Position - 1 - start);
 
@@ -136,9 +150,15 @@ namespace ArkeCLR.Utilities {
             return result;
         }
 
-        public T[] ReadArray<T>(uint count) => this.ReadArray<T>((int)count);
+        public T[] ReadArray<T>(uint count) {
+            if (count > int.MaxValue) throw new ArgumentOutOfRangeException(nameof(count));
+
+            return this.ReadArray<T>((int)count);
+        }
 
         public T[] ReadArray<T>(int count) {
+            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+
             var size = Marshal.SizeOf(default(T));
             var bytes = count * size;
             var buf = new T[count];
