@@ -1,5 +1,4 @@
-﻿using ArkeCLR.Runtime.Streams;
-using ArkeCLR.Utilities;
+﻿using ArkeCLR.Utilities;
 using ArkeCLR.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
@@ -57,7 +56,7 @@ namespace ArkeCLR.Runtime.Files {
             this.Reserved1 = root1.Reserved1;
             this.VersionLength = root1.VersionLength;
 
-            this.Version = file.ReadString(Encoding.UTF8, this.VersionLength, 0);
+            this.Version = file.ReadString(Encoding.UTF8, this.VersionLength);
 
             var root2 = file.ReadStruct<RootHeader2>();
             this.Flags = root2.Flags;
