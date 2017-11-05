@@ -40,6 +40,9 @@ namespace ArkeCLR.Runtime.Execution {
             //TODO Need to handle the optional string[] args
             this.callStack.Push(new CallFrame(entryAssembly.EntryPoint, 0));
 
+            if (entryAssembly.EntryPoint.Signature.ParamCount == 1)
+                this.evaluationStack.Push(TypeRecord.FromObject(0));
+
             this.RunInterpreter();
 
             var returnCode = 0L;
@@ -98,10 +101,19 @@ namespace ArkeCLR.Runtime.Execution {
 
                         //TODO Need to handle what is on the eval stack before and after a call
                         case InstructionType.ret:
+                            var ret = default(TypeRecord);
+
+                            if (!frame.Method.Signature.RetType.IsVoid)
+                                ret = this.Pop();
+
                             for (var i = 0; i < frame.Method.Signature.ParamCount + (frame.Method.Signature.HasThis ? 1 : 0); i++)
                                 this.Pop();
 
                             this.callStack.Pop();
+
+                            if (!frame.Method.Signature.RetType.IsVoid)
+                                this.Push(ret);
+
                             goto end;
 
                         case InstructionType.call:

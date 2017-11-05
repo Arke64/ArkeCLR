@@ -2,7 +2,7 @@
   "profiles": {
     "ArkeCLR.Hosts.Console": {
       "commandName": "Project",
-      "commandLineArgs": "D:\\CIL\\CilTester\\bin\\Debug\\CilTester.exe"
+      "commandLineArgs": "D:\\CIL\\CilTester\\bin\\Release\\CilTester.exe"
     }
   }
 }
