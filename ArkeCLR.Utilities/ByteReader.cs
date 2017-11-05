@@ -115,11 +115,7 @@ namespace ArkeCLR.Utilities {
         public void ReadCompressed(out int value) => value = this.ReadCompressedI4();
         public void ReadEnum<T>(out T value) => value = this.ReadEnum<T>();
 
-        public string ReadString(Encoding encoding, uint length) {
-            if (length > int.MaxValue) throw new ArgumentOutOfRangeException(nameof(length));
-
-            return this.ReadString(encoding, (int)length);
-        }
+        public string ReadString(Encoding encoding, uint length) => length <= int.MaxValue ? this.ReadString(encoding, (int)length) : throw new ArgumentOutOfRangeException(nameof(length));
 
         public string ReadString(Encoding encoding, int length) {
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
@@ -150,11 +146,7 @@ namespace ArkeCLR.Utilities {
             return result;
         }
 
-        public T[] ReadArray<T>(uint count) {
-            if (count > int.MaxValue) throw new ArgumentOutOfRangeException(nameof(count));
-
-            return this.ReadArray<T>((int)count);
-        }
+        public T[] ReadArray<T>(uint count) => count <= int.MaxValue ? this.ReadArray<T>((int)count) : throw new ArgumentOutOfRangeException(nameof(count));
 
         public T[] ReadArray<T>(int count) {
             if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
@@ -182,11 +174,7 @@ namespace ArkeCLR.Utilities {
         public T[] ReadCustom<T>(int count) where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(count);
         public T ReadCustom<T>() where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>();
 
-        public T[] ReadCustom<T, U>(int count) where T : struct, ICustomByteReader<U> where U : ByteReader {
-            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-
-            return this.ReadCustom<T, U>((uint)count);
-        }
+        public T[] ReadCustom<T, U>(int count) where T : struct, ICustomByteReader<U> where U : ByteReader => count >= 0 ? this.ReadCustom<T, U>((uint)count) : throw new ArgumentOutOfRangeException(nameof(count));
 
         public T[] ReadCustom<T, U>(uint count) where T : struct, ICustomByteReader<U> where U : ByteReader {
             var result = new T[count];
@@ -205,11 +193,7 @@ namespace ArkeCLR.Utilities {
             return result;
         }
 
-        public T[] ReadStruct<T>(int count) where T : struct {
-            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-
-            return this.ReadStruct<T>((uint)count);
-        }
+        public T[] ReadStruct<T>(int count) where T : struct => count >= 0 ? this.ReadStruct<T>((uint)count) : throw new ArgumentOutOfRangeException(nameof(count));
 
         public T[] ReadStruct<T>(uint count) where T : struct {
             var result = new T[count];
