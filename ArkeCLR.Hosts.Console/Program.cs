@@ -14,13 +14,18 @@ namespace ArkeCLR.Hosts.Console {
                 return;
             }
 
-            try {
-                log($"Exited with code {new ExecutionHost(new Interpreter(), new AssemblyResolver(Path.GetDirectoryName(args[0])), log).Run(args[0])}.");
-            }
-            catch (Exception ex) {
-                log(ex.ToString());
+            void run() => log($"Exited with code {new ExecutionHost(new Interpreter(), new AssemblyResolver(Path.GetDirectoryName(args[0])), log).Run(args[0])}.");
 
-                Debugger.Break();
+            if (!Debugger.IsAttached) {
+                try {
+                    run();
+                }
+                catch (Exception ex) {
+                    log(ex.ToString());
+                }
+            }
+            else {
+                run();
             }
         }
     }
