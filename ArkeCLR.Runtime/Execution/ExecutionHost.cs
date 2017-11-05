@@ -15,9 +15,7 @@ namespace ArkeCLR.Runtime.Execution {
         public ExecutionHost(IExecutionEngine engine, IAssemblyResolver assemblyResolver, Action<string> logger) => (this.engine, this.assemblyResolver, this.logger) = (engine, assemblyResolver, logger);
 
         private Assembly Resolve(AssemblyName name) {
-            var (found, data) = this.assemblyResolver.Resolve(name);
-
-            if (!found)
+            if (!this.assemblyResolver.Resolve(name, out var data))
                 throw new CouldNotResolveAssemblyException(name);
 
             var assm = new Assembly(new CliFile(new ByteReader(data)));

@@ -7,9 +7,11 @@ namespace ArkeCLR.Hosts.Console {
 
         public AssemblyResolver(string currentDirectory) => this.currentDirectory = currentDirectory;
 
-        public (bool, byte[]) Resolve(AssemblyName assemblyName) {
+        public bool Resolve(AssemblyName assemblyName, out byte[] result) {
             var path = default(string);
             var root = Path.Combine(this.currentDirectory, assemblyName.Name);
+
+            result = default;
 
             if (File.Exists(assemblyName.HintPath)) {
                 path = assemblyName.HintPath;
@@ -20,8 +22,13 @@ namespace ArkeCLR.Hosts.Console {
             else if (File.Exists(root + ".exe")) {
                 path = root + ".exe";
             }
+            else {
+                return false;
+            }
 
-            return path != default(string) ? (true, File.ReadAllBytes(path)) : (false, null);
+            result = File.ReadAllBytes(path);
+
+            return true;
         }
     }
 }
