@@ -2,6 +2,8 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
+#pragma warning disable S1104 // Fields should not have public accessibility
+
 namespace ArkeCLR.Runtime.Files {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct RvaAndSize {
