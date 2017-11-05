@@ -11,10 +11,10 @@ namespace ArkeCLR.Runtime.Tables {
 
         public void Read(IndexByteReader reader) {
             reader.Read(out this.Generation);
-            reader.Read(out this.Name, HeapType.String);
-            reader.Read(out this.Mvid, HeapType.Guid);
-            reader.Read(out this.EncId, HeapType.Guid);
-            reader.Read(out this.EncBaseId, HeapType.Guid);
+            reader.Read(HeapType.String, out this.Name);
+            reader.Read(HeapType.Guid, out this.Mvid);
+            reader.Read(HeapType.Guid, out this.EncId);
+            reader.Read(HeapType.Guid, out this.EncBaseId);
         }
     }
 }

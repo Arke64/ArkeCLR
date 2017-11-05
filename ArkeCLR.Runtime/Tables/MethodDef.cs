@@ -15,9 +15,9 @@ namespace ArkeCLR.Runtime.Tables {
             reader.Read(out this.RVA);
             reader.ReadEnum(out this.ImplFlags);
             reader.ReadEnum(out this.Flags);
-            reader.Read(out this.Name, HeapType.String);
-            reader.Read(out this.Signature, HeapType.Blob);
-            reader.Read(out this.ParamList, TableType.Param);
+            reader.Read(HeapType.String, out this.Name);
+            reader.Read(HeapType.Blob, out this.Signature);
+            reader.Read(TableType.Param, out this.ParamList);
         }
     }
 }

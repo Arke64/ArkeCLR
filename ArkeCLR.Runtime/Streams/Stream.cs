@@ -1,54 +1,54 @@
 ﻿using ArkeCLR.Utilities;
+using ArkeCLR.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
+
 namespace ArkeCLR.Runtime.Streams {
     public abstract class Stream {
-        public abstract string Name { get; }
+        public string Name { get; }
+
+        protected Stream(string name) => this.Name = name;
 
         public abstract void Initialize(ByteReader reader);
     }
 
-    public abstract class Stream<T> : Stream {
-        private Dictionary<int, T> cache = new Dictionary<int, T>();
+    public abstract class Heap<T> : Stream {
+        private readonly Dictionary<int, T> cache = new Dictionary<int, T>();
+        private readonly int offset;
+        private readonly int scale;
+        private ByteReader reader;
 
-        protected ByteReader reader;
+        public HeapType Type { get; }
 
-        protected virtual int Offset => 0;
-        protected virtual int Scale => 1;
+        protected Heap(string name, HeapType type) : this(name, type, 0, 1) { }
+        protected Heap(string name, HeapType type, int offset, int scale) : base(name) => (this.Type, this.offset, this.scale) = (type, offset, scale);
 
-        public abstract HeapType Type { get; }
+        protected abstract T Get(ByteReader reader);
 
         public override void Initialize(ByteReader reader) => this.reader = reader;
 
-        protected abstract T Get();
+        public T GetAt(HeapIndex index) => index.Heap == this.Type ? this.GetAt(index.Offset) : throw new ArgumentException("Invalid index type.", nameof(index));
 
-        public T GetAt(HeapIndex index) {
-            if (index.Heap != this.Type) throw new ArgumentException("Invalid index type.", nameof(index));
-
-            return this.GetAt(index.Offset);
-        }
-
-        public T GetAt(uint index) => this.GetAt((int)index);
+        public T GetAt(uint index) => index <= int.MaxValue ? this.GetAt((int)index) : throw new ArgumentOutOfRangeException(nameof(index));
 
         public T GetAt(int index) {
-            index = (index - this.Offset) * this.Scale;
+            if (index < 0) throw new ArgumentOutOfRangeException(nameof(index));
 
-            if (index < 0)
-                return default(T);
+            index = (index - this.offset) * this.scale;
 
             if (this.cache.TryGetValue(index, out var val))
                 return val;
 
             this.reader.Seek(index, SeekOrigin.Begin);
 
-            return this.cache[index] = this.Get();
+            return this.cache[index] = this.Get(this.reader);
         }
 
         public IEnumerable<T> ReadAll() {
             while (this.reader.Position < this.reader.Length)
-                yield return this.GetAt(this.reader.Position / this.Scale + this.Offset);
+                yield return this.GetAt(this.reader.Position / this.scale + this.offset);
         }
     }
 }

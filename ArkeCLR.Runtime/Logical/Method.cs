@@ -28,9 +28,9 @@ namespace ArkeCLR.Runtime.Logical {
             this.Signature = file.BlobStream.GetAt<MethodDefSig>(def.Signature);
             this.Header = file.ReadCustom<MethodHeader>(def.RVA);
 
-            var sigIndex = new TableIndex(this.Header.LocalVarSigTok);
+            var sigIndex = file.TableStream.ToTableIndex(this.Header.LocalVarSigTok);
             if (!sigIndex.IsZero)
-                this.LocalVariablesSignature = file.BlobStream.GetAt<LocalVarSig>(file.TableStream.StandAloneSigs[(int)(sigIndex.Row) - 1].Signature);
+                this.LocalVariablesSignature = file.BlobStream.GetAt<LocalVarSig>(file.TableStream.StandAloneSigs.Get(sigIndex).Signature);
 
             this.Instructions = this.ReadInstructions(file, new IndexByteReader(file.TableStream, this.Header.Body)).ToList();
 

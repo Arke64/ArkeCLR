@@ -1,10 +1,10 @@
-﻿using System.Text;
+﻿using ArkeCLR.Utilities;
+using System.Text;
 
 namespace ArkeCLR.Runtime.Streams {
-    public class StringStream : Stream<string> {
-        public override string Name => "#Strings";
-        public override HeapType Type => HeapType.String;
+    public class StringHeap : Heap<string> {
+        public StringHeap() : base("#Strings", HeapType.String) { }
 
-        protected override string Get() => this.reader.ReadStringTerminated(Encoding.UTF8);
+        protected override string Get(ByteReader reader) => reader.ReadStringTerminated(Encoding.UTF8);
     }
 }

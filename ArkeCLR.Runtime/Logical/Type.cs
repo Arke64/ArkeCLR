@@ -1,8 +1,6 @@
 ﻿using ArkeCLR.Runtime.Files;
-using ArkeCLR.Utilities.Extensions;
-using System.Collections.Generic;
-using System.Linq;
 using ArkeCLR.Runtime.Tables;
+using System.Collections.Generic;
 
 namespace ArkeCLR.Runtime.Logical {
     public class Type {
@@ -17,7 +15,7 @@ namespace ArkeCLR.Runtime.Logical {
             this.Row = row;
             this.Name = file.StringStream.GetAt(def.TypeName);
             this.Namespace = file.StringStream.GetAt(def.TypeNamespace);
-            this.Methods = file.TableStream.ExtractMethodList(def, row).ToList(d => new Method(file, this, d.def, d.row));
+            this.Methods = file.TableStream.MethodDefs.ExtractRun(file.TableStream.TypeDefs, p => p.MethodList.Row, def, row, (d, r) => new Method(file, this, d, r));
         }
     }
 }

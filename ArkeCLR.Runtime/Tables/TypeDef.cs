@@ -13,11 +13,11 @@ namespace ArkeCLR.Runtime.Tables {
 
         public void Read(IndexByteReader reader) {
             reader.ReadEnum(out this.Flags);
-            reader.Read(out this.TypeName, HeapType.String);
-            reader.Read(out this.TypeNamespace, HeapType.String);
-            reader.Read(out this.Extends, CodedIndexType.TypeDefOrRef);
-            reader.Read(out this.FieldList, TableType.Field);
-            reader.Read(out this.MethodList, TableType.MethodDef);
+            reader.Read(HeapType.String, out this.TypeName);
+            reader.Read(HeapType.String, out this.TypeNamespace);
+            reader.Read(CodedIndexType.TypeDefOrRef, out this.Extends);
+            reader.Read(TableType.Field, out this.FieldList);
+            reader.Read(TableType.MethodDef, out this.MethodList);
         }
     }
 }

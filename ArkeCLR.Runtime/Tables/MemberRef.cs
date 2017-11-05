@@ -8,9 +8,9 @@ namespace ArkeCLR.Runtime.Tables {
         public HeapIndex Signature;
 
         public void Read(IndexByteReader reader) {
-            reader.Read(out this.Class, CodedIndexType.MemberRefParent);
-            reader.Read(out this.Name, HeapType.String);
-            reader.Read(out this.Signature, HeapType.Blob);
+            reader.Read(CodedIndexType.MemberRefParent, out this.Class);
+            reader.Read(HeapType.String, out this.Name);
+            reader.Read(HeapType.Blob, out this.Signature);
         }
     }
 }

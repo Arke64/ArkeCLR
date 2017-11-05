@@ -11,10 +11,10 @@ namespace ArkeCLR.Runtime.Files {
         public CilMetadataRootHeader CliMetadataRootHeader { get; }
         public IReadOnlyDictionary<string, CilMetadataStreamHeader> StreamHeaders { get; }
 
-        public StringStream StringStream { get; }
-        public BlobStream BlobStream { get; }
-        public UserStringStream UserStringsStream { get; }
-        public GuidStream GuidStream { get; }
+        public StringHeap StringStream { get; }
+        public BlobHeap BlobStream { get; }
+        public UserStringHeap UserStringsStream { get; }
+        public GuidHeap GuidStream { get; }
         public TableStream TableStream { get; }
 
         public CliFile(ByteReader image) : base(image) {
@@ -29,10 +29,10 @@ namespace ArkeCLR.Runtime.Files {
 
             T read<T>() where T : Stream, new() { var res = new T(); if (this.StreamHeaders.TryGetValue(res.Name, out var val)) res.Initialize(metadata.CreateView(val.Offset, val.Size)); return res; }
 
-            this.StringStream = read<StringStream>();
-            this.BlobStream = read<BlobStream>();
-            this.UserStringsStream = read<UserStringStream>();
-            this.GuidStream = read<GuidStream>();
+            this.StringStream = read<StringHeap>();
+            this.BlobStream = read<BlobHeap>();
+            this.UserStringsStream = read<UserStringHeap>();
+            this.GuidStream = read<GuidHeap>();
             this.TableStream = read<TableStream>();
         }
 
@@ -44,44 +44,44 @@ namespace ArkeCLR.Runtime.Files {
             this.UserStringsStream.ReadAll().ForEach(s => builder.AppendLine(s));
             this.GuidStream.ReadAll().ForEach(s => builder.AppendLine(s.ToString()));
 
-            this.TableStream.Modules.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.TypeRefs.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.TypeDefs.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.Fields.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.MethodDefs.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.Params.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.InterfaceImpls.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.MemberRefs.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.Constants.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.CustomAttributes.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.FieldMarshals.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.DeclSecurities.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.ClassLayouts.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.FieldLayouts.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.StandAloneSigs.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.EventMaps.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.Events.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.PropertyMaps.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.Properties.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.MethodSemantics.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.MethodImpls.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.ModuleRefs.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.TypeSpecs.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.ImplMaps.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.FieldRVAs.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.Assemblies.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.AssemblyProcessors.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.AssemblyOSs.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.AssemblyRefs.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.AssemblyRefProcessors.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.AssemblyRefOSs.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.Files.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.ExportedTypes.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.ManifestResources.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.NestedClasses.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.GenericParams.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.MethodSpecs.ForEach(t => builder.AppendLine(t.ToString()));
-            this.TableStream.GenericParamConstraints.ForEach(t => builder.AppendLine(t.ToString()));
+            this.TableStream.Modules.ToString(builder);
+            this.TableStream.TypeRefs.ToString(builder);
+            this.TableStream.TypeDefs.ToString(builder);
+            this.TableStream.Fields.ToString(builder);
+            this.TableStream.MethodDefs.ToString(builder);
+            this.TableStream.Params.ToString(builder);
+            this.TableStream.InterfaceImpls.ToString(builder);
+            this.TableStream.MemberRefs.ToString(builder);
+            this.TableStream.Constants.ToString(builder);
+            this.TableStream.CustomAttributes.ToString(builder);
+            this.TableStream.FieldMarshals.ToString(builder);
+            this.TableStream.DeclSecurities.ToString(builder);
+            this.TableStream.ClassLayouts.ToString(builder);
+            this.TableStream.FieldLayouts.ToString(builder);
+            this.TableStream.StandAloneSigs.ToString(builder);
+            this.TableStream.EventMaps.ToString(builder);
+            this.TableStream.Events.ToString(builder);
+            this.TableStream.PropertyMaps.ToString(builder);
+            this.TableStream.Properties.ToString(builder);
+            this.TableStream.MethodSemantics.ToString(builder);
+            this.TableStream.MethodImpls.ToString(builder);
+            this.TableStream.ModuleRefs.ToString(builder);
+            this.TableStream.TypeSpecs.ToString(builder);
+            this.TableStream.ImplMaps.ToString(builder);
+            this.TableStream.FieldRVAs.ToString(builder);
+            this.TableStream.Assemblies.ToString(builder);
+            this.TableStream.AssemblyProcessors.ToString(builder);
+            this.TableStream.AssemblyOSs.ToString(builder);
+            this.TableStream.AssemblyRefs.ToString(builder);
+            this.TableStream.AssemblyRefProcessors.ToString(builder);
+            this.TableStream.AssemblyRefOSs.ToString(builder);
+            this.TableStream.Files.ToString(builder);
+            this.TableStream.ExportedTypes.ToString(builder);
+            this.TableStream.ManifestResources.ToString(builder);
+            this.TableStream.NestedClasses.ToString(builder);
+            this.TableStream.GenericParams.ToString(builder);
+            this.TableStream.MethodSpecs.ToString(builder);
+            this.TableStream.GenericParamConstraints.ToString(builder);
 
             return builder.ToString();
         }

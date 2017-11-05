@@ -5,127 +5,144 @@ using ArkeCLR.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace ArkeCLR.Runtime.Streams {
     public class TableStream : Stream {
-        public override string Name => "#~";
+        public TableStream() : base("#~") { }
 
         public CilTableStreamHeader Header { get; private set; }
 
-        //TODO Do these need to be public
-        public IReadOnlyList<Module> Modules { get; private set; }
-        public IReadOnlyList<TypeRef> TypeRefs { get; private set; }
-        public IReadOnlyList<TypeDef> TypeDefs { get; private set; }
-        public IReadOnlyList<Field> Fields { get; private set; }
-        public IReadOnlyList<MethodDef> MethodDefs { get; private set; }
-        public IReadOnlyList<Param> Params { get; private set; }
-        public IReadOnlyList<InterfaceImpl> InterfaceImpls { get; private set; }
-        public IReadOnlyList<MemberRef> MemberRefs { get; private set; }
-        public IReadOnlyList<Constant> Constants { get; private set; }
-        public IReadOnlyList<CustomAttribute> CustomAttributes { get; private set; }
-        public IReadOnlyList<FieldMarshal> FieldMarshals { get; private set; }
-        public IReadOnlyList<DeclSecurity> DeclSecurities { get; private set; }
-        public IReadOnlyList<ClassLayout> ClassLayouts { get; private set; }
-        public IReadOnlyList<FieldLayout> FieldLayouts { get; private set; }
-        public IReadOnlyList<StandAloneSig> StandAloneSigs { get; private set; }
-        public IReadOnlyList<EventMap> EventMaps { get; private set; }
-        public IReadOnlyList<Event> Events { get; private set; }
-        public IReadOnlyList<PropertyMap> PropertyMaps { get; private set; }
-        public IReadOnlyList<Property> Properties { get; private set; }
-        public IReadOnlyList<MethodSemantics> MethodSemantics { get; private set; }
-        public IReadOnlyList<MethodImpl> MethodImpls { get; private set; }
-        public IReadOnlyList<ModuleRef> ModuleRefs { get; private set; }
-        public IReadOnlyList<TypeSpec> TypeSpecs { get; private set; }
-        public IReadOnlyList<ImplMap> ImplMaps { get; private set; }
-        public IReadOnlyList<FieldRVA> FieldRVAs { get; private set; }
-        public IReadOnlyList<Assembly> Assemblies { get; private set; }
-        public IReadOnlyList<AssemblyProcessor> AssemblyProcessors { get; private set; }
-        public IReadOnlyList<AssemblyOS> AssemblyOSs { get; private set; }
-        public IReadOnlyList<AssemblyRef> AssemblyRefs { get; private set; }
-        public IReadOnlyList<AssemblyRefProcessor> AssemblyRefProcessors { get; private set; }
-        public IReadOnlyList<AssemblyRefOS> AssemblyRefOSs { get; private set; }
-        public IReadOnlyList<File> Files { get; private set; }
-        public IReadOnlyList<ExportedType> ExportedTypes { get; private set; }
-        public IReadOnlyList<ManifestResource> ManifestResources { get; private set; }
-        public IReadOnlyList<NestedClass> NestedClasses { get; private set; }
-        public IReadOnlyList<GenericParam> GenericParams { get; private set; }
-        public IReadOnlyList<MethodSpec> MethodSpecs { get; private set; }
-        public IReadOnlyList<GenericParamConstraint> GenericParamConstraints { get; private set; }
+        public TableList<Module> Modules { get; private set; }
+        public TableList<TypeRef> TypeRefs { get; private set; }
+        public TableList<TypeDef> TypeDefs { get; private set; }
+        public TableList<Field> Fields { get; private set; }
+        public TableList<MethodDef> MethodDefs { get; private set; }
+        public TableList<Param> Params { get; private set; }
+        public TableList<InterfaceImpl> InterfaceImpls { get; private set; }
+        public TableList<MemberRef> MemberRefs { get; private set; }
+        public TableList<Constant> Constants { get; private set; }
+        public TableList<CustomAttribute> CustomAttributes { get; private set; }
+        public TableList<FieldMarshal> FieldMarshals { get; private set; }
+        public TableList<DeclSecurity> DeclSecurities { get; private set; }
+        public TableList<ClassLayout> ClassLayouts { get; private set; }
+        public TableList<FieldLayout> FieldLayouts { get; private set; }
+        public TableList<StandAloneSig> StandAloneSigs { get; private set; }
+        public TableList<EventMap> EventMaps { get; private set; }
+        public TableList<Event> Events { get; private set; }
+        public TableList<PropertyMap> PropertyMaps { get; private set; }
+        public TableList<Property> Properties { get; private set; }
+        public TableList<MethodSemantics> MethodSemantics { get; private set; }
+        public TableList<MethodImpl> MethodImpls { get; private set; }
+        public TableList<ModuleRef> ModuleRefs { get; private set; }
+        public TableList<TypeSpec> TypeSpecs { get; private set; }
+        public TableList<ImplMap> ImplMaps { get; private set; }
+        public TableList<FieldRVA> FieldRVAs { get; private set; }
+        public TableList<Assembly> Assemblies { get; private set; }
+        public TableList<AssemblyProcessor> AssemblyProcessors { get; private set; }
+        public TableList<AssemblyOS> AssemblyOSs { get; private set; }
+        public TableList<AssemblyRef> AssemblyRefs { get; private set; }
+        public TableList<AssemblyRefProcessor> AssemblyRefProcessors { get; private set; }
+        public TableList<AssemblyRefOS> AssemblyRefOSs { get; private set; }
+        public TableList<File> Files { get; private set; }
+        public TableList<ExportedType> ExportedTypes { get; private set; }
+        public TableList<ManifestResource> ManifestResources { get; private set; }
+        public TableList<NestedClass> NestedClasses { get; private set; }
+        public TableList<GenericParam> GenericParams { get; private set; }
+        public TableList<MethodSpec> MethodSpecs { get; private set; }
+        public TableList<GenericParamConstraint> GenericParamConstraints { get; private set; }
 
-        public override void Initialize(ByteReader byteReader) {
-            var reader = new IndexByteReader(this, byteReader);
+        public override void Initialize(ByteReader reader) {
+            var indexReader = new IndexByteReader(this, reader);
 
-            this.Header = reader.ReadCustom<CilTableStreamHeader>();
+            this.Header = indexReader.ReadCustom<CilTableStreamHeader>();
 
             for (var i = 0; i < this.Header.Valid.Count; i++)
                 if (this.Header.Valid[i] && ((TableType)i).IsInvalid())
                     throw new NotSupportedException($"Table index '0x{i:X2}' is not supported.");
 
-            //TODO Make the first entry null so we don't need to subtract off one
-            IReadOnlyList<T> read<T>(TableType table) where T : struct, ICustomByteReader<IndexByteReader> => reader.ReadCustom<T, IndexByteReader>(this.Header.Rows[(int)table]);
-            this.Modules = read<Module>(TableType.Module);
-            this.TypeRefs = read<TypeRef>(TableType.TypeRef);
-            this.TypeDefs = read<TypeDef>(TableType.TypeDef);
-            this.Fields = read<Field>(TableType.Field);
-            this.MethodDefs = read<MethodDef>(TableType.MethodDef);
-            this.Params = read<Param>(TableType.Param);
-            this.InterfaceImpls = read<InterfaceImpl>(TableType.InterfaceImpl);
-            this.MemberRefs = read<MemberRef>(TableType.MemberRef);
-            this.Constants = read<Constant>(TableType.Constant);
-            this.CustomAttributes = read<CustomAttribute>(TableType.CustomAttribute);
-            this.FieldMarshals = read<FieldMarshal>(TableType.FieldMarshal);
-            this.DeclSecurities = read<DeclSecurity>(TableType.DeclSecurity);
-            this.ClassLayouts = read<ClassLayout>(TableType.ClassLayout);
-            this.FieldLayouts = read<FieldLayout>(TableType.FieldLayout);
-            this.StandAloneSigs = read<StandAloneSig>(TableType.StandAloneSig);
-            this.EventMaps = read<EventMap>(TableType.EventMap);
-            this.Events = read<Event>(TableType.Event);
-            this.PropertyMaps = read<PropertyMap>(TableType.PropertyMap);
-            this.Properties = read<Property>(TableType.Property);
-            this.MethodSemantics = read<MethodSemantics>(TableType.MethodSemantics);
-            this.MethodImpls = read<MethodImpl>(TableType.MethodImpl);
-            this.ModuleRefs = read<ModuleRef>(TableType.ModuleRef);
-            this.TypeSpecs = read<TypeSpec>(TableType.TypeSpec);
-            this.ImplMaps = read<ImplMap>(TableType.ImplMap);
-            this.FieldRVAs = read<FieldRVA>(TableType.FieldRVA);
-            this.Assemblies = read<Assembly>(TableType.Assembly);
-            this.AssemblyProcessors = read<AssemblyProcessor>(TableType.AssemblyProcessor);
-            this.AssemblyOSs = read<AssemblyOS>(TableType.AssemblyOS);
-            this.AssemblyRefs = read<AssemblyRef>(TableType.AssemblyRef);
-            this.AssemblyRefProcessors = read<AssemblyRefProcessor>(TableType.AssemblyRefProcessor);
-            this.AssemblyRefOSs = read<AssemblyRefOS>(TableType.AssemblyRefOS);
-            this.Files = read<File>(TableType.File);
-            this.ExportedTypes = read<ExportedType>(TableType.ExportedType);
-            this.ManifestResources = read<ManifestResource>(TableType.ManifestResource);
-            this.NestedClasses = read<NestedClass>(TableType.NestedClass);
-            this.GenericParams = read<GenericParam>(TableType.GenericParam);
-            this.MethodSpecs = read<MethodSpec>(TableType.MethodSpec);
-            this.GenericParamConstraints = read<GenericParamConstraint>(TableType.GenericParamConstraint);
+            TableList<T> read<T>(TableList<T> _, TableType table) where T : struct, ICustomByteReader<IndexByteReader> => new TableList<T>(this.Header.Valid[(int)table] ? indexReader.ReadCustom<T, IndexByteReader>(this.Header.Rows[(int)table]) : new T[0], table);
+
+            this.Modules = read(this.Modules, TableType.Module);
+            this.TypeRefs = read(this.TypeRefs, TableType.TypeRef);
+            this.TypeDefs = read(this.TypeDefs, TableType.TypeDef);
+            this.Fields = read(this.Fields, TableType.Field);
+            this.MethodDefs = read(this.MethodDefs, TableType.MethodDef);
+            this.Params = read(this.Params, TableType.Param);
+            this.InterfaceImpls = read(this.InterfaceImpls, TableType.InterfaceImpl);
+            this.MemberRefs = read(this.MemberRefs, TableType.MemberRef);
+            this.Constants = read(this.Constants, TableType.Constant);
+            this.CustomAttributes = read(this.CustomAttributes, TableType.CustomAttribute);
+            this.FieldMarshals = read(this.FieldMarshals, TableType.FieldMarshal);
+            this.DeclSecurities = read(this.DeclSecurities, TableType.DeclSecurity);
+            this.ClassLayouts = read(this.ClassLayouts, TableType.ClassLayout);
+            this.FieldLayouts = read(this.FieldLayouts, TableType.FieldLayout);
+            this.StandAloneSigs = read(this.StandAloneSigs, TableType.StandAloneSig);
+            this.EventMaps = read(this.EventMaps, TableType.EventMap);
+            this.Events = read(this.Events, TableType.Event);
+            this.PropertyMaps = read(this.PropertyMaps, TableType.PropertyMap);
+            this.Properties = read(this.Properties, TableType.Property);
+            this.MethodSemantics = read(this.MethodSemantics, TableType.MethodSemantics);
+            this.MethodImpls = read(this.MethodImpls, TableType.MethodImpl);
+            this.ModuleRefs = read(this.ModuleRefs, TableType.ModuleRef);
+            this.TypeSpecs = read(this.TypeSpecs, TableType.TypeSpec);
+            this.ImplMaps = read(this.ImplMaps, TableType.ImplMap);
+            this.FieldRVAs = read(this.FieldRVAs, TableType.FieldRVA);
+            this.Assemblies = read(this.Assemblies, TableType.Assembly);
+            this.AssemblyProcessors = read(this.AssemblyProcessors, TableType.AssemblyProcessor);
+            this.AssemblyOSs = read(this.AssemblyOSs, TableType.AssemblyOS);
+            this.AssemblyRefs = read(this.AssemblyRefs, TableType.AssemblyRef);
+            this.AssemblyRefProcessors = read(this.AssemblyRefProcessors, TableType.AssemblyRefProcessor);
+            this.AssemblyRefOSs = read(this.AssemblyRefOSs, TableType.AssemblyRefOS);
+            this.Files = read(this.Files, TableType.File);
+            this.ExportedTypes = read(this.ExportedTypes, TableType.ExportedType);
+            this.ManifestResources = read(this.ManifestResources, TableType.ManifestResource);
+            this.NestedClasses = read(this.NestedClasses, TableType.NestedClass);
+            this.GenericParams = read(this.GenericParams, TableType.GenericParam);
+            this.MethodSpecs = read(this.MethodSpecs, TableType.MethodSpec);
+            this.GenericParamConstraints = read(this.GenericParamConstraints, TableType.GenericParamConstraint);
         }
 
-        //TODO Verify table type in the index
-        public StandAloneSig GetStandAloneSig(TableIndex index) => this.StandAloneSigs[(int)(index.Row) - 1];
+        public TableIndex ToTableIndex(uint value) => new TableIndex { Table = (TableType)(value >> 24), Row = value & 0xFFFFFF };
 
-        public IEnumerable<(MethodDef def, uint row)> ExtractMethodList(TypeDef parent, uint parentIndex) => TableStream.FindRun(this.MethodDefs, this.TypeDefs, p => p.MethodList.Row, parent, parentIndex);
+        public class TableList<T> {
+            private readonly T[] list;
+            private readonly TableType type;
 
-        private static IEnumerable<(T, uint)> FindRun<T, U>(IReadOnlyCollection<T> source, IReadOnlyList<U> parentSource, Func<U, uint> parentRowSelector, U parent, uint parentIndex) {
-            parentIndex += 1;
+            public uint RowCount { get; }
 
-            var end = parentIndex < parentSource.Count ? (int)parentRowSelector(parentSource[(int)parentIndex]) - 1 : source.Count;
-            var start = (int)parentRowSelector(parent) - 1;
+            public TableList(T[] source, TableType type) {
+                this.list = new T[source.Length + 1];
+                this.type = type;
 
-            return source.Skip(start).Take(end - start).Select((s, i) => (s, (uint)(start + i)));
+                this.RowCount = (uint)source.Length;
+
+                Array.Copy(source, 0, this.list, 1, source.Length);
+            }
+
+            public T Get(TableIndex index) {
+                if (index.Table != this.type)
+                    throw new InvalidOperationException("Wrong table index.");
+
+                return this.list[index.Row];
+            }
+
+            public IReadOnlyCollection<TResult> ExtractRun<TParent, TResult>(TableList<TParent> parentTable, Func<TParent, uint> parentStartRowSelector, TParent parent, uint parentRow, Func<T, uint, TResult> resultSelector) {
+                var end = parentRow < parentTable.RowCount ? parentStartRowSelector(parentTable.list[parentRow + 1]) : this.RowCount + 1;
+                var start = parentStartRowSelector(parent);
+
+                return this.list.Skip((int)start).Take((int)(end - start)).Select((s, i) => resultSelector(s, (uint)(start + i))).ToArray();
+            }
+
+            public void ToString(StringBuilder builder) => this.list.ForEach(t => builder.AppendLine(t.ToString()));
         }
     }
 
     public class IndexByteReader : ByteReader {
-        private static IReadOnlyDictionary<CodedIndexType, IReadOnlyList<TableType>> CodedIndexTableMap { get; }
-        private static IReadOnlyDictionary<CodedIndexType, int> CodedIndexSizeMap { get; }
-        private static IReadOnlyDictionary<CodedIndexType, int> CodedIndexSizeMaskMap { get; }
-        private static IReadOnlyDictionary<CodedIndexType, int> CodedIndexMaxRows { get; }
+        private static IReadOnlyDictionary<CodedIndexType, (IReadOnlyList<TableType> tables, int size, int sizeMask, int maxRows)> CodedIndexDefinition { get; }
 
         static IndexByteReader() {
-            IndexByteReader.CodedIndexTableMap = new Dictionary<CodedIndexType, IReadOnlyList<TableType>> {
+            var indexes = new Dictionary<CodedIndexType, IReadOnlyList<TableType>> {
                 [CodedIndexType.TypeDefOrRef] = new[] { TableType.TypeDef, TableType.TypeRef, TableType.TypeSpec },
                 [CodedIndexType.HasConstant] = new[] { TableType.Field, TableType.Param, TableType.Property },
                 [CodedIndexType.HasCustomAttribute] = new[] { TableType.MethodDef, TableType.Field, TableType.TypeRef, TableType.TypeDef, TableType.Param, TableType.InterfaceImpl, TableType.MemberRef, TableType.Module, (TableType)0xFF /*Permission*/, TableType.Property, TableType.Event, TableType.StandAloneSig, TableType.ModuleRef, TableType.TypeSpec, TableType.Assembly, TableType.AssemblyRef, TableType.File, TableType.ExportedType, TableType.ManifestResource, TableType.GenericParam, TableType.GenericParamConstraint, TableType.MethodSpec },
@@ -141,9 +158,15 @@ namespace ArkeCLR.Runtime.Streams {
                 [CodedIndexType.TypeOfMethodDef] = new[] { TableType.TypeDef, TableType.MethodDef },
             };
 
-            IndexByteReader.CodedIndexSizeMap = IndexByteReader.CodedIndexTableMap.ToDictionary(d => d.Key, d => (int)Math.Ceiling(Math.Log(d.Value.Count, 2)));
-            IndexByteReader.CodedIndexSizeMaskMap = IndexByteReader.CodedIndexSizeMap.ToDictionary(d => d.Key, d => (1 << d.Value) - 1);
-            IndexByteReader.CodedIndexMaxRows = IndexByteReader.CodedIndexSizeMap.ToDictionary(d => d.Key, d => (int)Math.Pow(2, 16 - d.Value));
+            var result = new Dictionary<CodedIndexType, (IReadOnlyList<TableType> tables, int size, int sizeMask, int maxRows)>();
+
+            foreach (var d in indexes) {
+                var size = (int)Math.Ceiling(Math.Log(d.Value.Count, 2));
+
+                result.Add(d.Key, (d.Value, size, (1 << size) - 1, (int)Math.Pow(2, 16 - size)));
+            }
+
+            IndexByteReader.CodedIndexDefinition = result;
         }
 
         private readonly TableStream stream;
@@ -151,39 +174,33 @@ namespace ArkeCLR.Runtime.Streams {
         public IndexByteReader(TableStream stream, ByteReader reader) : base(reader) => this.stream = stream;
         public IndexByteReader(TableStream stream, byte[] buffer) : base(buffer) => this.stream = stream;
 
+        public TableIndex ReadIndex() => this.stream.ToTableIndex(this.ReadU4()); //TODO Is this always 4 bytes? See II.22.0
         public HeapIndex ReadIndex(HeapType type) => new HeapIndex { Heap = type, Offset = this.stream.Header.HeapSizes[(int)type] ? this.ReadU4() : this.ReadU2() };
         public TableIndex ReadIndex(TableType type) => new TableIndex { Table = type, Row = this.stream.Header.Rows[(int)type] >= 65536 ? this.ReadU4() : this.ReadU2() };
 
         public TableIndex ReadIndex(CodedIndexType type) {
+            var def = IndexByteReader.CodedIndexDefinition[type];
             var idx = new TableIndex { Row = this.ReadU2() };
 
-            idx.Table = IndexByteReader.CodedIndexTableMap[type][(int)(idx.Row & IndexByteReader.CodedIndexSizeMaskMap[type])];
+            idx.Table = def.tables[(int)(idx.Row & def.sizeMask)];
 
-            idx.Row >>= IndexByteReader.CodedIndexSizeMap[type];
+            idx.Row >>= def.size;
 
-            if (this.stream.Header.Rows[(int)idx.Table] >= IndexByteReader.CodedIndexMaxRows[type])
-                idx.Row |= (uint)(this.ReadU2() << (16 - IndexByteReader.CodedIndexSizeMap[type]));
+            if (this.stream.Header.Rows[(int)idx.Table] >= def.maxRows)
+                idx.Row |= (uint)(this.ReadU2() << (16 - def.size));
 
             return idx;
         }
 
-        public void Read(out HeapIndex value, HeapType type) => value = this.ReadIndex(type);
-        public void Read(out TableIndex value, TableType type) => value = this.ReadIndex(type);
-        public void Read(out TableIndex value, CodedIndexType type) => value = this.ReadIndex(type);
-
-        public void Read(out TableIndex value) => value = new TableIndex(this.ReadU4());
+        public void Read(out TableIndex value) => value = this.ReadIndex();
+        public void Read(HeapType type, out HeapIndex value) => value = this.ReadIndex(type);
+        public void Read(TableType type, out TableIndex value) => value = this.ReadIndex(type);
+        public void Read(CodedIndexType type, out TableIndex value) => value = this.ReadIndex(type);
     }
 
     public struct TableIndex {
         public TableType Table;
         public uint Row;
-
-        //TODO Should we get rid of these
-        public TableIndex(int value) : this((uint) value) {}
-        public TableIndex(uint value) {
-            this.Table = (TableType)(value >> 24);
-            this.Row = value & 0xFFFFFF;
-        }
 
         public bool IsZero => this.Row == 0;
 

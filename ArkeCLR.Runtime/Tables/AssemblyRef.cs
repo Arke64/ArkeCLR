@@ -20,10 +20,10 @@ namespace ArkeCLR.Runtime.Tables {
             reader.Read(out this.BuildNumber);
             reader.Read(out this.RevisionNumber);
             reader.ReadEnum(out this.Flags);
-            reader.Read(out this.PublicKeyOrToken, HeapType.Blob);
-            reader.Read(out this.Name, HeapType.String);
-            reader.Read(out this.Culture, HeapType.String);
-            reader.Read(out this.HashValue, HeapType.Blob);
+            reader.Read(HeapType.Blob, out this.PublicKeyOrToken);
+            reader.Read(HeapType.String, out this.Name);
+            reader.Read(HeapType.String, out this.Culture);
+            reader.Read(HeapType.Blob, out this.HashValue);
         }
     }
 }

@@ -1,11 +1,10 @@
 ﻿using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Streams {
-    public class BlobStream : Stream<byte[]> {
-        public override string Name => "#Blob";
-        public override HeapType Type => HeapType.Blob;
+    public class BlobHeap : Heap<byte[]> {
+        public BlobHeap() : base("#Blob", HeapType.Blob) { }
 
-        protected override byte[] Get() => this.reader.ReadArray<byte>(this.reader.ReadCompressedU4());
+        protected override byte[] Get(ByteReader reader) => reader.ReadArray<byte>(reader.ReadCompressedU4());
 
         public void GetAt<T>(HeapIndex index, out T value) where T : struct, ICustomByteReader => value = this.GetAt<T>(index);
 

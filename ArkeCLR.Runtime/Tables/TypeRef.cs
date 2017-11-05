@@ -8,9 +8,9 @@ namespace ArkeCLR.Runtime.Tables {
         public HeapIndex TypeNamespace;
 
         public void Read(IndexByteReader reader) {
-            reader.Read(out this.ResolutionScope, CodedIndexType.ResolutionScope);
-            reader.Read(out this.TypeName, HeapType.String);
-            reader.Read(out this.TypeNamespace, HeapType.String);
+            reader.Read(CodedIndexType.ResolutionScope, out this.ResolutionScope);
+            reader.Read(HeapType.String, out this.TypeName);
+            reader.Read(HeapType.String, out this.TypeNamespace);
         }
     }
 }

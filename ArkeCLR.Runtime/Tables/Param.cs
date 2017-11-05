@@ -11,7 +11,7 @@ namespace ArkeCLR.Runtime.Tables {
         public void Read(IndexByteReader reader) {
             reader.ReadEnum(out this.Flags);
             reader.Read(out this.Sequence);
-            reader.Read(out this.Name, HeapType.String);
+            reader.Read(HeapType.String, out this.Name);
         }
     }
 }
