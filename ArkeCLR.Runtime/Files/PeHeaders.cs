@@ -2,8 +2,6 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-#pragma warning disable S1104 // Fields should not have public accessibility
-
 namespace ArkeCLR.Runtime.Files {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct RvaAndSize {
@@ -115,7 +113,7 @@ namespace ArkeCLR.Runtime.Files {
         public ushort NumberOfLineNumbers;
         public SectionCharacteristics Characteristics;
 
-        public override string ToString() => Encoding.ASCII.GetString(this.NameData, 0, 8).Replace("\0", "");
+        public override string ToString() => Encoding.ASCII.GetString(this.NameData, 0, 8).Replace("\0", string.Empty);
     }
 
     public enum Machine : ushort {
@@ -149,7 +147,7 @@ namespace ArkeCLR.Runtime.Files {
     public enum CoffMagicNumber : ushort {
         Rom = 0x107,
         Pe32 = 0x10B,
-        Pe32Plus = 0x20B
+        Pe32Plus = 0x20B,
     }
 
     public enum NtSpecificSubSystem : ushort {
@@ -163,7 +161,7 @@ namespace ArkeCLR.Runtime.Files {
         EfiBootServiceDriver = 0xB,
         EfiRuntimeDriver = 0xC,
         EfiRom = 0xD,
-        Xbox = 0xE
+        Xbox = 0xE,
     }
 
     public enum DataDirectoryType {
@@ -181,7 +179,7 @@ namespace ArkeCLR.Runtime.Files {
         BoundImport = 11,
         Iat = 12,
         DelayImportDescriptior = 13,
-        CliHeader = 14
+        CliHeader = 14,
     }
 
     [Flags]
@@ -201,7 +199,7 @@ namespace ArkeCLR.Runtime.Files {
         FileSystem = 0x1000,
         Dll = 0x2000,
         UpSystemOnly = 0x4000,
-        BytesReversedHigh = 0x8000
+        BytesReversedHigh = 0x8000,
     }
 
     [Flags]
@@ -221,7 +219,7 @@ namespace ArkeCLR.Runtime.Files {
         AppContainer = 0x1000,
         WdmDriver = 0x2000,
         GuardCf = 0x4000,
-        TerminalServerAware = 0x8000
+        TerminalServerAware = 0x8000,
     }
 
     [Flags]

@@ -6,8 +6,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-#pragma warning disable S1104 // Fields should not have public accessibility
-
 namespace ArkeCLR.Runtime.Files {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct CliHeader {
@@ -240,15 +238,15 @@ namespace ArkeCLR.Runtime.Files {
         TinyFormat = 0x02,
         FatFormat = 0x03,
         MoreSects = 0x08,
-        InitLocals = 0x10
+        InitLocals = 0x10,
     }
 
     [Flags]
     public enum MethodDataSectionFlags : uint {
-        EHTable = 0x01,
-        OptILTable = 0x02,
+        EhTable = 0x01,
+        OptIlTable = 0x02,
         FatFormat = 0x40,
-        MoreSects = 0x80
+        MoreSects = 0x80,
     }
 
     [Flags]
