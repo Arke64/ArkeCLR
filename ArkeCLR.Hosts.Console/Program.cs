@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 
 namespace ArkeCLR.Hosts.Console {
-    public class Program {
+    public static class Program {
         public static void Main(string[] args) {
             void log(string message) => System.Console.WriteLine(message);
 
