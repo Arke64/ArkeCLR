@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace ArkeCLR.Utilities {
     public class BitVector : IEnumerable<bool> {
-        private byte[] data;
+        private readonly byte[] data;
 
         public int Count { get; }
 
@@ -27,7 +27,7 @@ namespace ArkeCLR.Utilities {
         public BitVector(ushort data) : this(BitConverter.GetBytes(data)) { }
         public BitVector(uint data) : this(BitConverter.GetBytes(data)) { }
         public BitVector(ulong data) : this(BitConverter.GetBytes(data)) { }
-        public BitVector(sbyte data) : this(new [] { (byte)data }) { }
+        public BitVector(sbyte data) : this((byte)data) { }
         public BitVector(short data) : this(BitConverter.GetBytes(data)) { }
         public BitVector(int data) : this(BitConverter.GetBytes(data)) { }
         public BitVector(long data) : this(BitConverter.GetBytes(data)) { }

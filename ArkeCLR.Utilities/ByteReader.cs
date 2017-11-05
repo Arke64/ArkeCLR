@@ -29,14 +29,10 @@ namespace ArkeCLR.Utilities {
         public void Seek(uint position, SeekOrigin seekOrigin) => this.Seek((int)position, seekOrigin);
 
         public void Seek(int position, SeekOrigin seekOrigin) {
-            if (seekOrigin == SeekOrigin.Begin) {
-                this.Position = position;
-            }
-            else if (seekOrigin == SeekOrigin.Current) {
-                this.Position += position;
-            }
-            else if (seekOrigin == SeekOrigin.End) {
-                this.Position = this.Length + position;
+            switch (seekOrigin) {
+                case SeekOrigin.Begin: this.Position = position; break;
+                case SeekOrigin.Current: this.Position += position; break;
+                case SeekOrigin.End: this.Position = this.Length + position; break;
             }
         }
 
@@ -94,7 +90,7 @@ namespace ArkeCLR.Utilities {
             else if (type == typeof(short)) return (T)(object)this.ReadI2();
             else if (type == typeof(int)) return (T)(object)this.ReadI4();
             else if (type == typeof(long)) return (T)(object)this.ReadI8();
-            else throw new ArgumentException();
+            else throw new NotSupportedException();
         }
 
         public void Read(out byte value) => value = this.ReadU1();
@@ -109,15 +105,12 @@ namespace ArkeCLR.Utilities {
         public void ReadCompressed(out int value) => value = this.ReadCompressedI4();
         public void ReadEnum<T>(out T value) => value = this.ReadEnum<T>();
 
-        public string ReadString(Encoding encoding, uint length) => this.ReadString(encoding, (int)length, 0);
-        public string ReadString(Encoding encoding, uint maxLength, byte padder) => this.ReadString(encoding, (int)maxLength, padder);
+        public string ReadString(Encoding encoding, uint length) => this.ReadString(encoding, (int)length);
 
-        public string ReadString(Encoding encoding, int length) => this.ReadString(encoding, length, 0);
-
-        public string ReadString(Encoding encoding, int maxLength, byte padder) {
+        public string ReadString(Encoding encoding, int maxLength) {
             var end = this.Position + maxLength;
 
-            while (this.buffer[--end] == padder)
+            while (this.buffer[--end] == 0)
                 ;
 
             var result = encoding.GetString(this.buffer, this.Position, end + 1 - this.Position);
@@ -148,13 +141,13 @@ namespace ArkeCLR.Utilities {
         public T[] ReadArray<T>(int count) {
             var size = Marshal.SizeOf(default(T));
             var bytes = count * size;
-            var buffer = new T[count];
+            var buf = new T[count];
 
-            Buffer.BlockCopy(this.buffer, this.Position, buffer, 0, bytes);
+            Buffer.BlockCopy(this.buffer, this.Position, buf, 0, bytes);
 
             this.Position += bytes;
 
-            return buffer;
+            return buf;
         }
 
         public void ReadCustom<T>(uint count, out T[] values) where T : struct, ICustomByteReader => values = this.ReadCustom<T>(count);
@@ -169,11 +162,13 @@ namespace ArkeCLR.Utilities {
         public T[] ReadCustom<T>(int count) where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(count);
         public T ReadCustom<T>() where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>();
 
-        public T[] ReadCustom<T, U>(uint count) where T : struct, ICustomByteReader<U> where U : ByteReader => this.ReadCustom<T, U>((int)count);
-
         public T[] ReadCustom<T, U>(int count) where T : struct, ICustomByteReader<U> where U : ByteReader {
             if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
 
+            return this.ReadCustom<T, U>((uint)count);
+        }
+
+        public T[] ReadCustom<T, U>(uint count) where T : struct, ICustomByteReader<U> where U : ByteReader {
             var result = new T[count];
 
             for (var i = 0; i < count; i++)
@@ -190,11 +185,13 @@ namespace ArkeCLR.Utilities {
             return result;
         }
 
-        public T[] ReadStruct<T>(uint count) where T : struct => this.ReadStruct<T>((int)count);
-
         public T[] ReadStruct<T>(int count) where T : struct {
             if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
 
+            return this.ReadStruct<T>((uint)count);
+        }
+
+        public T[] ReadStruct<T>(uint count) where T : struct {
             var result = new T[count];
 
             for (var i = 0; i < count; i++)
@@ -225,7 +222,7 @@ namespace ArkeCLR.Utilities {
 
     public interface ICustomByteReader : ICustomByteReader<ByteReader> { }
 
-    public interface ICustomByteReader<T> {
+    public interface ICustomByteReader<in T> {
         void Read(T reader);
     }
 }
