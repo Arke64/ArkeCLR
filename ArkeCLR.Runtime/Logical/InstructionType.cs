@@ -194,7 +194,7 @@
         extended = 0xFE
     }
 
-    public enum ExtendedInstructionType : byte { 
+    public enum ExtendedInstructionType : byte {
         arglist = 0x00,
         ceq = 0x01,
         cgt = 0x02,
@@ -214,14 +214,14 @@
         unaligned_prefix = 0x12,
         volatile_prefix = 0x13,
         tail_prefix = 0x14,
-        Initobj = 0x15,
+        initobj = 0x15,
         constrained_prefix = 0x16,
         cpblk = 0x17,
         initblk = 0x18,
         no_prefix = 0x19,
         rethrow = 0x1A,
         @sizeof = 0x1C,
-        Refanytype = 0x1D,
+        refanytype = 0x1D,
         readonly_prefix = 0x1E
     }
 }
