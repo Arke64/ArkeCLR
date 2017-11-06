@@ -1,7 +1,5 @@
 ﻿using ArkeCLR.Utilities;
-using ArkeCLR.Utilities.Extensions;
 using System;
-using System.Linq;
 
 namespace ArkeCLR.Runtime.Signatures {
     public struct Param {
@@ -33,24 +31,5 @@ namespace ArkeCLR.Runtime.Signatures {
 
             this.Type.Read(cur, reader);
         }
-
-        public bool Equals(Param obj) => obj == this;
-        public override bool Equals(object obj) => obj != null && this.Equals((Param)obj);
-
-        public override int GetHashCode() {
-            var hash = 17;
-
-            hash = hash * 23 + this.IsByRef.GetHashCode();
-            hash = hash * 23 + this.IsTypedByRef.GetHashCode();
-            hash = hash * 23 + this.Type.GetHashCode();
-
-            foreach (var m in this.CustomMods)
-                hash = hash * 23 + m.GetHashCode();
-
-            return hash;
-        }
-
-        public static bool operator !=(Param self, Param other) => !(self == other);
-        public static bool operator ==(Param self, Param other) => self.Type == other.Type && self.IsByRef == other.IsByRef && self.IsTypedByRef == other.IsTypedByRef && self.CustomMods.SequenceEqual(other.CustomMods);
     }
 }

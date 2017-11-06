@@ -1,8 +1,6 @@
-﻿using System;
-using ArkeCLR.Utilities;
-using System.Linq;
+﻿using ArkeCLR.Utilities;
+using System;
 using System.Collections.Generic;
-using ArkeCLR.Utilities.Extensions;
 
 namespace ArkeCLR.Runtime.Signatures {
     public struct LocalVarSig : ICustomByteReader {

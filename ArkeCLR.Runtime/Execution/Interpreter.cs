@@ -34,8 +34,9 @@ namespace ArkeCLR.Runtime.Execution {
 
         public long Run(Assembly entryAssembly, IReadOnlyCollection<Assembly> references, Action<string> logger) {
             if (entryAssembly.EntryPoint.Signature.HasThis || entryAssembly.EntryPoint.Signature.ExplicitThis) throw new InvalidAssemblyException("Entry point must be static.");
-            if (entryAssembly.EntryPoint.Signature.ParamCount == 0 || (entryAssembly.EntryPoint.Signature.ParamCount == 1 && entryAssembly.EntryPoint.Signature.Params[0] != new Param(ElementType.SzArray))) throw new InvalidAssemblyException("Entry point must take no parameters or a single string[] only.");
-            if (!entryAssembly.EntryPoint.Signature.RetType.IsVoid && entryAssembly.EntryPoint.Signature.RetType.Type != new Signatures.Type(ElementType.I4) && entryAssembly.EntryPoint.Signature.RetType.Type != new Signatures.Type(ElementType.U4)) throw new InvalidAssemblyException("Entry point return type must be I4, U4, or void.");
+            if (entryAssembly.EntryPoint.Signature.ParamCount == 0 || (entryAssembly.EntryPoint.Signature.ParamCount == 1 && entryAssembly.EntryPoint.Signature.Params[0].Type.ElementType != ElementType.SzArray)) throw new InvalidAssemblyException("Entry point must take no parameters or a single string[] only.");
+            if (!entryAssembly.EntryPoint.Signature.RetType.IsVoid && entryAssembly.EntryPoint.Signature.RetType.Type.ElementType != ElementType.I4 && entryAssembly.EntryPoint.Signature.RetType.Type.ElementType != ElementType.U4) throw new InvalidAssemblyException("Entry point return type must be I4, U4, or void.");
+            //TODO Need to do better comparions above
 
             //TODO Need to handle the optional string[] args
             this.callStack.Push(new CallFrame(entryAssembly.EntryPoint, 0));
@@ -47,10 +48,10 @@ namespace ArkeCLR.Runtime.Execution {
 
             var returnCode = 0L;
 
-            if (entryAssembly.EntryPoint.Signature.RetType.Type == new Signatures.Type(ElementType.I4)) {
+            if (entryAssembly.EntryPoint.Signature.RetType.Type.ElementType == ElementType.I4) {
                 returnCode = this.Pop(ElementType.I4).I4;
             }
-            else if (entryAssembly.EntryPoint.Signature.RetType.Type == new Signatures.Type(ElementType.U4)) {
+            else if (entryAssembly.EntryPoint.Signature.RetType.Type.ElementType == ElementType.U4) {
                 returnCode = this.Pop(ElementType.U4).U4;
             }
 

@@ -1,5 +1,4 @@
 ﻿using ArkeCLR.Utilities;
-using ArkeCLR.Utilities.Extensions;
 
 namespace ArkeCLR.Runtime.Signatures {
     public struct MethodDefSig : ICustomByteReader {
