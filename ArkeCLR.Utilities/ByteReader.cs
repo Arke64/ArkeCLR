@@ -60,6 +60,65 @@ namespace ArkeCLR.Utilities {
         public int PeekI4() => BitConverter.ToInt32(this.buffer, this.Position);
         public long PeekI8() => BitConverter.ToInt64(this.buffer, this.Position);
 
+        public T PeekEnum<T>() {
+            var type = Enum.GetUnderlyingType(typeof(T));
+
+            if (type == typeof(byte)) return (T)(object)this.PeekU1();
+            else if (type == typeof(ushort)) return (T)(object)this.PeekU2();
+            else if (type == typeof(uint)) return (T)(object)this.PeekU4();
+            else if (type == typeof(ulong)) return (T)(object)this.PeekU8();
+            else if (type == typeof(sbyte)) return (T)(object)this.PeekI1();
+            else if (type == typeof(short)) return (T)(object)this.PeekI2();
+            else if (type == typeof(int)) return (T)(object)this.PeekI4();
+            else if (type == typeof(long)) return (T)(object)this.PeekI8();
+            else throw new NotSupportedException();
+        }
+
+        public bool TryPeekEnum<T>(T expected) => this.PeekEnum<T>().Equals(expected);
+
+        public bool TryPeekEnum<T>(out T result, params T[] expected) {
+            var a = this.PeekEnum<T>();
+
+            foreach (var e in expected) {
+                if (e.Equals(a)) {
+                    result = a;
+
+                    return true;
+                }
+            }
+
+            result = default;
+
+            return false;
+        }
+
+        public bool TryReadEnum<T>(T expected) {
+            var res = this.PeekEnum<T>().Equals(expected);
+
+            if (res)
+                this.ReadEnum<T>();
+
+            return res;
+        }
+
+        public bool TryReadEnum<T>(out T result, params T[] expected) {
+            var a = this.PeekEnum<T>();
+
+            foreach (var e in expected) {
+                if (e.Equals(a)) {
+                    result = a;
+
+                    this.ReadEnum<T>();
+
+                    return true;
+                }
+            }
+
+            result = default;
+
+            return false;
+        }
+
         public byte ReadU1() => this.buffer[this.Position++];
         public ushort ReadU2() { var r = BitConverter.ToUInt16(this.buffer, this.Position); this.Position += sizeof(ushort); return r; }
         public uint ReadU4() { var r = BitConverter.ToUInt32(this.buffer, this.Position); this.Position += sizeof(uint); return r; }
