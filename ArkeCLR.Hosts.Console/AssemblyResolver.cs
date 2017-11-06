@@ -7,7 +7,7 @@ namespace ArkeCLR.Hosts.Console {
 
         public AssemblyResolver(string currentDirectory) => this.currentDirectory = currentDirectory;
 
-        public bool Resolve(AssemblyName assemblyName, out byte[] result) {
+        public bool TryResolve(AssemblyName assemblyName, out byte[] result) {
             var path = default(string);
             var root = Path.Combine(this.currentDirectory, assemblyName.Name);
 

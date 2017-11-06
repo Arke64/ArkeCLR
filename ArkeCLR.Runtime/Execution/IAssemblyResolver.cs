@@ -1,5 +1,5 @@
 ﻿namespace ArkeCLR.Runtime.Execution {
     public interface IAssemblyResolver {
-        bool Resolve(AssemblyName assemblyName, out byte[] result);
+        bool TryResolve(AssemblyName assemblyName, out byte[] result);
     }
 }
