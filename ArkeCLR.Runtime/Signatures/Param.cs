@@ -10,7 +10,7 @@ namespace ArkeCLR.Runtime.Signatures {
         public void Read(ByteReader reader) {
             this.CustomMods = CustomMod.ReadCustomMods(reader);
 
-            if (reader.TryReadEnum(out var res, ElementType.ByRef, ElementType.ByRef)) {
+            if (reader.TryReadEnum(out var res, ElementType.ByRef, ElementType.TypedByRef)) {
                 switch (res) {
                     case ElementType.ByRef: this.IsByRef = true; break;
                     case ElementType.TypedByRef: this.IsTypedByRef = true; return;

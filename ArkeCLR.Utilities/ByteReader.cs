@@ -205,6 +205,9 @@ namespace ArkeCLR.Utilities {
             return result;
         }
 
+        public void ReadArray<T>(uint count, out T[] values) => values = this.ReadArray<T>(count);
+        public void ReadArray<T>(int count, out T[] values) => values = this.ReadArray<T>(count);
+
         public T[] ReadArray<T>(uint count) => count <= int.MaxValue ? this.ReadArray<T>((int)count) : throw new ArgumentOutOfRangeException(nameof(count));
 
         public T[] ReadArray<T>(int count) {
