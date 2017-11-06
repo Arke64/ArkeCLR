@@ -162,21 +162,21 @@ namespace ArkeCLR.Utilities {
             return buf;
         }
 
-        public void ReadCustom<T>(uint count, out T[] values) where T : struct, ICustomByteReader => values = this.ReadCustom<T>(count);
-        public void ReadCustom<T>(int count, out T[] values) where T : struct, ICustomByteReader => values = this.ReadCustom<T>(count);
-        public void ReadCustom<T>(out T value) where T : struct, ICustomByteReader => value = this.ReadCustom<T>();
+        public void ReadCustom<T>(uint count, out T[] values) where T : ICustomByteReader, new() => values = this.ReadCustom<T>(count);
+        public void ReadCustom<T>(int count, out T[] values) where T : ICustomByteReader, new() => values = this.ReadCustom<T>(count);
+        public void ReadCustom<T>(out T value) where T : ICustomByteReader, new() => value = this.ReadCustom<T>();
 
-        public void ReadCustom<T, U>(uint count, out T[] values) where T : struct, ICustomByteReader<U> where U : ByteReader => values = this.ReadCustom<T, U>(count);
-        public void ReadCustom<T, U>(int count, out T[] values) where T : struct, ICustomByteReader<U> where U : ByteReader => values = this.ReadCustom<T, U>(count);
-        public void ReadCustom<T, U>(out T value) where T : struct, ICustomByteReader<U> where U : ByteReader => value = this.ReadCustom<T, U>();
+        public void ReadCustom<T, U>(uint count, out T[] values) where T : ICustomByteReader<U>, new() where U : ByteReader => values = this.ReadCustom<T, U>(count);
+        public void ReadCustom<T, U>(int count, out T[] values) where T : ICustomByteReader<U>, new() where U : ByteReader => values = this.ReadCustom<T, U>(count);
+        public void ReadCustom<T, U>(out T value) where T : ICustomByteReader<U>, new() where U : ByteReader => value = this.ReadCustom<T, U>();
 
-        public T[] ReadCustom<T>(uint count) where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(count);
-        public T[] ReadCustom<T>(int count) where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>(count);
-        public T ReadCustom<T>() where T : struct, ICustomByteReader => this.ReadCustom<T, ByteReader>();
+        public T[] ReadCustom<T>(uint count) where T : ICustomByteReader, new() => this.ReadCustom<T, ByteReader>(count);
+        public T[] ReadCustom<T>(int count) where T : ICustomByteReader, new() => this.ReadCustom<T, ByteReader>(count);
+        public T ReadCustom<T>() where T : ICustomByteReader, new() => this.ReadCustom<T, ByteReader>();
 
-        public T[] ReadCustom<T, U>(int count) where T : struct, ICustomByteReader<U> where U : ByteReader => count >= 0 ? this.ReadCustom<T, U>((uint)count) : throw new ArgumentOutOfRangeException(nameof(count));
+        public T[] ReadCustom<T, U>(int count) where T : ICustomByteReader<U>, new() where U : ByteReader => count >= 0 ? this.ReadCustom<T, U>((uint)count) : throw new ArgumentOutOfRangeException(nameof(count));
 
-        public T[] ReadCustom<T, U>(uint count) where T : struct, ICustomByteReader<U> where U : ByteReader {
+        public T[] ReadCustom<T, U>(uint count) where T : ICustomByteReader<U>, new() where U : ByteReader {
             var result = new T[count];
 
             for (var i = 0; i < count; i++)
@@ -185,7 +185,7 @@ namespace ArkeCLR.Utilities {
             return result;
         }
 
-        public T ReadCustom<T, U>() where T : struct, ICustomByteReader<U> where U : ByteReader {
+        public T ReadCustom<T, U>() where T : ICustomByteReader<U>, new() where U : ByteReader {
             var result = new T();
 
             result.Read((U)this);

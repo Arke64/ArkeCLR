@@ -16,7 +16,7 @@ namespace ArkeCLR.Runtime.Files {
 
         private uint RvaToFileAddress(uint rva) => this.SectionHeaders.Where(s => rva > s.VirtualAddress && rva < s.VirtualAddress + s.SizeOfRawData).Select(s => rva - s.VirtualAddress + s.PointerToRawData).Single();
 
-        public PeFile(ByteReader image)  {
+        public PeFile(ByteReader image) {
             this.image = image;
 
             this.image.Seek(0, SeekOrigin.Begin);
@@ -50,7 +50,7 @@ namespace ArkeCLR.Runtime.Files {
 
         public ByteReader ReadRva(RvaAndSize rva) => this.image.CreateView(this.RvaToFileAddress(rva.Rva), rva.Size);
 
-        public T ReadCustom<T>(uint rva) where T : struct, ICustomByteReader {
+        public T ReadCustom<T>(uint rva) where T : ICustomByteReader, new() {
             this.image.Seek(this.RvaToFileAddress(rva), SeekOrigin.Begin);
 
             return this.image.ReadCustom<T>();
