@@ -32,7 +32,5 @@ namespace ArkeCLR.Runtime.Signatures {
 
             this.Type.Read(cur, reader);
         }
-
-        public override string ToString() => $"{this.CustomMods.ToString(", ", "[", "] ", true)}{(!this.IsTypedByRef ? (!this.IsVoid ? this.Type.ToString() : "void") : "typedref")}{(this.IsByRef ? "&" : string.Empty)}";
     }
 }

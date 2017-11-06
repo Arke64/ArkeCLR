@@ -62,16 +62,6 @@ namespace ArkeCLR.Runtime.Execution {
         public static TypeRecord FromString(ulong value) => new TypeRecord { Tag = ElementType.String, String = value };
         public static TypeRecord FromObject(ulong value) => new TypeRecord { Tag = ElementType.Object, Object = value };
 
-        public override string ToString() {
-            var val = string.Empty;
-
-            switch (this.Tag) {
-                case ElementType.I4: val = this.I4.ToString(); break;
-            }
-
-            return $"{this.Tag}->{val}";
-        }
-
         //TODO Need to properly implement what CLR types can be added, also overflow
         public static TypeRecord Add(TypeRecord a, TypeRecord b) {
             switch (a.Tag) {

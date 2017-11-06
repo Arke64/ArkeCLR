@@ -75,10 +75,6 @@ namespace ArkeCLR.Runtime.Signatures {
 
                 this.CustomMods = mods.ToArray();
             }
-
-            public override string ToString() => $"{this.CustomMods.ToString(", ", "[", "] ", true)}{(!this.IsTypedByRef ? this.Type.ToString() : "typedref")}{(this.IsByRef ? "&" : string.Empty)}";
         }
-
-        public override string ToString() => $"<{string.Join(" ", this.Locals.Select(t => t.ToString()))}>";
     }
 }

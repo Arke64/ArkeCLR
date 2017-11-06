@@ -30,28 +30,6 @@ namespace ArkeCLR.Runtime.Logical {
             }
         }
 
-        public override string ToString() {
-            var type = this.Type != InstructionType.extended ? this.Type.ToString() : this.ExtendedType.ToString();
-            var operand = string.Empty;
-            var noOperand = false;
-
-            switch (this.Type) {
-                case InstructionType.ldstr:
-                case InstructionType.call:
-                case InstructionType.callvirt:
-                case InstructionType.newobj:
-                    operand = this.TableIndexOperand.ToString(); break;
-
-                case InstructionType.br_s:
-                    operand = this.BranchInstruction.ToString(); break;
-
-                default:
-                    noOperand = true; break;
-            }
-
-            return type + (noOperand ? string.Empty : " ") + operand;
-        }
-
         public void FixUp(int index, IReadOnlyList<Instruction> instructions) {
             if (this.Type == InstructionType.br_s) {
                 var end = this.BranchInstruction + instructions[index + 1].ByteOffset;

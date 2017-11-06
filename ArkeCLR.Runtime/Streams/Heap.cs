@@ -45,8 +45,6 @@ namespace ArkeCLR.Runtime.Streams {
     public struct HeapIndex {
         public HeapType Heap;
         public uint Offset;
-
-        public override string ToString() => $"{this.Heap.ToString()}@0x{this.Offset:X8}";
     }
 
     public enum HeapType {

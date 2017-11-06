@@ -24,12 +24,4 @@ namespace ArkeCLR.Utilities.Extensions {
         public static U[] ToArray<T, U>(this IEnumerable<T> self, Func<T, U> selector) => self.Select(s => selector(s)).ToArray();
         public static U[] ToArray<T, U>(this IEnumerable<T> self, Func<T, int, U> selector) => self.Select((s, i) => selector(s, i)).ToArray();
     }
-
-    public static class ArrayExtensions {
-        public static string ToString<T>(this T[] self, string separator, string prefix, string suffix, bool supressSuffixOnEmpty) {
-            if (self.Length == 0 && supressSuffixOnEmpty) return string.Empty;
-
-            return prefix + string.Join(separator, self) + suffix;
-        }
-    }
 }

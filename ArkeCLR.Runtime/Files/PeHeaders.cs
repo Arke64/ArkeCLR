@@ -9,8 +9,6 @@ namespace ArkeCLR.Runtime.Files {
         public uint Size;
 
         public bool IsZero => this.Rva == 0 && this.Size == 0;
-
-        public override string ToString() => $"RVA: 0x{this.Rva:X8} Size: 0x{this.Size:X8}";
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -112,8 +110,6 @@ namespace ArkeCLR.Runtime.Files {
         public ushort NumberOfRelocations;
         public ushort NumberOfLineNumbers;
         public SectionCharacteristics Characteristics;
-
-        public override string ToString() => Encoding.ASCII.GetString(this.NameData, 0, 8).Replace("\0", string.Empty);
     }
 
     public enum Machine : ushort {

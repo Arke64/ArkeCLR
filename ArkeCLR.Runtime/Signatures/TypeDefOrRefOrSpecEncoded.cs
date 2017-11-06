@@ -15,7 +15,5 @@ namespace ArkeCLR.Runtime.Signatures {
 
             this.Table = uncompressed == 0 ? TableType.TypeDef : (uncompressed == 1 ? TableType.TypeRef : TableType.TypeSpec);
         }
-
-        public override string ToString() => $"{this.Table}->0x{this.Row:X8}";
     }
 }

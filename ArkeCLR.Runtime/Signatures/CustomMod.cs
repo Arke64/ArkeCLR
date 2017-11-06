@@ -27,7 +27,5 @@ namespace ArkeCLR.Runtime.Signatures {
 
             return customMods.ToArray();
         }
-
-        public override string ToString() => $"{(this.Type == ElementType.CModOpt ? "opt" : "req")} {this.EncodedType}";
     }
 }

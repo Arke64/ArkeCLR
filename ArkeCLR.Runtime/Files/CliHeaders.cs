@@ -82,8 +82,6 @@ namespace ArkeCLR.Runtime.Files {
 
             this.Name = file.ReadStringTerminated(Encoding.ASCII, 0, 4);
         }
-
-        public override string ToString() => this.Name;
     }
 
     public struct CilTableStreamHeader : ICustomByteReader {

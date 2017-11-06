@@ -133,8 +133,6 @@ namespace ArkeCLR.Runtime.Streams {
 
                 return this.list.Skip((int)start).Take((int)(end - start)).Select((s, i) => resultSelector(s, (uint)(start + i))).ToArray();
             }
-
-            public void ToString(StringBuilder builder) => this.list.ForEach(t => builder.AppendLine(t.ToString()));
         }
     }
 
@@ -143,8 +141,6 @@ namespace ArkeCLR.Runtime.Streams {
         public uint Row;
 
         public bool IsZero => this.Row == 0;
-
-        public override string ToString() => $"{this.Table.ToString()}@0x{this.Row:X8}";
     }
 
     public enum CodedIndexType {

@@ -13,7 +13,5 @@ namespace ArkeCLR.Runtime.Signatures.Types {
 
             this.Type.Read(cur, reader);
         }
-
-        public override string ToString() => $"{this.CustomMods.ToString(", ", "[", "] ", true)}{this.Type}[]";
     }
 }
