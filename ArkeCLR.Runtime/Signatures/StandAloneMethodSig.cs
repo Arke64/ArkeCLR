@@ -3,20 +3,14 @@ using System.Collections.Generic;
 
 namespace ArkeCLR.Runtime.Signatures {
     public class StandAloneMethodSig : ICustomByteReader {
-        public bool HasThis;
-        public bool ExplicitThis;
-        public CallingConvention CallingConvention;
+        public SignatureFlags Flags;
         public uint ParamCount;
         public RetType RetType;
         public Param[] Params;
         public Param[] VarArgParams;
 
         public void Read(ByteReader reader) {
-            var first = reader.ReadU1();
-
-            this.HasThis = (first & 0x20) != 0;
-            this.ExplicitThis = (first & 0x40) != 0;
-            this.CallingConvention = (CallingConvention)(first & 0x1F);
+            reader.ReadEnum(out this.Flags);
 
             this.ParamCount = reader.ReadCompressedU4();
 
@@ -25,7 +19,7 @@ namespace ArkeCLR.Runtime.Signatures {
             var param = new List<Param>();
             var varArgParam = new List<Param>();
             var cur = param;
-            var isVarArg = this.CallingConvention == CallingConvention.VarArg || this.CallingConvention == CallingConvention.C;
+            var isVarArg = (this.Flags & SignatureFlags.C) != 0 || (this.Flags & SignatureFlags.VarArg) != 0;
 
             for (var i = 0; i < this.ParamCount; i++) {
                 if (isVarArg && reader.TryReadEnum(ElementType.Sentinel))

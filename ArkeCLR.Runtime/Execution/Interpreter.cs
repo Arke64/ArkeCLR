@@ -12,15 +12,17 @@ namespace ArkeCLR.Runtime.Execution {
         public TypeRecord[] Locals;
 
         public CallFrame(Method method, int instructionPointer) {
+            var hasThis = Interpreter.MethodHasThis(method.Signature);
+
             this.Method = method;
             this.InstructionPointer = instructionPointer;
-            this.Args = new TypeRecord[method.Signature.ParamCount + (method.Signature.HasThis ? 1 : 0)];
+            this.Args = new TypeRecord[method.Signature.ParamCount + (hasThis ? 1 : 0)];
             this.Locals = new TypeRecord[method.LocalVariablesSignature.Count];
 
-            if (method.Signature.HasThis)
+            if (hasThis)
                 this.Args[0].Tag = ElementType.Class; //TODO Need to record actual class, also valuetypes
 
-            for (int i = 0, j = method.Signature.HasThis ? 1 : 0; i < method.Signature.ParamCount; i++, j++)
+            for (int i = 0, j = hasThis ? 1 : 0; i < method.Signature.ParamCount; i++, j++)
                 this.Args[j].Tag = method.Signature.Params[i].Type.ElementType;
 
             for (var i = 0; i < method.LocalVariablesSignature.Count; i++)
@@ -32,8 +34,11 @@ namespace ArkeCLR.Runtime.Execution {
         private readonly Stack<TypeRecord> evaluationStack = new Stack<TypeRecord>();
         private readonly Stack<CallFrame> callStack = new Stack<CallFrame>();
 
+        public static bool MethodHasThis(MethodDefSig sig) => (sig.Flags & SignatureFlags.HasThis) != 0;
+        public static bool MethodHasExplicitThis(MethodDefSig sig) => (sig.Flags & SignatureFlags.ExplicitThis) != 0;
+
         public long Run(Assembly entryAssembly, IReadOnlyCollection<Assembly> references, Action<string> logger) {
-            if (entryAssembly.EntryPoint.Signature.HasThis || entryAssembly.EntryPoint.Signature.ExplicitThis) throw new InvalidAssemblyException("Entry point must be static.");
+            if (Interpreter.MethodHasThis(entryAssembly.EntryPoint.Signature) || Interpreter.MethodHasExplicitThis(entryAssembly.EntryPoint.Signature)) throw new InvalidAssemblyException("Entry point must be static.");
             if (entryAssembly.EntryPoint.Signature.ParamCount == 0 || (entryAssembly.EntryPoint.Signature.ParamCount == 1 && entryAssembly.EntryPoint.Signature.Params[0].Type.ElementType != ElementType.SzArray)) throw new InvalidAssemblyException("Entry point must take no parameters or a single string[] only.");
             if (!entryAssembly.EntryPoint.Signature.RetType.IsVoid && entryAssembly.EntryPoint.Signature.RetType.Type.ElementType != ElementType.I4 && entryAssembly.EntryPoint.Signature.RetType.Type.ElementType != ElementType.U4) throw new InvalidAssemblyException("Entry point return type must be I4, U4, or void.");
             //TODO Need to do better comparions above
@@ -107,7 +112,7 @@ namespace ArkeCLR.Runtime.Execution {
                             if (!frame.Method.Signature.RetType.IsVoid)
                                 ret = this.Pop();
 
-                            for (var i = 0; i < frame.Method.Signature.ParamCount + (frame.Method.Signature.HasThis ? 1 : 0); i++)
+                            for (var i = 0; i < frame.Method.Signature.ParamCount + (Interpreter.MethodHasThis(frame.Method.Signature) ? 1 : 0); i++)
                                 this.Pop();
 
                             this.callStack.Pop();

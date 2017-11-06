@@ -7,9 +7,7 @@ namespace ArkeCLR.Runtime.Signatures {
         public Type[] Types;
 
         public void Read(ByteReader reader) {
-            var first = reader.ReadU1();
-
-            if ((first & 0x0A) != 0) throw new InvalidOperationException();
+            if (!reader.TryReadEnum(SignatureFlags.GenericInst)) throw new InvalidOperationException();
 
             this.GenArgCount = reader.ReadCompressedU4();
 

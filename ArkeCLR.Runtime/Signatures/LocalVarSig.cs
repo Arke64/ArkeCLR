@@ -8,9 +8,7 @@ namespace ArkeCLR.Runtime.Signatures {
         public LocalVar[] Locals;
 
         public void Read(ByteReader reader) {
-            var sig = reader.ReadU1();
-
-            if (sig != 0x07) throw new InvalidOperationException();
+            if (!reader.TryReadEnum(SignatureFlags.LocalSig)) throw new InvalidOperationException();
 
             reader.ReadCompressed(out this.Count);
             reader.ReadCustom(this.Count, out this.Locals);

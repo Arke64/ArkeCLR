@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace ArkeCLR.Runtime.Signatures {
     public class CustomMod : ICustomByteReader {
-        public bool IsRequired;
+        public ElementType ElementType;
         public TypeDefOrRefOrSpecEncoded EncodedType;
 
         public void Read(ByteReader reader) {
-            this.IsRequired = reader.ReadEnum<ElementType>() == ElementType.CModReqD;
+            reader.ReadEnum(out this.ElementType);
 
             this.EncodedType.Read(reader);
         }

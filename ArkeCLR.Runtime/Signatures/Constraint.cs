@@ -2,8 +2,8 @@
 
 namespace ArkeCLR.Runtime.Signatures {
     public class Constraint : ICustomByteReader {
-        public ElementType Type;
+        public ElementType ElementType;
 
-        public void Read(ByteReader reader) => this.Type = reader.ReadEnum<ElementType>();
+        public void Read(ByteReader reader) => this.ElementType = reader.ReadEnum<ElementType>();
     }
 }

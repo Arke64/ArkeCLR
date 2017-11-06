@@ -7,9 +7,7 @@ namespace ArkeCLR.Runtime.Signatures {
         public Type Type;
 
         public void Read(ByteReader reader) {
-            var sig = reader.ReadU1();
-
-            if (sig != 0x06) throw new InvalidOperationException();
+            if (!reader.TryReadEnum(SignatureFlags.Field)) throw new InvalidOperationException();
 
             this.CustomMods = CustomMod.ReadCustomMods(reader);
 

@@ -3,18 +3,16 @@ using System;
 
 namespace ArkeCLR.Runtime.Signatures {
     public class PropertySig : ICustomByteReader {
-        public bool HasThis;
+        public SignatureFlags Flags;
         public uint ParamCount;
         public CustomMod[] CustomMods;
         public Type Type;
         public Param[] Params;
 
         public void Read(ByteReader reader) {
-            var first = reader.ReadU1();
+            reader.ReadEnum(out this.Flags);
 
-            if ((first & 0x08) == 0 && (first & 0x28) == 0) throw new InvalidOperationException();
-
-            this.HasThis = (first & 0x20) != 0;
+            if ((this.Flags & SignatureFlags.Property) == 0) throw new InvalidOperationException();
 
             this.ParamCount = reader.ReadCompressedU4();
             this.CustomMods = CustomMod.ReadCustomMods(reader);

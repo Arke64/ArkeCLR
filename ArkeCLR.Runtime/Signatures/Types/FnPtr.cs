@@ -13,7 +13,7 @@ namespace ArkeCLR.Runtime.Signatures.Types {
             reader.ReadCustom(out this.MethodDefSig);
             this.IsDef = true;
 
-            if (this.MethodDefSig.CallingConvention == CallingConvention.VarArg) {
+            if ((this.MethodDefSig.Flags & SignatureFlags.VarArg) != 0) {
                 this.MethodDefSig = null;
                 reader.Seek(start, SeekOrigin.Begin);
 

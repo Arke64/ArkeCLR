@@ -3,22 +3,18 @@ using System.Collections.Generic;
 
 namespace ArkeCLR.Runtime.Signatures {
     public class MethodRefSig : ICustomByteReader {
-        public bool HasThis;
-        public bool ExplicitThis;
-        public CallingConvention CallingConvention;
+        public SignatureFlags Flags;
+        public uint GenParamCount;
         public uint ParamCount;
         public RetType RetType;
         public Param[] Params;
         public Param[] VarArgParams;
 
         public void Read(ByteReader reader) {
-            var first = reader.ReadU1();
+            reader.ReadEnum(out this.Flags);
 
-            this.HasThis = (first & 0x20) != 0;
-            this.ExplicitThis = (first & 0x40) != 0;
-
-            if ((CallingConvention)(first & 0x1F) == CallingConvention.VarArg)
-                this.CallingConvention = CallingConvention.VarArg;
+            if ((this.Flags & SignatureFlags.Generic) != 0)
+                this.GenParamCount = reader.ReadCompressedU4();
 
             this.ParamCount = reader.ReadCompressedU4();
 
