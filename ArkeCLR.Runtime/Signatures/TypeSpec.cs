@@ -1,5 +1,9 @@
-﻿namespace ArkeCLR.Runtime.Signatures {
-    public struct TypeSpec {
+﻿using ArkeCLR.Utilities;
 
+namespace ArkeCLR.Runtime.Signatures {
+    public class TypeSpec : ICustomByteReader {
+        public void Read(ByteReader reader) {
+
+        }
     }
 }
