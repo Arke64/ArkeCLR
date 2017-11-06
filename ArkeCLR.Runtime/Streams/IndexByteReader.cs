@@ -11,7 +11,7 @@ namespace ArkeCLR.Runtime.Streams {
                 [CodedIndexType.TypeDefOrRef] = new[] { TableType.TypeDef, TableType.TypeRef, TableType.TypeSpec },
                 [CodedIndexType.HasConstant] = new[] { TableType.Field, TableType.Param, TableType.Property },
                 [CodedIndexType.HasCustomAttribute] = new[] { TableType.MethodDef, TableType.Field, TableType.TypeRef, TableType.TypeDef, TableType.Param, TableType.InterfaceImpl, TableType.MemberRef, TableType.Module, (TableType)0xFF /*Permission*/, TableType.Property, TableType.Event, TableType.StandAloneSig, TableType.ModuleRef, TableType.TypeSpec, TableType.Assembly, TableType.AssemblyRef, TableType.File, TableType.ExportedType, TableType.ManifestResource, TableType.GenericParam, TableType.GenericParamConstraint, TableType.MethodSpec },
-                [CodedIndexType.HasFieldMarshall] = new[] { TableType.Field, TableType.Param },
+                [CodedIndexType.HasFieldMarshal] = new[] { TableType.Field, TableType.Param },
                 [CodedIndexType.HasDeclSecurity] = new[] { TableType.TypeDef, TableType.MethodDef, TableType.Assembly },
                 [CodedIndexType.MemberRefParent] = new[] { TableType.TypeDef, TableType.TypeRef, TableType.ModuleRef, TableType.MethodDef, TableType.TypeSpec },
                 [CodedIndexType.HasSemantics] = new[] { TableType.Event, TableType.Property },

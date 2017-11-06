@@ -2,7 +2,7 @@ using System;
 
 namespace ArkeCLR.Runtime.Flags {
     [Flags]
-    public enum GenericParameterAttributes : ushort {
+    public enum GenericParamAttributes : ushort {
         VarianceMask = 0x0003,
         None = 0x0000,
         Covariant = 0x0001,

@@ -13,6 +13,8 @@ namespace ArkeCLR.Runtime.Streams {
 
         public CilTableStreamHeader Header { get; private set; }
 
+
+        //TODO Need to validate all the rules for each table.
         public TableList<Module> Modules { get; private set; }
         public TableList<TypeRef> TypeRefs { get; private set; }
         public TableList<TypeDef> TypeDefs { get; private set; }
@@ -147,7 +149,7 @@ namespace ArkeCLR.Runtime.Streams {
         TypeDefOrRef,
         HasConstant,
         HasCustomAttribute,
-        HasFieldMarshall,
+        HasFieldMarshal,
         HasDeclSecurity,
         MemberRefParent,
         HasSemantics,
