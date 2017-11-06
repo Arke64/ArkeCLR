@@ -1,7 +1,7 @@
 ﻿using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Signatures {
-    public struct MethodDefSig : ICustomByteReader {
+    public class MethodDefSig : ICustomByteReader {
         public bool HasThis;
         public bool ExplicitThis;
         public CallingConvention CallingConvention;
@@ -22,11 +22,9 @@ namespace ArkeCLR.Runtime.Signatures {
 
             this.ParamCount = reader.ReadCompressedU4();
 
-            this.RetType.Read(reader);
+            reader.ReadCustom(out this.RetType);
 
-            this.Params = new Param[this.ParamCount];
-            for (var i = 0; i < this.ParamCount; i++)
-                this.Params[i].Read(reader);
+            reader.ReadCustom(this.ParamCount, out this.Params);
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Signatures.Types {
-    public class Class {
+    public class Class : ICustomByteReader {
         public TypeDefOrRefOrSpecEncoded TypeDefOrRefOrSpecEncoded;
 
-        public Class(ByteReader reader) => this.TypeDefOrRefOrSpecEncoded.Read(reader);
+        public void Read(ByteReader reader) => reader.ReadCustom(out this.TypeDefOrRefOrSpecEncoded);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Signatures {
-    public struct RetType {
+    public class RetType : ICustomByteReader {
         public CustomMod[] CustomMods;
         public bool IsByRef;
         public bool IsTypedByRef;
@@ -9,27 +9,17 @@ namespace ArkeCLR.Runtime.Signatures {
         public Type Type;
 
         public void Read(ByteReader reader) {
-            var cur = reader.ReadEnum<ElementType>();
+            this.CustomMods = CustomMod.ReadCustomMods(reader);
 
-            this.CustomMods = CustomMod.ReadCustomMods(reader, ref cur);
-
-            if (cur == ElementType.ByRef) {
-                this.IsByRef = true;
-
-                cur = reader.ReadEnum<ElementType>();
-            }
-            else if (cur == ElementType.TypedByRef) {
-                this.IsTypedByRef = true;
-
-                return;
-            }
-            else if (cur == ElementType.Void) {
-                this.IsVoid = true;
-
-                return;
+            if (reader.TryReadEnum(out var res, ElementType.ByRef, ElementType.ByRef, ElementType.Void)) {
+                switch (res) {
+                    case ElementType.ByRef: this.IsByRef = true; break;
+                    case ElementType.TypedByRef: this.IsTypedByRef = true; return;
+                    case ElementType.Void: this.IsVoid = true; return;
+                }
             }
 
-            this.Type.Read(cur, reader);
+            reader.ReadCustom(out this.Type);
         }
     }
 }

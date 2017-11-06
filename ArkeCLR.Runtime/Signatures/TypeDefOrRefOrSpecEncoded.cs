@@ -2,18 +2,17 @@
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Signatures {
-    public struct TypeDefOrRefOrSpecEncoded {
-        public TableType Table;
-        public uint Row;
+    public class TypeDefOrRefOrSpecEncoded : ICustomByteReader {
+        public TableIndex Index;
 
         public void Read(ByteReader reader) {
             var uncompressed = reader.ReadCompressedU4();
 
-            this.Row = uncompressed >> 2;
+            this.Index = new TableIndex { Row = uncompressed >> 2 };
 
             uncompressed &= 0x03;
 
-            this.Table = uncompressed == 0 ? TableType.TypeDef : (uncompressed == 1 ? TableType.TypeRef : TableType.TypeSpec);
+            this.Index.Table = uncompressed == 0 ? TableType.TypeDef : (uncompressed == 1 ? TableType.TypeRef : TableType.TypeSpec);
         }
     }
 }

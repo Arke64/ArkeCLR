@@ -1,35 +1,23 @@
 ﻿using ArkeCLR.Utilities;
-using System;
 
 namespace ArkeCLR.Runtime.Signatures {
-    public struct Param {
+    public class Param : ICustomByteReader {
         public CustomMod[] CustomMods;
         public bool IsByRef;
         public bool IsTypedByRef;
         public Type Type;
 
-        public Param(ElementType elementType) : this() {
-            this.CustomMods = Array.Empty<CustomMod>();
-            this.Type = new Type(elementType);
-        }
-
         public void Read(ByteReader reader) {
-            var cur = reader.ReadEnum<ElementType>();
+            this.CustomMods = CustomMod.ReadCustomMods(reader);
 
-            this.CustomMods = CustomMod.ReadCustomMods(reader, ref cur);
-
-            if (cur == ElementType.ByRef) {
-                this.IsByRef = true;
-
-                cur = reader.ReadEnum<ElementType>();
-            }
-            else if (cur == ElementType.TypedByRef) {
-                this.IsTypedByRef = true;
-
-                return;
+            if (reader.TryReadEnum(out var res, ElementType.ByRef, ElementType.ByRef)) {
+                switch (res) {
+                    case ElementType.ByRef: this.IsByRef = true; break;
+                    case ElementType.TypedByRef: this.IsTypedByRef = true; return;
+                }
             }
 
-            this.Type.Read(cur, reader);
+            reader.ReadCustom(out this.Type);
         }
     }
 }

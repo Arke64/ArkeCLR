@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 namespace ArkeCLR.Runtime.Signatures {
-    public struct LocalVarSig : ICustomByteReader {
+    public class LocalVarSig : ICustomByteReader {
         public uint Count;
         public LocalVar[] Locals;
 
@@ -13,65 +13,35 @@ namespace ArkeCLR.Runtime.Signatures {
             if (sig != 0x07) throw new InvalidOperationException();
 
             reader.ReadCompressed(out this.Count);
-
-            this.Locals = new LocalVar[this.Count];
-            for (var i = 0; i < this.Count; i++)
-                this.Locals[i].Read(reader);
+            reader.ReadCustom(this.Count, out this.Locals);
         }
 
-        public struct LocalVar {
-            public LocalVarCustomMod[] CustomMods;
+        public class LocalVar : ICustomByteReader {
+            public CustomMod[] CustomMods;
+            public Constraint[] Constraints;
             public bool IsByRef;
             public bool IsTypedByRef;
             public Type Type;
 
-            public struct LocalVarCustomMod {
-                public CustomMod CustomMod;
-                public Constraint Constraint;
-            }
-
             public void Read(ByteReader reader) {
-                var cur = reader.ReadEnum<ElementType>();
-                var mods = new List<LocalVarCustomMod>();
+                this.IsTypedByRef = reader.TryReadEnum(ElementType.TypedByRef);
 
-                if (cur != ElementType.TypedByRef) {
-                    while (cur == ElementType.CModOpt || cur == ElementType.CModReqD || cur == ElementType.Pinned) {
-                        if (cur == ElementType.CModOpt || cur == ElementType.CModReqD) {
-                            var mod = new CustomMod();
-                            var cons = new Constraint();
+                var mods = new List<CustomMod>();
+                var cons = new List<Constraint>();
 
-                            mod.Read(cur, reader);
-
-                            cur = reader.ReadEnum<ElementType>();
-
-                            if (cur == ElementType.Pinned) {
-                                cons.Type = ElementType.Pinned;
-
-                                cur = reader.ReadEnum<ElementType>();
-                            }
-
-                            mods.Add(new LocalVarCustomMod { CustomMod = mod, Constraint = cons });
-                        }
-                        else {
-                            mods.Add(new LocalVarCustomMod { Constraint = new Constraint { Type = ElementType.Pinned } });
-
-                            cur = reader.ReadEnum<ElementType>();
-                        }
+                if (!this.IsTypedByRef) {
+                    while (reader.TryPeekEnum(out var res, ElementType.CModOpt, ElementType.CModReqD, ElementType.Pinned)) {
+                        if (res == ElementType.Pinned) { cons.Add(reader.ReadCustom<Constraint>()); }
+                        else { mods.Add(reader.ReadCustom<CustomMod>()); }
                     }
 
-                    if (cur == ElementType.ByRef) {
-                        this.IsByRef = true;
+                    this.IsByRef = reader.TryReadEnum(ElementType.ByRef);
 
-                        cur = reader.ReadEnum<ElementType>();
-                    }
-
-                    this.Type.Read(cur, reader);
-                }
-                else {
-                    this.IsTypedByRef = true;
+                    reader.ReadCustom(out this.Type);
                 }
 
                 this.CustomMods = mods.ToArray();
+                this.Constraints = cons.ToArray();
             }
         }
     }
