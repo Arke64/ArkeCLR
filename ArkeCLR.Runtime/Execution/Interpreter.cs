@@ -1,4 +1,5 @@
-﻿using ArkeCLR.Runtime.Logical;
+﻿using ArkeCLR.Runtime.Files;
+using ArkeCLR.Runtime.Logical;
 using ArkeCLR.Runtime.Signatures;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace ArkeCLR.Runtime.Execution {
             this.Method = method;
             this.InstructionPointer = instructionPointer;
             this.Args = new TypeRecord[method.Signature.ParamCount + (hasThis ? 1 : 0)];
-            this.Locals = new TypeRecord[method.LocalVariablesSignature.Count];
+            this.Locals = new TypeRecord[method.Locals.Count];
 
             if (hasThis)
                 this.Args[0].Tag = ElementType.Class; //TODO Need to record actual class, also valuetypes
@@ -25,38 +26,47 @@ namespace ArkeCLR.Runtime.Execution {
             for (int i = 0, j = hasThis ? 1 : 0; i < method.Signature.ParamCount; i++, j++)
                 this.Args[j].Tag = method.Signature.Params[i].Type.ElementType;
 
-            for (var i = 0; i < method.LocalVariablesSignature.Count; i++)
-                this.Locals[i].Tag = method.LocalVariablesSignature.Locals[i].Type.ElementType;
+            for (var i = 0; i < method.Locals.Count; i++)
+                this.Locals[i].Tag = method.Locals[i].Type.ElementType;
         }
     }
 
     public class Interpreter : IExecutionEngine {
         private readonly Stack<TypeRecord> evaluationStack = new Stack<TypeRecord>();
         private readonly Stack<CallFrame> callStack = new Stack<CallFrame>();
+        private readonly IAssemblyResolver assemblyResolver;
+        private readonly Action<string> logger;
+        private TypeSystem typeSystem;
 
         public static bool MethodHasThis(MethodDefSig sig) => (sig.Flags & SignatureFlags.HasThis) != 0;
         public static bool MethodHasExplicitThis(MethodDefSig sig) => (sig.Flags & SignatureFlags.ExplicitThis) != 0;
 
-        public long Run(Assembly entryAssembly, IReadOnlyCollection<Assembly> references, Action<string> logger) {
-            if (Interpreter.MethodHasThis(entryAssembly.EntryPoint.Signature) || Interpreter.MethodHasExplicitThis(entryAssembly.EntryPoint.Signature)) throw new InvalidAssemblyException("Entry point must be static.");
-            if (entryAssembly.EntryPoint.Signature.ParamCount == 0 || (entryAssembly.EntryPoint.Signature.ParamCount == 1 && entryAssembly.EntryPoint.Signature.Params[0].Type.ElementType != ElementType.SzArray)) throw new InvalidAssemblyException("Entry point must take no parameters or a single string[] only.");
-            if (!entryAssembly.EntryPoint.Signature.RetType.IsVoid && entryAssembly.EntryPoint.Signature.RetType.Type.ElementType != ElementType.I4 && entryAssembly.EntryPoint.Signature.RetType.Type.ElementType != ElementType.U4) throw new InvalidAssemblyException("Entry point return type must be I4, U4, or void.");
+        public Interpreter(IAssemblyResolver assemblyResolver, Action<string> logger) => (this.assemblyResolver, this.logger) = (assemblyResolver, logger);
+
+        public long Run(string entryAssemblyPath) {
+            this.typeSystem = new TypeSystem(entryAssemblyPath, this.assemblyResolver, this.logger);
+
+            var entryPoint = this.typeSystem.FindEntryPoint();
+
+            if (Interpreter.MethodHasThis(entryPoint.Signature) || Interpreter.MethodHasExplicitThis(entryPoint.Signature)) throw new InvalidAssemblyException("Entry point must be static.");
+            if (entryPoint.Signature.ParamCount == 0 || (entryPoint.Signature.ParamCount == 1 && entryPoint.Signature.Params[0].Type.ElementType != ElementType.SzArray)) throw new InvalidAssemblyException("Entry point must take no parameters or a single string[] only.");
+            if (!entryPoint.Signature.RetType.IsVoid && entryPoint.Signature.RetType.Type.ElementType != ElementType.I4 && entryPoint.Signature.RetType.Type.ElementType != ElementType.U4) throw new InvalidAssemblyException("Entry point return type must be I4, U4, or void.");
             //TODO Need to do better comparions above
 
             //TODO Need to handle the optional string[] args
-            this.callStack.Push(new CallFrame(entryAssembly.EntryPoint, 0));
+            this.callStack.Push(new CallFrame(entryPoint, 0));
 
-            if (entryAssembly.EntryPoint.Signature.ParamCount == 1)
+            if (entryPoint.Signature.ParamCount == 1)
                 this.evaluationStack.Push(TypeRecord.FromObject(0));
 
             this.RunInterpreter();
 
             var returnCode = 0L;
 
-            if (entryAssembly.EntryPoint.Signature.RetType.Type.ElementType == ElementType.I4) {
+            if (entryPoint.Signature.RetType.Type.ElementType == ElementType.I4) {
                 returnCode = this.Pop(ElementType.I4).I4;
             }
-            else if (entryAssembly.EntryPoint.Signature.RetType.Type.ElementType == ElementType.U4) {
+            else if (entryPoint.Signature.RetType.Type.ElementType == ElementType.U4) {
                 returnCode = this.Pop(ElementType.U4).U4;
             }
 
@@ -93,15 +103,15 @@ namespace ArkeCLR.Runtime.Execution {
                         case InstructionType.ldarg_2: this.Push(frame.Args[2]); break;
                         case InstructionType.ldarg_3: this.Push(frame.Args[3]); break;
 
-                        case InstructionType.ldloc_0: this.Push(frame.Locals[0], frame.Method.LocalVariablesSignature.Locals[0].Type); break;
-                        case InstructionType.ldloc_1: this.Push(frame.Locals[1], frame.Method.LocalVariablesSignature.Locals[1].Type); break;
-                        case InstructionType.ldloc_2: this.Push(frame.Locals[2], frame.Method.LocalVariablesSignature.Locals[2].Type); break;
-                        case InstructionType.ldloc_3: this.Push(frame.Locals[3], frame.Method.LocalVariablesSignature.Locals[3].Type); break;
+                        case InstructionType.ldloc_0: this.Push(frame.Locals[0], frame.Method.Locals[0].Type); break;
+                        case InstructionType.ldloc_1: this.Push(frame.Locals[1], frame.Method.Locals[1].Type); break;
+                        case InstructionType.ldloc_2: this.Push(frame.Locals[2], frame.Method.Locals[2].Type); break;
+                        case InstructionType.ldloc_3: this.Push(frame.Locals[3], frame.Method.Locals[3].Type); break;
 
-                        case InstructionType.stloc_0: this.Pop(ref frame.Locals[0], frame.Method.LocalVariablesSignature.Locals[0].Type); break;
-                        case InstructionType.stloc_1: this.Pop(ref frame.Locals[1], frame.Method.LocalVariablesSignature.Locals[1].Type); break;
-                        case InstructionType.stloc_2: this.Pop(ref frame.Locals[2], frame.Method.LocalVariablesSignature.Locals[2].Type); break;
-                        case InstructionType.stloc_3: this.Pop(ref frame.Locals[3], frame.Method.LocalVariablesSignature.Locals[3].Type); break;
+                        case InstructionType.stloc_0: this.Pop(ref frame.Locals[0], frame.Method.Locals[0].Type); break;
+                        case InstructionType.stloc_1: this.Pop(ref frame.Locals[1], frame.Method.Locals[1].Type); break;
+                        case InstructionType.stloc_2: this.Pop(ref frame.Locals[2], frame.Method.Locals[2].Type); break;
+                        case InstructionType.stloc_3: this.Pop(ref frame.Locals[3], frame.Method.Locals[3].Type); break;
 
                         case InstructionType.br_s: frame.InstructionPointer = inst.BranchInstruction; break;
 
@@ -125,7 +135,7 @@ namespace ArkeCLR.Runtime.Execution {
                         case InstructionType.call:
                         case InstructionType.callvirt: //TODO Need to dynamically invoke on the object type
                             if (inst.TableIndexOperand.Table == Streams.TableType.MemberRef) goto end;
-                            this.callStack.Push(new CallFrame(frame.Method.Type.Assembly.FindMethod(inst.TableIndexOperand), 0)); goto end;
+                            this.callStack.Push(new CallFrame(this.typeSystem.FindMethod(inst.TableIndexOperand), 0)); goto end;
 
                         //TODO Need to handle value types and delegates, also actually allocate something
                         case InstructionType.newobj: this.Push(new TypeRecord { Tag = ElementType.Class }); goto case InstructionType.call;
