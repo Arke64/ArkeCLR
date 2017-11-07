@@ -151,7 +151,7 @@ namespace ArkeCLR.Runtime.Files {
                 this.MaxStack = 8;
             }
 
-            this.Body = file.ReadArray<byte>(this.CodeSize);
+            file.ReadArray(this.CodeSize, out this.Body);
 
             var sects = new List<MethodDataSectionHeader>();
 
@@ -205,7 +205,7 @@ namespace ArkeCLR.Runtime.Files {
                 this.Clauses = file.ReadArray<TinyExceptionHandlingClause>((this.DataSize - 4) / 12).ToArray(c => c.Expand());
             }
             else {
-                this.Clauses = file.ReadArray<ExceptionHandlingClause>((this.DataSize - 4) / 24);
+                file.ReadArray((this.DataSize - 4) / 24, out this.Clauses);
             }
         }
     }
