@@ -1,6 +1,6 @@
 using System;
 
-namespace ArkeCLR.Runtime.Flags {
+namespace ArkeCLR.Runtime.Tables.Flags {
     [Flags]
     public enum ParamAttributes : ushort {
         In = 0x0001,

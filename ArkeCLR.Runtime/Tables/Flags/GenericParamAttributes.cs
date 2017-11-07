@@ -1,6 +1,6 @@
 using System;
 
-namespace ArkeCLR.Runtime.Flags {
+namespace ArkeCLR.Runtime.Tables.Flags {
     [Flags]
     public enum GenericParamAttributes : ushort {
         VarianceMask = 0x0003,

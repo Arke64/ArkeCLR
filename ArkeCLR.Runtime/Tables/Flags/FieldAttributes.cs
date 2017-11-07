@@ -1,6 +1,6 @@
 using System;
 
-namespace ArkeCLR.Runtime.Flags {
+namespace ArkeCLR.Runtime.Tables.Flags {
     [Flags]
     public enum FieldAttributes : ushort {
         FieldAccessMask = 0x0007,

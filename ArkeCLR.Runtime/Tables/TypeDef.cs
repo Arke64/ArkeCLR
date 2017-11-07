@@ -1,4 +1,4 @@
-﻿using ArkeCLR.Runtime.Flags;
+﻿using ArkeCLR.Runtime.Tables.Flags;
 using ArkeCLR.Runtime.Streams;
 using ArkeCLR.Utilities;
 
