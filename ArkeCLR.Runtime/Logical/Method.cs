@@ -21,14 +21,20 @@ namespace ArkeCLR.Runtime.Logical {
             this.Name = file.StringStream.GetAt(def.Name);
             this.Signature = file.BlobStream.GetAt<MethodDefSig>(def.Signature);
 
-            var header = file.ReadCustom<MethodHeader>(def.RVA);
-            var localVarSig = file.TableStream.ParseMetadataToken(header.LocalVarSigTok);
+            if (def.RVA != 0) {
+                var header = file.ReadCustom<MethodHeader>(def.RVA);
+                var localVarSig = file.TableStream.ParseMetadataToken(header.LocalVarSigTok);
 
-            this.Locals = !localVarSig.IsZero ? file.BlobStream.GetAt<LocalVarSig>(file.TableStream.StandAloneSigs.Get(localVarSig).Signature).Locals : new LocalVarSig.LocalVar[0];
+                this.Locals = !localVarSig.IsZero ? file.BlobStream.GetAt<LocalVarSig>(file.TableStream.StandAloneSigs.Get(localVarSig).Signature).Locals : new LocalVarSig.LocalVar[0];
 
-            this.Instructions = readInstructions(new IndexByteReader(file.TableStream, header.Body)).ToList();
+                this.Instructions = readInstructions(new IndexByteReader(file.TableStream, header.Body)).ToList();
 
-            this.Instructions.ForEach((idx, inst) => inst.FixUp(idx, this.Instructions));
+                this.Instructions.ForEach((idx, inst) => inst.FixUp(idx, this.Instructions));
+            }
+            else {
+                this.Locals = new LocalVarSig.LocalVar[0];
+                this.Instructions = new List<Instruction>();
+            }
 
             IEnumerable<Instruction> readInstructions(IndexByteReader reader) {
                 while (reader.Position < reader.Length)
