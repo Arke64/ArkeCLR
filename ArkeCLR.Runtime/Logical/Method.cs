@@ -22,7 +22,7 @@ namespace ArkeCLR.Runtime.Logical {
             this.Signature = file.BlobStream.GetAt<MethodDefSig>(def.Signature);
 
             var header = file.ReadCustom<MethodHeader>(def.RVA);
-            var localVarSig = file.TableStream.ToTableIndex(header.LocalVarSigTok);
+            var localVarSig = file.TableStream.ParseMetadataToken(header.LocalVarSigTok);
 
             this.Locals = !localVarSig.IsZero ? file.BlobStream.GetAt<LocalVarSig>(file.TableStream.StandAloneSigs.Get(localVarSig).Signature).Locals : new LocalVarSig.LocalVar[0];
 

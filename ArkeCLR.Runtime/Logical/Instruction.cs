@@ -24,7 +24,7 @@ namespace ArkeCLR.Runtime.Logical {
                 case InstructionType.call:
                 case InstructionType.callvirt:
                 case InstructionType.newobj:
-                    body.Read(out this.TableIndexOperand); break;
+                    body.ReadToken(out this.TableIndexOperand); break;
 
                 case InstructionType.br_s: this.BranchInstruction = body.ReadI1(); break;
             }

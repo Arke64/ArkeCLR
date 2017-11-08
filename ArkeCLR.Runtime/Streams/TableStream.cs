@@ -5,14 +5,43 @@ using ArkeCLR.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace ArkeCLR.Runtime.Streams {
     public class TableStream : Stream {
+        public static IReadOnlyDictionary<CodedIndexType, (IReadOnlyList<TableType> tables, int tagSize, int tagMask, int maxRows)> CodedIndexDefinitions { get; }
+
+        static TableStream() {
+            var indexes = new Dictionary<CodedIndexType, IReadOnlyList<TableType>> {
+                [CodedIndexType.TypeDefOrRef] = new[] { TableType.TypeDef, TableType.TypeRef, TableType.TypeSpec },
+                [CodedIndexType.HasConstant] = new[] { TableType.Field, TableType.Param, TableType.Property },
+                [CodedIndexType.HasCustomAttribute] = new[] { TableType.MethodDef, TableType.Field, TableType.TypeRef, TableType.TypeDef, TableType.Param, TableType.InterfaceImpl, TableType.MemberRef, TableType.Module, (TableType)0xFF /*Permission*/, TableType.Property, TableType.Event, TableType.StandAloneSig, TableType.ModuleRef, TableType.TypeSpec, TableType.Assembly, TableType.AssemblyRef, TableType.File, TableType.ExportedType, TableType.ManifestResource, TableType.GenericParam, TableType.GenericParamConstraint, TableType.MethodSpec },
+                [CodedIndexType.HasFieldMarshal] = new[] { TableType.Field, TableType.Param },
+                [CodedIndexType.HasDeclSecurity] = new[] { TableType.TypeDef, TableType.MethodDef, TableType.Assembly },
+                [CodedIndexType.MemberRefParent] = new[] { TableType.TypeDef, TableType.TypeRef, TableType.ModuleRef, TableType.MethodDef, TableType.TypeSpec },
+                [CodedIndexType.HasSemantics] = new[] { TableType.Event, TableType.Property },
+                [CodedIndexType.MethodDefOrRef] = new[] { TableType.MethodDef, TableType.MemberRef },
+                [CodedIndexType.MemberForwarded] = new[] { TableType.Field, TableType.MethodDef },
+                [CodedIndexType.Implementation] = new[] { TableType.File, TableType.AssemblyRef, TableType.ExportedType },
+                [CodedIndexType.CustomAttributeType] = new[] { (TableType)0xFF /*Not defined*/, (TableType)0xFF /*Not defined*/, TableType.MethodDef, TableType.MemberRef, (TableType)0xFF /*Not defined*/ },
+                [CodedIndexType.ResolutionScope] = new[] { TableType.Module, TableType.ModuleRef, TableType.AssemblyRef, TableType.TypeRef },
+                [CodedIndexType.TypeOfMethodDef] = new[] { TableType.TypeDef, TableType.MethodDef },
+            };
+
+            var result = new Dictionary<CodedIndexType, (IReadOnlyList<TableType> tables, int tagSize, int tagMask, int maxRows)>();
+
+            foreach (var d in indexes) {
+                var tagSize = (int)Math.Ceiling(Math.Log(d.Value.Count, 2));
+
+                result.Add(d.Key, (d.Value, tagSize, (1 << tagSize) - 1, 2 << (16 - tagSize)));
+            }
+
+            TableStream.CodedIndexDefinitions = result;
+        }
+
         public TableStream() : base("#~") { }
 
         public CilTableStreamHeader Header { get; private set; }
-
+        public IReadOnlyDictionary<CodedIndexType, bool> CodedIndexSizes { get; private set; }
 
         //TODO Need to validate all the rules for each table.
         public TableList<Module> Modules { get; private set; }
@@ -58,6 +87,7 @@ namespace ArkeCLR.Runtime.Streams {
             var indexReader = new IndexByteReader(this, reader);
 
             this.Header = indexReader.ReadCustom<CilTableStreamHeader>();
+            this.CodedIndexSizes = TableStream.CodedIndexDefinitions.ToDictionary(d => d.Key, d => d.Value.tables.Any(v => v != (TableType)0xFF && this.Header.Rows[(int)v] >= d.Value.maxRows));
 
             for (var i = 0; i < this.Header.Valid.Count; i++)
                 if (this.Header.Valid[i] && ((TableType)i).IsInvalid())
@@ -105,7 +135,7 @@ namespace ArkeCLR.Runtime.Streams {
             this.GenericParamConstraints = read(this.GenericParamConstraints, TableType.GenericParamConstraint);
         }
 
-        public TableIndex ToTableIndex(uint value) => new TableIndex { Table = (TableType)(value >> 24), Row = value & 0xFFFFFF };
+        public TableIndex ParseMetadataToken(uint value) => new TableIndex { Table = (TableType)(value >> 24), Row = value & 0xFFFFFF };
 
         public class TableList<T> {
             private readonly T[] list;

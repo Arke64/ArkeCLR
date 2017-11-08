@@ -1,9 +1,7 @@
 ﻿using ArkeCLR.Runtime.Streams;
 using ArkeCLR.Utilities;
-using ArkeCLR.Utilities.Extensions;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace ArkeCLR.Runtime.Files {
     public class CliFile : PeFile {
