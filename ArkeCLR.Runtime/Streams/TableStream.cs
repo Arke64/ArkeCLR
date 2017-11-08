@@ -32,7 +32,7 @@ namespace ArkeCLR.Runtime.Streams {
             foreach (var d in indexes) {
                 var tagSize = (int)Math.Ceiling(Math.Log(d.Value.Count, 2));
 
-                result.Add(d.Key, (d.Value, tagSize, (1 << tagSize) - 1, 2 << (16 - tagSize)));
+                result.Add(d.Key, (d.Value, tagSize, (1 << tagSize) - 1, (int)Math.Pow(2, 16 - tagSize)));
             }
 
             TableStream.CodedIndexDefinitions = result;
