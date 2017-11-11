@@ -152,12 +152,8 @@ namespace ArkeCLR.Runtime.Streams {
                 Array.Copy(source, 0, this.list, 1, source.Length);
             }
 
-            public T Get(TableIndex index) {
-                if (index.Table != this.type)
-                    throw new InvalidOperationException("Wrong table index.");
-
-                return this.list[index.Row];
-            }
+            public T Get(TableIndex index) => index.Table == this.type ? this.Get(index.Row) : throw new InvalidOperationException("Wrong table index.");
+            public T Get(uint row) => this.list[row];
 
             public IReadOnlyCollection<TResult> ExtractRun<TParent, TResult>(TableList<TParent> parentTable, Func<TParent, uint> parentStartRowSelector, TParent parent, uint parentRow, Func<T, uint, TResult> resultSelector) {
                 var end = parentRow < parentTable.RowCount ? parentStartRowSelector(parentTable.list[parentRow + 1]) : this.RowCount + 1;
