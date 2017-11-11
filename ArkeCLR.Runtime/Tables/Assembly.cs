@@ -3,18 +3,18 @@ using ArkeCLR.Runtime.Streams;
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct Assembly : ICustomByteReader<IndexByteReader> {
+    public struct Assembly : ICustomByteReader<TokenByteReader> {
         public AssemblyHashAlgorithm HashAlgId;
         public ushort MajorVersion;
         public ushort MinorVersion;
         public ushort BuildNumber;
         public ushort RevisionNumber;
         public AssemblyFlags Flags;
-        public HeapIndex PublicKey;
-        public HeapIndex Name;
-        public HeapIndex Culture;
+        public HeapToken PublicKey;
+        public HeapToken Name;
+        public HeapToken Culture;
 
-        public void Read(IndexByteReader reader) {
+        public void Read(TokenByteReader reader) {
             reader.ReadEnum(out this.HashAlgId);
             reader.Read(out this.MajorVersion);
             reader.Read(out this.MinorVersion);

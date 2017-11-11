@@ -3,15 +3,15 @@ using ArkeCLR.Runtime.Streams;
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct TypeDef : ICustomByteReader<IndexByteReader> {
+    public struct TypeDef : ICustomByteReader<TokenByteReader> {
         public TypeAttributes Flags;
-        public HeapIndex TypeName;
-        public HeapIndex TypeNamespace;
-        public TableIndex Extends;
-        public TableIndex FieldList;
-        public TableIndex MethodList;
+        public HeapToken TypeName;
+        public HeapToken TypeNamespace;
+        public TableToken Extends;
+        public TableToken FieldList;
+        public TableToken MethodList;
 
-        public void Read(IndexByteReader reader) {
+        public void Read(TokenByteReader reader) {
             reader.ReadEnum(out this.Flags);
             reader.Read(HeapType.String, out this.TypeName);
             reader.Read(HeapType.String, out this.TypeNamespace);

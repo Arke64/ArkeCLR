@@ -3,13 +3,13 @@ using ArkeCLR.Runtime.Streams;
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct ImplMap : ICustomByteReader<IndexByteReader> {
+    public struct ImplMap : ICustomByteReader<TokenByteReader> {
         public PInvokeAttributes MappingFlags;
-        public TableIndex MemberForwarded;
-        public HeapIndex ImportName;
-        public TableIndex ImportScope;
+        public TableToken MemberForwarded;
+        public HeapToken ImportName;
+        public TableToken ImportScope;
 
-        public void Read(IndexByteReader reader) {
+        public void Read(TokenByteReader reader) {
             reader.ReadEnum(out this.MappingFlags);
             reader.Read(CodedIndexType.MemberForwarded, out this.MemberForwarded);
             reader.Read(HeapType.String, out this.ImportName);

@@ -2,11 +2,11 @@
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct MethodSpec : ICustomByteReader<IndexByteReader> {
-        public TableIndex Method;
-        public HeapIndex Instantiation;
+    public struct MethodSpec : ICustomByteReader<TokenByteReader> {
+        public TableToken Method;
+        public HeapToken Instantiation;
 
-        public void Read(IndexByteReader reader) {
+        public void Read(TokenByteReader reader) {
             reader.Read(CodedIndexType.MethodDefOrRef, out this.Method);
             reader.Read(HeapType.Blob, out this.Instantiation);
         }

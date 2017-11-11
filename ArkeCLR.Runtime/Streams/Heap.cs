@@ -19,7 +19,7 @@ namespace ArkeCLR.Runtime.Streams {
 
         public override void Initialize(ByteReader reader) => this.reader = reader;
 
-        public T GetAt(HeapIndex index) => index.Heap == this.Type ? this.GetAt(index.Offset) : throw new ArgumentException("Invalid index type.", nameof(index));
+        public T GetAt(HeapToken token) => token.Heap == this.Type ? this.GetAt(token.Offset) : throw new ArgumentException("Invalid token type.", nameof(token));
 
         public T GetAt(uint index) => index <= int.MaxValue ? this.GetAt((int)index) : throw new ArgumentOutOfRangeException(nameof(index));
 
@@ -42,7 +42,7 @@ namespace ArkeCLR.Runtime.Streams {
         }
     }
 
-    public struct HeapIndex {
+    public struct HeapToken {
         public HeapType Heap;
         public uint Offset;
     }

@@ -7,7 +7,7 @@ namespace ArkeCLR.Runtime.Logical {
     public class Instruction {
         public uint ByteOffset;
         public InstructionType Type;
-        public TableIndex TableIndexOperand;
+        public TableToken TableIndexOperand;
         public int BranchInstruction;
 
         public Instruction(CliFile file, uint offset, MethodInstruction inst) {
@@ -17,17 +17,17 @@ namespace ArkeCLR.Runtime.Logical {
 
             switch (this.Type) {
                 case InstructionType.ldstr:
-                    this.TableIndexOperand = new TableIndex(inst.String);
+                    this.TableIndexOperand = new TableToken(inst.String);
                     break;
 
                 case InstructionType.call:
                 case InstructionType.callvirt:
                 case InstructionType.newobj:
-                    this.TableIndexOperand = new TableIndex(inst.Method);
+                    this.TableIndexOperand = new TableToken(inst.Method);
                     break;
 
                 case InstructionType.ldfld:
-                    this.TableIndexOperand = new TableIndex(inst.Field);
+                    this.TableIndexOperand = new TableToken(inst.Field);
                     break;
 
                 case InstructionType.br_s:

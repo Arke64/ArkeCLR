@@ -12,7 +12,7 @@ namespace ArkeCLR.Runtime.Logical {
         public IReadOnlyCollection<Type> Types { get; }
 
         public Assembly(CliFile file) {
-            var def = file.TableStream.Assemblies.Get(new TableIndex { Row = 1, Table = TableType.Assembly });
+            var def = file.TableStream.Assemblies.Get(new TableToken { Row = 1, Table = TableType.Assembly });
 
             this.CliFile = file;
             this.Name = new AssemblyName(file.StringStream.GetAt(def.Name), new Version(def.MajorVersion, def.MinorVersion, def.BuildNumber, def.RevisionNumber), new CultureInfo(file.StringStream.GetAt(def.Culture)), file.BlobStream.GetAt(def.PublicKey));

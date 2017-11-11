@@ -2,11 +2,11 @@
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct FieldRVA : ICustomByteReader<IndexByteReader> {
+    public struct FieldRVA : ICustomByteReader<TokenByteReader> {
         public uint RVA;
-        public TableIndex Field;
+        public TableToken Field;
 
-        public void Read(IndexByteReader reader) {
+        public void Read(TokenByteReader reader) {
             reader.Read(out this.RVA);
             reader.Read(TableType.Field, out this.Field);
         }

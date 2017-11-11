@@ -84,16 +84,16 @@ namespace ArkeCLR.Runtime.Streams {
         public TableList<GenericParamConstraint> GenericParamConstraints { get; private set; }
 
         public override void Initialize(ByteReader reader) {
-            var indexReader = new IndexByteReader(this, reader);
+            var indexReader = new TokenByteReader(this, reader);
 
             this.Header = indexReader.ReadCustom<CilTableStreamHeader>();
             this.CodedIndexSizes = TableStream.CodedIndexDefinitions.ToDictionary(d => d.Key, d => d.Value.tables.Any(v => v != (TableType)0xFF && this.Header.Rows[(int)v] >= d.Value.maxRows));
 
             for (var i = 0; i < this.Header.Valid.Count; i++)
                 if (this.Header.Valid[i] && ((TableType)i).IsInvalid())
-                    throw new NotSupportedException($"Table index '0x{i:X2}' is not supported.");
+                    throw new NotSupportedException($"Table '0x{i:X2}' is not supported.");
 
-            TableList<T> read<T>(TableList<T> _, TableType table) where T : struct, ICustomByteReader<IndexByteReader> => new TableList<T>(this.Header.Valid[(int)table] ? indexReader.ReadCustom<T, IndexByteReader>(this.Header.Rows[(int)table]) : new T[0], table);
+            TableList<T> read<T>(TableList<T> _, TableType table) where T : struct, ICustomByteReader<TokenByteReader> => new TableList<T>(this.Header.Valid[(int)table] ? indexReader.ReadCustom<T, TokenByteReader>(this.Header.Rows[(int)table]) : new T[0], table);
 
             this.Modules = read(this.Modules, TableType.Module);
             this.TypeRefs = read(this.TypeRefs, TableType.TypeRef);
@@ -150,7 +150,7 @@ namespace ArkeCLR.Runtime.Streams {
                 Array.Copy(source, 0, this.list, 1, source.Length);
             }
 
-            public T Get(TableIndex index) => index.Table == this.type ? this.Get(index.Row) : throw new InvalidOperationException("Wrong table index.");
+            public T Get(TableToken token) => token.Table == this.type ? this.Get(token.Row) : throw new InvalidOperationException("Wrong token index.");
             public T Get(uint row) => this.list[row];
 
             public IReadOnlyCollection<TResult> ExtractRun<TParent, TResult>(TableList<TParent> parentTable, Func<TParent, uint> parentStartRowSelector, TParent parent, uint parentRow, Func<T, uint, TResult> resultSelector) {
@@ -162,13 +162,13 @@ namespace ArkeCLR.Runtime.Streams {
         }
     }
 
-    public struct TableIndex {
+    public struct TableToken {
         public TableType Table;
         public uint Row;
 
         public bool IsZero => this.Row == 0;
 
-        public TableIndex(uint value) {
+        public TableToken(uint value) {
             this.Table = (TableType)(value >> 24);
             this.Row = value & 0xFFFFFF;
         }

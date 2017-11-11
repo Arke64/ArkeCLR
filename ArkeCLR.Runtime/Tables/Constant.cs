@@ -3,13 +3,13 @@ using ArkeCLR.Runtime.Streams;
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct Constant : ICustomByteReader<IndexByteReader> {
+    public struct Constant : ICustomByteReader<TokenByteReader> {
         public ElementType Type;
         public byte Padding;
-        public TableIndex Parent;
-        public HeapIndex Value;
+        public TableToken Parent;
+        public HeapToken Value;
 
-        public void Read(IndexByteReader reader) {
+        public void Read(TokenByteReader reader) {
             reader.ReadEnum(out this.Type);
             reader.Read(out this.Padding);
             reader.Read(CodedIndexType.HasConstant, out this.Parent);

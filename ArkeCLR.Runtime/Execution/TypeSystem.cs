@@ -30,12 +30,12 @@ namespace ArkeCLR.Runtime.Execution {
         }
 
         public Method FindEntryPoint() {
-            var idx = new TableIndex(this.entryAssembly.CliFile.CliHeader.EntryPointToken);
+            var idx = new TableToken(this.entryAssembly.CliFile.CliHeader.EntryPointToken);
 
             return this.FindMethod(this.entryAssembly, idx);
         }
 
-        public Method FindMethod(TableIndex index) => this.entryAssembly.Types.SelectMany(t => t.Methods).Single(m => m.Row == index.Row); //TODO Fix this, shouldn't be entryAssembly.
-        public Method FindMethod(Assembly assembly, TableIndex index) => assembly.Types.SelectMany(t => t.Methods).Single(m => m.Row == index.Row);
+        public Method FindMethod(TableToken token) => this.entryAssembly.Types.SelectMany(t => t.Methods).Single(m => m.Row == token.Row); //TODO Fix this, shouldn't be entryAssembly.
+        public Method FindMethod(Assembly assembly, TableToken token) => assembly.Types.SelectMany(t => t.Methods).Single(m => m.Row == token.Row);
     }
 }

@@ -2,12 +2,12 @@
 using ArkeCLR.Utilities;
 
 namespace ArkeCLR.Runtime.Tables {
-    public struct ClassLayout : ICustomByteReader<IndexByteReader> {
+    public struct ClassLayout : ICustomByteReader<TokenByteReader> {
         public ushort PackingSize;
         public uint ClassSize;
-        public TableIndex Parent;
+        public TableToken Parent;
 
-        public void Read(IndexByteReader reader) {
+        public void Read(TokenByteReader reader) {
             reader.Read(out this.PackingSize);
             reader.Read(out this.ClassSize);
             reader.Read(TableType.TypeDef, out this.Parent);
