@@ -127,6 +127,8 @@ namespace ArkeCLR.Utilities {
         public short ReadI2() { var r = BitConverter.ToInt16(this.buffer, this.Position); this.Position += sizeof(short); return r; }
         public int ReadI4() { var r = BitConverter.ToInt32(this.buffer, this.Position); this.Position += sizeof(int); return r; }
         public long ReadI8() { var r = BitConverter.ToInt64(this.buffer, this.Position); this.Position += sizeof(long); return r; }
+        public float ReadR4() { var r = BitConverter.ToSingle(this.buffer, this.Position); this.Position += sizeof(float); return r; }
+        public double ReadR8() { var r = BitConverter.ToDouble(this.buffer, this.Position); this.Position += sizeof(double); return r; }
 
         public uint ReadCompressedU4() {
             var first = this.ReadU1();
@@ -170,6 +172,8 @@ namespace ArkeCLR.Utilities {
         public void Read(out short value) => value = this.ReadI2();
         public void Read(out int value) => value = this.ReadI4();
         public void Read(out long value) => value = this.ReadI8();
+        public void Read(out float value) => value = this.ReadR4();
+        public void Read(out double value) => value = this.ReadR8();
         public void ReadCompressed(out uint value) => value = this.ReadCompressedU4();
         public void ReadCompressed(out int value) => value = this.ReadCompressedI4();
         public void ReadEnum<T>(out T value) => value = this.ReadEnum<T>();
@@ -204,6 +208,9 @@ namespace ArkeCLR.Utilities {
 
             return result;
         }
+
+        public ByteReader ReadByteReader(uint count) => count <= int.MaxValue ? this.ReadByteReader((int)count) : throw new ArgumentOutOfRangeException(nameof(count));
+        public ByteReader ReadByteReader(int count) => count >= 0 ? new ByteReader(this.ReadArray<byte>(count)) : throw new ArgumentOutOfRangeException(nameof(count));
 
         public void ReadArray<T>(uint count, out T[] values) => values = this.ReadArray<T>(count);
         public void ReadArray<T>(int count, out T[] values) => values = this.ReadArray<T>(count);
