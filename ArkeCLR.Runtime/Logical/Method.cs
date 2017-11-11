@@ -1,5 +1,6 @@
 ﻿using ArkeCLR.Runtime.Files;
 using ArkeCLR.Runtime.Signatures;
+using ArkeCLR.Runtime.Streams;
 using ArkeCLR.Runtime.Tables;
 using ArkeCLR.Utilities.Extensions;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace ArkeCLR.Runtime.Logical {
 
             if (def.RVA != 0) {
                 var header = file.GetMethodHeader(def.RVA);
-                var localVarSig = file.TableStream.ParseMetadataToken(header.LocalVarSigTok);
+                var localVarSig = new TableIndex(header.LocalVarSigTok);
 
                 this.Locals = !localVarSig.IsZero ? file.BlobStream.GetAt<LocalVarSig>(file.TableStream.StandAloneSigs.Get(localVarSig).Signature).Locals : new LocalVarSig.LocalVar[0];
 

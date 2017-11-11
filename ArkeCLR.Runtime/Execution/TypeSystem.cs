@@ -30,7 +30,7 @@ namespace ArkeCLR.Runtime.Execution {
         }
 
         public Method FindEntryPoint() {
-            var idx = this.entryAssembly.CliFile.TableStream.ParseMetadataToken(this.entryAssembly.CliFile.CliHeader.EntryPointToken);
+            var idx = new TableIndex(this.entryAssembly.CliFile.CliHeader.EntryPointToken);
 
             return this.FindMethod(this.entryAssembly, idx);
         }

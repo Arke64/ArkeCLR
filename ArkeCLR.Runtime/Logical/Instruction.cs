@@ -17,17 +17,17 @@ namespace ArkeCLR.Runtime.Logical {
 
             switch (this.Type) {
                 case InstructionType.ldstr:
-                    this.TableIndexOperand = file.TableStream.ParseMetadataToken(inst.String);
+                    this.TableIndexOperand = new TableIndex(inst.String);
                     break;
 
                 case InstructionType.call:
                 case InstructionType.callvirt:
                 case InstructionType.newobj:
-                    this.TableIndexOperand = file.TableStream.ParseMetadataToken(inst.Method);
+                    this.TableIndexOperand = new TableIndex(inst.Method);
                     break;
 
                 case InstructionType.ldfld:
-                    this.TableIndexOperand = file.TableStream.ParseMetadataToken(inst.Field);
+                    this.TableIndexOperand = new TableIndex(inst.Field);
                     break;
 
                 case InstructionType.br_s:

@@ -135,8 +135,6 @@ namespace ArkeCLR.Runtime.Streams {
             this.GenericParamConstraints = read(this.GenericParamConstraints, TableType.GenericParamConstraint);
         }
 
-        public TableIndex ParseMetadataToken(uint value) => new TableIndex { Table = (TableType)(value >> 24), Row = value & 0xFFFFFF };
-
         public class TableList<T> {
             private readonly T[] list;
             private readonly TableType type;
@@ -169,6 +167,11 @@ namespace ArkeCLR.Runtime.Streams {
         public uint Row;
 
         public bool IsZero => this.Row == 0;
+
+        public TableIndex(uint value) {
+            this.Table = (TableType)(value >> 24);
+            this.Row = value & 0xFFFFFF;
+        }
     }
 
     public enum CodedIndexType {
