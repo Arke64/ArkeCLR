@@ -6,7 +6,6 @@ namespace ArkeCLR.Runtime.Streams {
         private readonly TableStream stream;
 
         public IndexByteReader(TableStream stream, ByteReader reader) : base(reader) => this.stream = stream;
-        public IndexByteReader(TableStream stream, byte[] buffer) : base(buffer) => this.stream = stream;
 
         public TableIndex ReadToken() => this.stream.ParseMetadataToken(this.ReadU4());
         public HeapIndex ReadIndex(HeapType type) => type != HeapType.UserString ? new HeapIndex { Heap = type, Offset = this.stream.Header.HeapSizes[(int)type] ? this.ReadU4() : this.ReadU2() } : throw new ArgumentException("#US isn't valid here.", nameof(type));

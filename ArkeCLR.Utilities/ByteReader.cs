@@ -18,9 +18,14 @@ namespace ArkeCLR.Utilities {
             if (buffer == null) throw new ArgumentNullException(nameof(buffer));
             if (size <= 0 || checked(offset + size) > buffer.Length) throw new ArgumentOutOfRangeException(nameof(size));
 
-            this.buffer = new byte[size];
+            if (offset == 0 && size == buffer.Length) {
+                this.buffer = buffer;
+            }
+            else {
+                this.buffer = new byte[size];
 
-            Array.Copy(buffer, offset, this.buffer, 0, size);
+                Array.Copy(buffer, offset, this.buffer, 0, size);
+            }
 
             this.Length = size;
             this.Position = 0;
