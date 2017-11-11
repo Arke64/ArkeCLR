@@ -5,31 +5,34 @@ using System.Linq;
 
 namespace ArkeCLR.Runtime.Logical {
     public class Instruction {
-        public int ByteOffset;
+        public uint ByteOffset;
         public InstructionType Type;
-        public ExtendedInstructionType ExtendedType;
         public TableIndex TableIndexOperand;
         public int BranchInstruction;
 
-        public Instruction(CliFile file, IndexByteReader body) {
-            this.ByteOffset = body.Position;
+        public Instruction(CliFile file, uint offset, MethodInstruction inst) {
+            this.ByteOffset = offset;
 
-            body.ReadEnum(out this.Type);
-
-            if (this.Type == InstructionType.extended)
-                body.ReadEnum(out this.ExtendedType);
+            this.Type = inst.Op;
 
             switch (this.Type) {
                 case InstructionType.ldstr:
+                    this.TableIndexOperand = file.TableStream.ParseMetadataToken(inst.String);
+                    break;
+
                 case InstructionType.call:
                 case InstructionType.callvirt:
                 case InstructionType.newobj:
-                    body.ReadToken(out this.TableIndexOperand); break;
+                    this.TableIndexOperand = file.TableStream.ParseMetadataToken(inst.Method);
+                    break;
 
                 case InstructionType.ldfld:
-                    body.ReadToken(out this.TableIndexOperand); break;
+                    this.TableIndexOperand = file.TableStream.ParseMetadataToken(inst.Field);
+                    break;
 
-                case InstructionType.br_s: this.BranchInstruction = body.ReadI1(); break;
+                case InstructionType.br_s:
+                    this.BranchInstruction = inst.BrTarget;
+                    break;
             }
         }
 

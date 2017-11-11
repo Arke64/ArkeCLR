@@ -5,6 +5,8 @@ using System.Linq;
 
 namespace ArkeCLR.Runtime.Files {
     public class CliFile : PeFile {
+        private Dictionary<uint, MethodHeader> MethodHeaders { get; } = new Dictionary<uint, MethodHeader>();
+
         public CliHeader CliHeader { get; }
         public CilMetadataRootHeader CliMetadataRootHeader { get; }
         public IReadOnlyDictionary<string, CilMetadataStreamHeader> StreamHeaders { get; }
@@ -33,5 +35,7 @@ namespace ArkeCLR.Runtime.Files {
             this.GuidStream = read<GuidHeap>();
             this.TableStream = read<TableStream>();
         }
+
+        public MethodHeader GetMethodHeader(uint rva) => this.MethodHeaders.TryGetValue(rva, out var value) ? value : (this.MethodHeaders[rva] = this.ReadCustom<MethodHeader>(rva));
     }
 }

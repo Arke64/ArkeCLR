@@ -141,13 +141,6 @@ namespace ArkeCLR.Runtime.Execution {
                         case InstructionType.newobj: this.Push(new TypeRecord { Tag = ElementType.Class }); goto case InstructionType.call;
 
                         case InstructionType.add: this.Push(TypeRecord.Add(this.Pop(), this.Pop())); break;
-
-                        case InstructionType.extended:
-                            switch (inst.ExtendedType) {
-                                default: throw new NotImplementedException();
-                            }
-
-                            break;
                     }
                 }
 
