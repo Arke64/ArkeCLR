@@ -26,12 +26,15 @@ namespace ArkeCLR.Runtime.Logical {
                 case InstructionType.newobj:
                     body.ReadToken(out this.TableIndexOperand); break;
 
+                case InstructionType.ldfld:
+                    body.ReadToken(out this.TableIndexOperand); break;
+
                 case InstructionType.br_s: this.BranchInstruction = body.ReadI1(); break;
             }
         }
 
         public void FixUp(int index, IReadOnlyList<Instruction> instructions) {
-            if (this.Type == InstructionType.br_s) {
+            if (this.Type == InstructionType.br_s && index < instructions.Count - 1) {
                 var end = this.BranchInstruction + instructions[index + 1].ByteOffset;
 
                 this.BranchInstruction = instructions.TakeWhile(i => i.ByteOffset != end).Count();
