@@ -49,7 +49,7 @@ namespace ArkeCLR.Runtime.Execution {
             if (!frame.Method.Signature.RetType.IsVoid)
                 ret = this.Pop();
 
-            for (var i = 0; i < frame.Method.Signature.ParamCount + (Interpreter.MethodHasThis(frame.Method.Signature) ? 1 : 0); i++)
+            for (var i = 0; i < frame.Method.Signature.ParamCount + (!frame.Method.IsStatic ? 1 : 0); i++)
                 this.Pop();
 
             this.callStack.Pop();
@@ -67,7 +67,7 @@ namespace ArkeCLR.Runtime.Execution {
             public TypeRecord[] Locals { get; }
 
             public CallFrame(Method method) {
-                var hasThis = Interpreter.MethodHasThis(method.Signature);
+                var hasThis = !method.IsStatic;
 
                 this.Method = method;
                 this.InstructionPointer = 0;

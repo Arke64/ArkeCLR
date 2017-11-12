@@ -2,6 +2,7 @@
 using ArkeCLR.Runtime.Signatures;
 using ArkeCLR.Runtime.Streams;
 using ArkeCLR.Runtime.Tables;
+using ArkeCLR.Runtime.Tables.Flags;
 using ArkeCLR.Utilities.Extensions;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,8 @@ namespace ArkeCLR.Runtime.Logical {
         public MethodDefSig Signature { get; } //TODO Remove
         public IReadOnlyList<LocalVarSig.LocalVar> Locals { get; } //TODO Add a logical type for local var.
         public IReadOnlyList<Instruction> Instructions { get; }
+
+        public bool IsStatic { get; }
 
         public Method(CliFile file, Type type, MethodDef def, uint row) {
             this.Type = type;
@@ -32,6 +35,8 @@ namespace ArkeCLR.Runtime.Logical {
                 this.Locals = new LocalVarSig.LocalVar[0];
                 this.Instructions = new List<Instruction>();
             }
+
+            this.IsStatic = def.Flags.FlagSet(MethodAttributes.Static);
         }
     }
 }

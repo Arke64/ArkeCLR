@@ -8,15 +8,12 @@ namespace ArkeCLR.Runtime.Execution {
         private readonly TypeSystem typeSystem;
         private readonly Stack stack;
 
-        public static bool MethodHasThis(MethodDefSig sig) => (sig.Flags & SignatureFlags.HasThis) != 0;
-        public static bool MethodHasExplicitThis(MethodDefSig sig) => (sig.Flags & SignatureFlags.ExplicitThis) != 0;
-
         public Interpreter(IFileResolver fileResolver, Action<string> logger) => (this.typeSystem, this.stack, this.logger) = (new TypeSystem(fileResolver, logger), new Stack(), logger);
 
         public long Run(string entryAssemblyPath) {
             var entryPoint = this.typeSystem.Load(entryAssemblyPath).EntryPoint;
 
-            if (Interpreter.MethodHasThis(entryPoint.Signature) || Interpreter.MethodHasExplicitThis(entryPoint.Signature)) throw new InvalidAssemblyException("Entry point must be static.");
+            if (!entryPoint.IsStatic) throw new InvalidAssemblyException("Entry point must be static.");
             if (entryPoint.Signature.ParamCount == 0 || (entryPoint.Signature.ParamCount == 1 && entryPoint.Signature.Params[0].Type.ElementType != ElementType.SzArray)) throw new InvalidAssemblyException("Entry point must take no parameters or a single string[] only.");
             if (!entryPoint.Signature.RetType.IsVoid && entryPoint.Signature.RetType.Type.ElementType != ElementType.I4 && entryPoint.Signature.RetType.Type.ElementType != ElementType.U4) throw new InvalidAssemblyException("Entry point return type must be I4, U4, or void.");
             //TODO Need to do better comparions above
