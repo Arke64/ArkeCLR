@@ -15,6 +15,8 @@ namespace ArkeCLR.Runtime.Execution {
             if (this.callStack.Any()) throw new ExecutionEngineException("Expected empty call stack.");
         }
 
+        //TODO Need to properly zero extend, sign extend, truncate, and round data pushed and popped to the stack following III.1.1, III.1.5, and III.1.6.
+
         public TypeRecord Pop() => this.evaluationStack.Pop();
         public TypeRecord Pop(Signatures.Type expected) => this.Pop(expected.ElementType); //TODO Need to verify the rest of the signature.
 
