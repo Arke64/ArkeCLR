@@ -113,7 +113,7 @@ namespace ArkeCLR.Runtime.Execution {
                         case InstructionType.stloc_2: this.Pop(ref frame.Locals[2], frame.Method.Locals[2].Type); break;
                         case InstructionType.stloc_3: this.Pop(ref frame.Locals[3], frame.Method.Locals[3].Type); break;
 
-                        case InstructionType.br_s: frame.InstructionPointer = inst.BranchInstruction; break;
+                        case InstructionType.br_s: frame.InstructionPointer = inst.BrTarget; break;
 
                         //TODO Need to handle what is on the eval stack before and after a call
                         case InstructionType.ret:

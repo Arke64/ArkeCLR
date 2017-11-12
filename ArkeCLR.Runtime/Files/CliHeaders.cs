@@ -181,6 +181,8 @@ namespace ArkeCLR.Runtime.Files {
                 instructions.Add(file.ReadCustom<MethodInstruction>());
             }
 
+            offsets.Add((uint)file.Position);
+
             this.Offsets = offsets.ToArray();
             this.Instructions = instructions.ToArray();
         }

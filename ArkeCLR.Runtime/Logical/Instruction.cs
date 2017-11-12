@@ -1,17 +1,15 @@
 ﻿using ArkeCLR.Runtime.Files;
 using ArkeCLR.Runtime.Streams;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace ArkeCLR.Runtime.Logical {
     public class Instruction {
-        public uint ByteOffset;
         public InstructionType Type;
         public TableToken TableIndexOperand;
-        public int BranchInstruction;
+        public int BrTarget;
 
-        public Instruction(CliFile file, uint offset, MethodInstruction inst) {
-            this.ByteOffset = offset;
+        public Instruction(MethodBody body, uint i) {
+            var inst = body.Instructions[i];
 
             this.Type = inst.Op;
 
@@ -31,16 +29,11 @@ namespace ArkeCLR.Runtime.Logical {
                     break;
 
                 case InstructionType.br_s:
-                    this.BranchInstruction = inst.BrTarget;
+                    var end = inst.BrTarget + body.Offsets[i + 1];
+
+                    this.BrTarget = body.Offsets.TakeWhile(o => o != end).Count();
+
                     break;
-            }
-        }
-
-        public void FixUp(int index, IReadOnlyList<Instruction> instructions) {
-            if (this.Type == InstructionType.br_s && index < instructions.Count - 1) {
-                var end = this.BranchInstruction + instructions[index + 1].ByteOffset;
-
-                this.BranchInstruction = instructions.TakeWhile(i => i.ByteOffset != end).Count();
             }
         }
     }

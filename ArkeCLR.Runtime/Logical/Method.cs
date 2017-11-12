@@ -26,19 +26,11 @@ namespace ArkeCLR.Runtime.Logical {
                 var localVarSig = new TableToken(header.LocalVarSigTok);
 
                 this.Locals = !localVarSig.IsZero ? file.BlobStream.GetAt<LocalVarSig>(file.TableStream.StandAloneSigs.Get(localVarSig).Signature).Locals : new LocalVarSig.LocalVar[0];
-
-                this.Instructions = readInstructions(header.Body).ToList();
-
-                this.Instructions.ForEach((idx, inst) => inst.FixUp(idx, this.Instructions));
+                this.Instructions = Enumerable.Range(0, header.Body.Instructions.Length).ToList(i => new Instruction(header.Body, (uint)i));
             }
             else {
                 this.Locals = new LocalVarSig.LocalVar[0];
                 this.Instructions = new List<Instruction>();
-            }
-
-            IEnumerable<Instruction> readInstructions(MethodBody reader) {
-                for (var i = 0; i < reader.Instructions.Length; i++)
-                    yield return new Instruction(file, reader.Offsets[i], reader.Instructions[i]);
             }
         }
     }
