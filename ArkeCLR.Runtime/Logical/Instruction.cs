@@ -1,21 +1,29 @@
 ﻿using ArkeCLR.Runtime.Files;
 using ArkeCLR.Runtime.Streams;
+using ArkeCLR.Utilities.Extensions;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ArkeCLR.Runtime.Logical {
     public class Instruction {
-        public InstructionType Op;
-        public TableToken TableToken;
-        public uint BranchTarget;
-        public int[] SwitchTable;
-        public ushort Var;
-        public int I4;
-        public long I8;
-        public float R4;
-        public double R8;
+        public InstructionType Op { get; }
+        public TableToken TableToken { get; }
+        public uint BranchTarget { get; }
+        public IReadOnlyList<uint> SwitchTable { get; }
+        public ushort Var { get; }
+        public int I4 { get; }
+        public long I8 { get; }
+        public float R4 { get; }
+        public double R8 { get; }
 
-        public Instruction(MethodBody body, uint i) {
-            var inst = body.Instructions[i];
+        private static uint ConvertRelativeByteOffsetToIndex(MethodBody body, uint index, int byteOffset) {
+            var end = byteOffset + body.Offsets[index + 1];
+
+            return (uint)body.Offsets.TakeWhile(o => o != end).Count();
+        }
+
+        public Instruction(MethodBody body, uint index) {
+            var inst = body.Instructions[index];
 
             this.Op = inst.Op;
 
@@ -34,8 +42,7 @@ namespace ArkeCLR.Runtime.Logical {
                 case InstructionType.brfalse:
                 case InstructionType.brtrue:
                 case InstructionType.leave:
-                    var end = inst.BrTarget + body.Offsets[i + 1];
-                    this.BranchTarget = (uint)body.Offsets.TakeWhile(o => o != end).Count();
+                    this.BranchTarget = Instruction.ConvertRelativeByteOffsetToIndex(body, index, inst.BrTarget);
                     break;
 
                 case InstructionType.ldfld:
@@ -77,7 +84,7 @@ namespace ArkeCLR.Runtime.Logical {
                     break;
 
                 case InstructionType.@switch:
-                    this.SwitchTable = inst.SwitchTable;
+                    this.SwitchTable = inst.SwitchTable.ToList(s => Instruction.ConvertRelativeByteOffsetToIndex(body, index, s));
                     break;
 
                 case InstructionType.ldtoken:
