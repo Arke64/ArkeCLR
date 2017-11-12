@@ -1,6 +1,7 @@
 ﻿using ArkeCLR.Runtime.Files;
 using ArkeCLR.Runtime.Signatures;
 using System;
+using System.Collections.Generic;
 
 namespace ArkeCLR.Runtime.Execution {
     public class Interpreter : IExecutionEngine {
@@ -10,7 +11,7 @@ namespace ArkeCLR.Runtime.Execution {
 
         public Interpreter(IFileResolver fileResolver, Action<string> logger) => (this.typeSystem, this.stack, this.logger) = (new TypeSystem(fileResolver, logger), new Stack(), logger);
 
-        public long Run(string entryAssemblyPath) {
+        public long Run(string entryAssemblyPath, IEnumerable<string> args) {
             var entryPoint = this.typeSystem.Load(entryAssemblyPath).EntryPoint;
 
             if (!entryPoint.IsStatic) throw new InvalidAssemblyException("Entry point must be static.");
