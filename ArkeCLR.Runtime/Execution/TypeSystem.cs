@@ -1,7 +1,6 @@
 ﻿using ArkeCLR.Runtime.Files;
 using ArkeCLR.Runtime.Logical;
 using ArkeCLR.Runtime.Streams;
-using ArkeCLR.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +21,7 @@ namespace ArkeCLR.Runtime.Execution {
         private Assembly ResolveAssembly(AssemblyName name) {
             if (!this.assemblyResolver.TryResolve(name, out var data)) throw new CouldNotResolveAssemblyException(name);
 
-            var result = new Assembly(new CliFile(new ByteReader(data)));
+            var result = new Assembly(new CliFile(data));
 
             this.assemblies.Add(result);
 

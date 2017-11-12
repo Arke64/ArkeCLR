@@ -1,5 +1,4 @@
 ﻿using ArkeCLR.Runtime.Streams;
-using ArkeCLR.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,7 +16,7 @@ namespace ArkeCLR.Runtime.Files {
         public GuidHeap GuidStream { get; }
         public TableStream TableStream { get; }
 
-        public CliFile(ByteReader image) : base(image) {
+        public CliFile(byte[] data) : base(data) {
             this.CliHeader = this.ReadDataDirectory(DataDirectoryType.CliHeader).ReadStruct<CliHeader>();
 
             var metadata = this.ReadRva(this.CliHeader.Metadata);

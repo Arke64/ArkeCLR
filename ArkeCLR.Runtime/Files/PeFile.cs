@@ -16,8 +16,8 @@ namespace ArkeCLR.Runtime.Files {
 
         private uint RvaToFileAddress(uint rva) => this.SectionHeaders.Where(s => rva > s.VirtualAddress && rva < s.VirtualAddress + s.SizeOfRawData).Select(s => rva - s.VirtualAddress + s.PointerToRawData).Single();
 
-        public PeFile(ByteReader image) {
-            this.image = image;
+        public PeFile(byte[] data) {
+            this.image = new ByteReader(data);
 
             this.image.Seek(0, SeekOrigin.Begin);
             this.DosHeader = this.image.ReadStruct<DosHeader>();
