@@ -14,7 +14,7 @@ namespace ArkeCLR.Runtime.Logical {
         public Assembly(IFileResolver fileResolver, CliFile file) {
             var def = file.TableStream.Assemblies.Get(new TableToken(TableType.Assembly, 1));
 
-            //TODO Need to resolve other modules and files in this logical assembly. It's expected that this CliFile is the manifest assembly.
+            //TODO Need to resolve other modules and files in this logical assembly. It's expected that this CliFile is the manifest assembly. See II.6.1.
 
             this.CliFile = file;
             this.Name = new AssemblyName(file.StringStream.GetAt(def.Name), new Version(def.MajorVersion, def.MinorVersion, def.BuildNumber, def.RevisionNumber), new CultureInfo(file.StringStream.GetAt(def.Culture)), file.BlobStream.GetAt(def.PublicKey));
