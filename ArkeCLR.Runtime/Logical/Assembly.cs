@@ -11,8 +11,10 @@ namespace ArkeCLR.Runtime.Logical {
         public AssemblyName Name { get; }
         public IReadOnlyCollection<Type> Types { get; }
 
-        public Assembly(CliFile file) {
+        public Assembly(IFileResolver fileResolver, CliFile file) {
             var def = file.TableStream.Assemblies.Get(new TableToken { Row = 1, Table = TableType.Assembly });
+
+            //TODO Need to resolve other modules and files in this logical assembly. It's expected that this CliFile is the manifest assembly.
 
             this.CliFile = file;
             this.Name = new AssemblyName(file.StringStream.GetAt(def.Name), new Version(def.MajorVersion, def.MinorVersion, def.BuildNumber, def.RevisionNumber), new CultureInfo(file.StringStream.GetAt(def.Culture)), file.BlobStream.GetAt(def.PublicKey));

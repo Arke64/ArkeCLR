@@ -21,7 +21,7 @@ namespace ArkeCLR.Runtime.Execution {
         private Assembly ResolveAssembly(AssemblyName name) {
             if (!this.fileResolver.TryResolve(name.Name, name.HintPath, out var data)) throw new CouldNotResolveAssemblyException(name);
 
-            var result = new Assembly(new CliFile(data));
+            var result = new Assembly(this.fileResolver, new CliFile(data));
 
             this.assemblies.Add(result);
 
