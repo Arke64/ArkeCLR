@@ -42,65 +42,60 @@ namespace ArkeCLR.Runtime.Execution {
         }
 
         private void RunInterpreter() {
-            do {
-                var frame = this.stack.Current;
+            while (this.stack.Current is var frame && frame != null) {
+                var inst = frame.Method.Instructions[(int)(frame.InstructionPointer++)];
 
-                while (frame.InstructionPointer < frame.Method.Instructions.Count) {
-                    var inst = frame.Method.Instructions[(int)(frame.InstructionPointer++)];
+                switch (inst.Op) {
+                    default: throw new NotImplementedException();
 
-                    switch (inst.Op) {
-                        default: throw new NotImplementedException();
+                    case InstructionType.nop: break;
 
-                        case InstructionType.nop: break;
+                    case InstructionType.ldc_i4_0: this.stack.Push(TypeRecord.FromI4(0)); break;
+                    case InstructionType.ldc_i4_1: this.stack.Push(TypeRecord.FromI4(1)); break;
+                    case InstructionType.ldc_i4_2: this.stack.Push(TypeRecord.FromI4(2)); break;
+                    case InstructionType.ldc_i4_3: this.stack.Push(TypeRecord.FromI4(3)); break;
+                    case InstructionType.ldc_i4_4: this.stack.Push(TypeRecord.FromI4(4)); break;
+                    case InstructionType.ldc_i4_5: this.stack.Push(TypeRecord.FromI4(5)); break;
+                    case InstructionType.ldc_i4_6: this.stack.Push(TypeRecord.FromI4(6)); break;
+                    case InstructionType.ldc_i4_7: this.stack.Push(TypeRecord.FromI4(7)); break;
+                    case InstructionType.ldc_i4_8: this.stack.Push(TypeRecord.FromI4(8)); break;
 
-                        case InstructionType.ldc_i4_0: this.stack.Push(TypeRecord.FromI4(0)); break;
-                        case InstructionType.ldc_i4_1: this.stack.Push(TypeRecord.FromI4(1)); break;
-                        case InstructionType.ldc_i4_2: this.stack.Push(TypeRecord.FromI4(2)); break;
-                        case InstructionType.ldc_i4_3: this.stack.Push(TypeRecord.FromI4(3)); break;
-                        case InstructionType.ldc_i4_4: this.stack.Push(TypeRecord.FromI4(4)); break;
-                        case InstructionType.ldc_i4_5: this.stack.Push(TypeRecord.FromI4(5)); break;
-                        case InstructionType.ldc_i4_6: this.stack.Push(TypeRecord.FromI4(6)); break;
-                        case InstructionType.ldc_i4_7: this.stack.Push(TypeRecord.FromI4(7)); break;
-                        case InstructionType.ldc_i4_8: this.stack.Push(TypeRecord.FromI4(8)); break;
+                    case InstructionType.ldarg_0: this.stack.Push(frame.Args[0]); break;
+                    case InstructionType.ldarg_1: this.stack.Push(frame.Args[1]); break;
+                    case InstructionType.ldarg_2: this.stack.Push(frame.Args[2]); break;
+                    case InstructionType.ldarg_3: this.stack.Push(frame.Args[3]); break;
 
-                        case InstructionType.ldarg_0: this.stack.Push(frame.Args[0]); break;
-                        case InstructionType.ldarg_1: this.stack.Push(frame.Args[1]); break;
-                        case InstructionType.ldarg_2: this.stack.Push(frame.Args[2]); break;
-                        case InstructionType.ldarg_3: this.stack.Push(frame.Args[3]); break;
+                    case InstructionType.ldloc_0: this.stack.Push(frame.Locals[0], frame.Method.Locals[0].Type); break;
+                    case InstructionType.ldloc_1: this.stack.Push(frame.Locals[1], frame.Method.Locals[1].Type); break;
+                    case InstructionType.ldloc_2: this.stack.Push(frame.Locals[2], frame.Method.Locals[2].Type); break;
+                    case InstructionType.ldloc_3: this.stack.Push(frame.Locals[3], frame.Method.Locals[3].Type); break;
 
-                        case InstructionType.ldloc_0: this.stack.Push(frame.Locals[0], frame.Method.Locals[0].Type); break;
-                        case InstructionType.ldloc_1: this.stack.Push(frame.Locals[1], frame.Method.Locals[1].Type); break;
-                        case InstructionType.ldloc_2: this.stack.Push(frame.Locals[2], frame.Method.Locals[2].Type); break;
-                        case InstructionType.ldloc_3: this.stack.Push(frame.Locals[3], frame.Method.Locals[3].Type); break;
+                    case InstructionType.stloc_0: this.stack.Pop(ref frame.Locals[0], frame.Method.Locals[0].Type); break;
+                    case InstructionType.stloc_1: this.stack.Pop(ref frame.Locals[1], frame.Method.Locals[1].Type); break;
+                    case InstructionType.stloc_2: this.stack.Pop(ref frame.Locals[2], frame.Method.Locals[2].Type); break;
+                    case InstructionType.stloc_3: this.stack.Pop(ref frame.Locals[3], frame.Method.Locals[3].Type); break;
 
-                        case InstructionType.stloc_0: this.stack.Pop(ref frame.Locals[0], frame.Method.Locals[0].Type); break;
-                        case InstructionType.stloc_1: this.stack.Pop(ref frame.Locals[1], frame.Method.Locals[1].Type); break;
-                        case InstructionType.stloc_2: this.stack.Pop(ref frame.Locals[2], frame.Method.Locals[2].Type); break;
-                        case InstructionType.stloc_3: this.stack.Pop(ref frame.Locals[3], frame.Method.Locals[3].Type); break;
+                    case InstructionType.add: this.stack.Push(TypeRecord.Add(this.stack.Pop(), this.stack.Pop())); break;
 
-                        case InstructionType.br_s: frame.InstructionPointer = inst.BranchTarget; break;
+                    case InstructionType.br_s: frame.InstructionPointer = inst.BranchTarget; break;
 
-                        //TODO Need to handle what is on the eval stack before and after a call
-                        case InstructionType.ret:
-                            this.stack.Return();
+                    case InstructionType.ret: this.stack.Return(); break;
 
-                            goto end;
+                    case InstructionType.call:
+                    case InstructionType.callvirt: //TODO Need to dynamically invoke on the object type
+                        if (inst.TableToken.Table != Streams.TableType.MemberRef)
+                            this.stack.Call(this.typeSystem.FindMethod(frame.Method, inst.TableToken));
 
-                        case InstructionType.call:
-                        case InstructionType.callvirt: //TODO Need to dynamically invoke on the object type
-                            if (inst.TableToken.Table == Streams.TableType.MemberRef) goto end;
-                            this.stack.Call(this.typeSystem.FindMethod(frame.Method, inst.TableToken)); goto end;
+                        break;
 
-                        //TODO Need to handle value types and delegates, also actually allocate something
-                        case InstructionType.newobj: this.stack.Push(new TypeRecord { Tag = ElementType.Class }); goto case InstructionType.call;
+                    //TODO Need to handle value types and delegates, also actually allocate something of the proper type
+                    case InstructionType.newobj:
+                        this.stack.Push(new TypeRecord { Tag = ElementType.Class });
+                        this.stack.Call(this.typeSystem.FindMethod(frame.Method, inst.TableToken));
 
-                        case InstructionType.add: this.stack.Push(TypeRecord.Add(this.stack.Pop(), this.stack.Pop())); break;
-                    }
+                        break;
                 }
-
-                end:
-                ;
-            } while (this.stack.Current != null);
+            }
         }
     }
 }
