@@ -220,6 +220,14 @@ namespace ArkeCLR.Runtime.Files {
         public uint Type;
         [FieldOffset(12)]
         public ushort Var;
+        [FieldOffset(12)]
+        public sbyte ShortBrTarget;
+        [FieldOffset(12)]
+        public sbyte ShortI;
+        [FieldOffset(12)]
+        public float ShortR;
+        [FieldOffset(12)]
+        public byte ShortVar;
 
         public void Read(ByteReader file) {
             var first = file.ReadU1();
@@ -334,16 +342,16 @@ namespace ArkeCLR.Runtime.Files {
                 case InstructionType.ble_un_s:
                 case InstructionType.blt_un_s:
                 case InstructionType.leave_s:
-                    this.BrTarget = file.ReadI1();
+                    file.Read(out this.ShortBrTarget);
                     break;
 
                 case InstructionType.ldc_i4_s:
                 case InstructionType.unaligned_prefix:
-                    this.I = file.ReadI1();
+                    file.Read(out this.ShortI);
                     break;
 
                 case InstructionType.ldc_r4:
-                    this.R = file.ReadR4();
+                    file.Read(out this.ShortR);
                     break;
 
                 case InstructionType.ldarg_s:
@@ -352,9 +360,8 @@ namespace ArkeCLR.Runtime.Files {
                 case InstructionType.ldloc_s:
                 case InstructionType.ldloca_s:
                 case InstructionType.stloc_s:
-                    this.Var = file.ReadU1();
+                    file.Read(out this.ShortVar);
                     break;
-
             }
         }
     }
