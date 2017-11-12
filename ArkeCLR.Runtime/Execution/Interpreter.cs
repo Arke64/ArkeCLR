@@ -15,31 +15,24 @@ namespace ArkeCLR.Runtime.Execution {
         public long Run(string entryAssemblyPath, IEnumerable<string> args) {
             var entryPoint = this.typeSystem.Load(entryAssemblyPath).EntryPoint;
 
+            //TODO Get a proper signature comparison, don't forget modreqs and modopts.
             if (!entryPoint.IsStatic) throw new InvalidAssemblyException("Entry point must be static.");
-            if (entryPoint.Signature.ParamCount == 0 || (entryPoint.Signature.ParamCount == 1 && entryPoint.Signature.Params[0].Type.ElementType != ElementType.SzArray)) throw new InvalidAssemblyException("Entry point must take no parameters or a single string[] only.");
+            if (entryPoint.Signature.ParamCount != 0 && (entryPoint.Signature.ParamCount != 1 || entryPoint.Signature.Params[0].Type.ElementType != ElementType.SzArray || entryPoint.Signature.Params[0].Type.SzArray.Type.ElementType != ElementType.String)) throw new InvalidAssemblyException("Entry point must take no parameters or a single string[] only.");
             if (!entryPoint.Signature.RetType.IsVoid && entryPoint.Signature.RetType.Type.ElementType != ElementType.I4 && entryPoint.Signature.RetType.Type.ElementType != ElementType.U4) throw new InvalidAssemblyException("Entry point return type must be I4, U4, or void.");
-            //TODO Need to do better comparions above
 
-            //TODO Need to handle the optional string[] args
-            this.stack.Call(entryPoint);
-
+            //TODO Need to actually pass args.
             if (entryPoint.Signature.ParamCount == 1)
                 this.stack.Push(TypeRecord.FromObject(0));
 
+            this.stack.Call(entryPoint);
+
             this.RunInterpreter();
 
-            var returnCode = 0L;
-
-            if (entryPoint.Signature.RetType.Type.ElementType == ElementType.I4) {
-                returnCode = this.stack.Pop(ElementType.I4).I4;
-            }
-            else if (entryPoint.Signature.RetType.Type.ElementType == ElementType.U4) {
-                returnCode = this.stack.Pop(ElementType.U4).U4;
-            }
+            var ret = !entryPoint.Signature.RetType.IsVoid ? this.stack.Pop(entryPoint.Signature.RetType.Type) : default;
 
             this.stack.EnsureEmpty();
 
-            return returnCode;
+            return entryPoint.Signature.RetType.IsVoid ? 0L : (entryPoint.Signature.RetType.Type.ElementType == ElementType.I4 ? ret.I4 : (long)ret.U4);
         }
 
         private void RunInterpreter() {
@@ -96,8 +89,10 @@ namespace ArkeCLR.Runtime.Execution {
                         throw new NotImplementedException();
 
                     case InstructionType.call:
-                        if (inst.TableToken.Table != Streams.TableType.MemberRef)
-                            this.stack.Call(this.typeSystem.FindMethod(frame.Method, inst.TableToken));
+                        if (inst.TableToken.Table == Streams.TableType.MemberRef) break; //TODO Need to implement calling MemberRefs
+                        if (inst.TableToken.Table != Streams.TableType.MethodDef) throw new NotImplementedException();
+
+                        this.stack.Call(this.typeSystem.FindMethod(frame.Method, inst.TableToken));
 
                         break;
 
@@ -181,8 +176,9 @@ namespace ArkeCLR.Runtime.Execution {
                         throw new NotImplementedException();
 
                     case InstructionType.callvirt: //TODO Need to dynamically invoke on the object type
-                        if (inst.TableToken.Table != Streams.TableType.MemberRef)
-                            this.stack.Call(this.typeSystem.FindMethod(frame.Method, inst.TableToken));
+                        if (inst.TableToken.Table != Streams.TableType.MethodDef) throw new NotImplementedException();
+
+                        this.stack.Call(this.typeSystem.FindMethod(frame.Method, inst.TableToken));
 
                         break;
 
