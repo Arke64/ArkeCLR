@@ -168,10 +168,8 @@ namespace ArkeCLR.Runtime.Streams {
 
         public bool IsZero => this.Row == 0;
 
-        public TableToken(uint value) {
-            this.Table = (TableType)(value >> 24);
-            this.Row = value & 0xFFFFFF;
-        }
+        public TableToken(uint value) : this((TableType)(value >> 24), value & 0xFFFFFF) { }
+        public TableToken(TableType table, uint row) => (this.Table, this.Row) = (table, row);
     }
 
     public enum CodedIndexType {
