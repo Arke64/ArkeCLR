@@ -8,11 +8,11 @@ using System.Linq;
 namespace ArkeCLR.Runtime.Execution {
     public class CallFrame {
         public Method Method;
-        public int InstructionPointer;
+        public uint InstructionPointer;
         public TypeRecord[] Args;
         public TypeRecord[] Locals;
 
-        public CallFrame(Method method, int instructionPointer) {
+        public CallFrame(Method method, uint instructionPointer) {
             var hasThis = Interpreter.MethodHasThis(method.Signature);
 
             this.Method = method;
@@ -81,9 +81,9 @@ namespace ArkeCLR.Runtime.Execution {
                 var frame = this.callStack.Peek();
 
                 while (frame.InstructionPointer < frame.Method.Instructions.Count) {
-                    var inst = frame.Method.Instructions[frame.InstructionPointer++];
+                    var inst = frame.Method.Instructions[(int)(frame.InstructionPointer++)];
 
-                    switch (inst.Type) {
+                    switch (inst.Op) {
                         default: throw new NotImplementedException();
 
                         case InstructionType.nop: break;
@@ -113,7 +113,7 @@ namespace ArkeCLR.Runtime.Execution {
                         case InstructionType.stloc_2: this.Pop(ref frame.Locals[2], frame.Method.Locals[2].Type); break;
                         case InstructionType.stloc_3: this.Pop(ref frame.Locals[3], frame.Method.Locals[3].Type); break;
 
-                        case InstructionType.br_s: frame.InstructionPointer = inst.BrTarget; break;
+                        case InstructionType.br_s: frame.InstructionPointer = inst.BranchTarget; break;
 
                         //TODO Need to handle what is on the eval stack before and after a call
                         case InstructionType.ret:
@@ -134,8 +134,8 @@ namespace ArkeCLR.Runtime.Execution {
 
                         case InstructionType.call:
                         case InstructionType.callvirt: //TODO Need to dynamically invoke on the object type
-                            if (inst.TableIndexOperand.Table == Streams.TableType.MemberRef) goto end;
-                            this.callStack.Push(new CallFrame(this.typeSystem.FindMethod(inst.TableIndexOperand), 0)); goto end;
+                            if (inst.TableToken.Table == Streams.TableType.MemberRef) goto end;
+                            this.callStack.Push(new CallFrame(this.typeSystem.FindMethod(inst.TableToken), 0)); goto end;
 
                         //TODO Need to handle value types and delegates, also actually allocate something
                         case InstructionType.newobj: this.Push(new TypeRecord { Tag = ElementType.Class }); goto case InstructionType.call;
