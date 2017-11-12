@@ -63,10 +63,10 @@ namespace ArkeCLR.Runtime.Execution {
         }
 
         public class CallFrame {
-            public Method Method;
-            public uint InstructionPointer;
-            public TypeRecord[] Args;
-            public TypeRecord[] Locals;
+            public uint InstructionPointer { get; set; }
+            public Method Method { get; }
+            public TypeRecord[] Args { get; }
+            public TypeRecord[] Locals { get; }
 
             public CallFrame(Method method) {
                 var hasThis = Interpreter.MethodHasThis(method.Signature);
@@ -89,21 +89,17 @@ namespace ArkeCLR.Runtime.Execution {
     }
 
     public class Interpreter : IExecutionEngine {
-        private readonly IFileResolver fileResolver;
         private readonly Action<string> logger;
-        private TypeSystem typeSystem;
-        private Stack stack;
+        private readonly TypeSystem typeSystem;
+        private readonly Stack stack;
 
         public static bool MethodHasThis(MethodDefSig sig) => (sig.Flags & SignatureFlags.HasThis) != 0;
         public static bool MethodHasExplicitThis(MethodDefSig sig) => (sig.Flags & SignatureFlags.ExplicitThis) != 0;
 
-        public Interpreter(IFileResolver fileResolver, Action<string> logger) => (this.fileResolver, this.logger) = (fileResolver, logger);
+        public Interpreter(IFileResolver fileResolver, Action<string> logger) => (this.typeSystem, this.stack, this.logger) = (new TypeSystem(fileResolver, logger), new Stack(), logger);
 
         public long Run(string entryAssemblyPath) {
-            this.typeSystem = new TypeSystem(entryAssemblyPath, this.fileResolver, this.logger);
-            this.stack = new Stack();
-
-            var entryPoint = this.typeSystem.FindEntryPoint();
+            var entryPoint = this.typeSystem.Load(entryAssemblyPath).EntryPoint;
 
             if (Interpreter.MethodHasThis(entryPoint.Signature) || Interpreter.MethodHasExplicitThis(entryPoint.Signature)) throw new InvalidAssemblyException("Entry point must be static.");
             if (entryPoint.Signature.ParamCount == 0 || (entryPoint.Signature.ParamCount == 1 && entryPoint.Signature.Params[0].Type.ElementType != ElementType.SzArray)) throw new InvalidAssemblyException("Entry point must take no parameters or a single string[] only.");
@@ -180,7 +176,7 @@ namespace ArkeCLR.Runtime.Execution {
                         case InstructionType.call:
                         case InstructionType.callvirt: //TODO Need to dynamically invoke on the object type
                             if (inst.TableToken.Table == Streams.TableType.MemberRef) goto end;
-                            this.stack.Call(this.typeSystem.FindMethod(inst.TableToken)); goto end;
+                            this.stack.Call(this.typeSystem.FindMethod(frame.Method, inst.TableToken)); goto end;
 
                         //TODO Need to handle value types and delegates, also actually allocate something
                         case InstructionType.newobj: this.stack.Push(new TypeRecord { Tag = ElementType.Class }); goto case InstructionType.call;
