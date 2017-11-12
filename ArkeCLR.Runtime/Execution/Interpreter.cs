@@ -34,17 +34,17 @@ namespace ArkeCLR.Runtime.Execution {
     public class Interpreter : IExecutionEngine {
         private readonly Stack<TypeRecord> evaluationStack = new Stack<TypeRecord>();
         private readonly Stack<CallFrame> callStack = new Stack<CallFrame>();
-        private readonly IAssemblyResolver assemblyResolver;
+        private readonly IFileResolver fileResolver;
         private readonly Action<string> logger;
         private TypeSystem typeSystem;
 
         public static bool MethodHasThis(MethodDefSig sig) => (sig.Flags & SignatureFlags.HasThis) != 0;
         public static bool MethodHasExplicitThis(MethodDefSig sig) => (sig.Flags & SignatureFlags.ExplicitThis) != 0;
 
-        public Interpreter(IAssemblyResolver assemblyResolver, Action<string> logger) => (this.assemblyResolver, this.logger) = (assemblyResolver, logger);
+        public Interpreter(IFileResolver fileResolver, Action<string> logger) => (this.fileResolver, this.logger) = (fileResolver, logger);
 
         public long Run(string entryAssemblyPath) {
-            this.typeSystem = new TypeSystem(entryAssemblyPath, this.assemblyResolver, this.logger);
+            this.typeSystem = new TypeSystem(entryAssemblyPath, this.fileResolver, this.logger);
 
             var entryPoint = this.typeSystem.FindEntryPoint();
 

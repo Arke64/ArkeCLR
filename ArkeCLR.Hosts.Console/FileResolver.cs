@@ -2,19 +2,19 @@
 using System.IO;
 
 namespace ArkeCLR.Hosts.Console {
-    public class AssemblyResolver : IAssemblyResolver {
+    public class FileResolver : IFileResolver {
         private readonly string currentDirectory;
 
-        public AssemblyResolver(string currentDirectory) => this.currentDirectory = currentDirectory;
+        public FileResolver(string currentDirectory) => this.currentDirectory = currentDirectory;
 
-        public bool TryResolve(AssemblyName assemblyName, out byte[] result) {
+        public bool TryResolve(string fileName, string hintPath, out byte[] result) {
             var path = default(string);
-            var root = Path.Combine(this.currentDirectory, assemblyName.Name);
+            var root = Path.Combine(this.currentDirectory, fileName);
 
             result = default;
 
-            if (File.Exists(assemblyName.HintPath)) {
-                path = assemblyName.HintPath;
+            if (File.Exists(hintPath)) {
+                path = hintPath;
             }
             else if (File.Exists(root + ".dll")) {
                 path = root + ".dll";

@@ -8,18 +8,18 @@ using System.Linq;
 namespace ArkeCLR.Runtime.Execution {
     public class TypeSystem {
         private readonly List<Assembly> assemblies = new List<Assembly>();
-        private readonly IAssemblyResolver assemblyResolver;
+        private readonly IFileResolver fileResolver;
         private readonly Action<string> logger;
         private readonly Assembly entryAssembly;
 
-        public TypeSystem(string entryAssemblyPath, IAssemblyResolver assemblyResolver, Action<string> logger) {
-            (this.assemblyResolver, this.logger) = (assemblyResolver, logger);
+        public TypeSystem(string entryAssemblyPath, IFileResolver fileResolver, Action<string> logger) {
+            (this.fileResolver, this.logger) = (fileResolver, logger);
 
             this.entryAssembly = this.ResolveAssembly(AssemblyName.FromFilePath(entryAssemblyPath));
         }
 
         private Assembly ResolveAssembly(AssemblyName name) {
-            if (!this.assemblyResolver.TryResolve(name, out var data)) throw new CouldNotResolveAssemblyException(name);
+            if (!this.fileResolver.TryResolve(name.Name, name.HintPath, out var data)) throw new CouldNotResolveAssemblyException(name);
 
             var result = new Assembly(new CliFile(data));
 

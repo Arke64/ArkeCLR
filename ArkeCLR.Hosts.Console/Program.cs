@@ -14,7 +14,7 @@ namespace ArkeCLR.Hosts.Console {
                 return;
             }
 
-            void run() => log($"Exited with code {new ExecutionHost(new Interpreter(new AssemblyResolver(Path.GetDirectoryName(args[0])), log)).Run(args[0])}.");
+            void run() => log($"Exited with code {new ExecutionHost(new Interpreter(new FileResolver(Path.GetDirectoryName(args[0])), log)).Run(args[0])}.");
 
             if (!Debugger.IsAttached) {
                 try {
