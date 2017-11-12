@@ -18,6 +18,10 @@ namespace ArkeCLR.Runtime.Logical {
 
         public bool IsStatic { get; }
 
+        public uint FormatParametersStart { get; }
+        public uint FormalParameters { get; }
+        public uint ActualParameters { get; }
+
         public Method(CliFile file, Type type, MethodDef def, uint row) {
             this.Type = type;
             this.Row = row;
@@ -37,6 +41,10 @@ namespace ArkeCLR.Runtime.Logical {
             }
 
             this.IsStatic = def.Flags.FlagSet(MethodAttributes.Static);
+
+            this.FormatParametersStart = this.IsStatic ? 0U : 1U;
+            this.FormalParameters = this.Signature.ParamCount;
+            this.ActualParameters = this.FormalParameters + this.FormatParametersStart;
         }
     }
 }

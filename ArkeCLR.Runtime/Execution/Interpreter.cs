@@ -22,7 +22,7 @@ namespace ArkeCLR.Runtime.Execution {
 
             //TODO Need to actually pass args.
             if (entryPoint.Signature.ParamCount == 1)
-                this.stack.Push(TypeRecord.FromObject(0));
+                this.stack.Push(TypeRecord.FromSzArray(0));
 
             this.stack.Call(entryPoint);
 
@@ -43,20 +43,20 @@ namespace ArkeCLR.Runtime.Execution {
                     case InstructionType.nop: break;
                     case InstructionType.@break: Debugger.Break(); break;
 
-                    case InstructionType.ldarg_0: this.stack.Push(frame.Args[0]); break;
-                    case InstructionType.ldarg_1: this.stack.Push(frame.Args[1]); break;
-                    case InstructionType.ldarg_2: this.stack.Push(frame.Args[2]); break;
-                    case InstructionType.ldarg_3: this.stack.Push(frame.Args[3]); break;
+                    case InstructionType.ldarg_0: this.stack.Push(frame.Arg(0)); break;
+                    case InstructionType.ldarg_1: this.stack.Push(frame.Arg(1)); break;
+                    case InstructionType.ldarg_2: this.stack.Push(frame.Arg(2)); break;
+                    case InstructionType.ldarg_3: this.stack.Push(frame.Arg(3)); break;
 
-                    case InstructionType.ldloc_0: this.stack.Push(frame.Locals[0], frame.Method.Locals[0].Type); break;
-                    case InstructionType.ldloc_1: this.stack.Push(frame.Locals[1], frame.Method.Locals[1].Type); break;
-                    case InstructionType.ldloc_2: this.stack.Push(frame.Locals[2], frame.Method.Locals[2].Type); break;
-                    case InstructionType.ldloc_3: this.stack.Push(frame.Locals[3], frame.Method.Locals[3].Type); break;
+                    case InstructionType.ldloc_0: this.stack.Push(frame.Local(0), frame.Method.Locals[0].Type); break;
+                    case InstructionType.ldloc_1: this.stack.Push(frame.Local(1), frame.Method.Locals[1].Type); break;
+                    case InstructionType.ldloc_2: this.stack.Push(frame.Local(2), frame.Method.Locals[2].Type); break;
+                    case InstructionType.ldloc_3: this.stack.Push(frame.Local(3), frame.Method.Locals[3].Type); break;
 
-                    case InstructionType.stloc_0: this.stack.Pop(ref frame.Locals[0], frame.Method.Locals[0].Type); break;
-                    case InstructionType.stloc_1: this.stack.Pop(ref frame.Locals[1], frame.Method.Locals[1].Type); break;
-                    case InstructionType.stloc_2: this.stack.Pop(ref frame.Locals[2], frame.Method.Locals[2].Type); break;
-                    case InstructionType.stloc_3: this.stack.Pop(ref frame.Locals[3], frame.Method.Locals[3].Type); break;
+                    case InstructionType.stloc_0: this.stack.Pop(ref frame.Local(0), frame.Method.Locals[0].Type); break;
+                    case InstructionType.stloc_1: this.stack.Pop(ref frame.Local(1), frame.Method.Locals[1].Type); break;
+                    case InstructionType.stloc_2: this.stack.Pop(ref frame.Local(2), frame.Method.Locals[2].Type); break;
+                    case InstructionType.stloc_3: this.stack.Pop(ref frame.Local(3), frame.Method.Locals[3].Type); break;
 
                     case InstructionType.ldarg_s:
                     case InstructionType.ldarga_s:

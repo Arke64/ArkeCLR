@@ -1,6 +1,6 @@
 ﻿using ArkeCLR.Runtime.Signatures;
-using System.Runtime.InteropServices;
 using System;
+using System.Runtime.InteropServices;
 
 namespace ArkeCLR.Runtime.Execution {
     [StructLayout(LayoutKind.Explicit)]
@@ -44,6 +44,12 @@ namespace ArkeCLR.Runtime.Execution {
         [FieldOffset(4)]
         public ulong Object;
 
+        public void Assign(TypeRecord src) {
+            if (this.Tag != src.Tag) throw new ExecutionEngineException("Wrong type.");
+
+            this.U8 = src.U8;
+        }
+
         public static TypeRecord FromU1(byte value) => new TypeRecord { Tag = ElementType.U1, U1 = value };
         public static TypeRecord FromU2(ushort value) => new TypeRecord { Tag = ElementType.U2, U2 = value };
         public static TypeRecord FromU4(uint value) => new TypeRecord { Tag = ElementType.U4, U4 = value };
@@ -61,6 +67,9 @@ namespace ArkeCLR.Runtime.Execution {
         public static TypeRecord FromTypedByRef(ulong value) => new TypeRecord { Tag = ElementType.TypedByRef, TypedByRef = value };
         public static TypeRecord FromString(ulong value) => new TypeRecord { Tag = ElementType.String, String = value };
         public static TypeRecord FromObject(ulong value) => new TypeRecord { Tag = ElementType.Object, Object = value };
+        public static TypeRecord FromSzArray(ulong value) => new TypeRecord { Tag = ElementType.SzArray, Object = value };
+        public static TypeRecord FromType(Logical.Type type) => new TypeRecord { Tag = ElementType.Class, Object = 0 };
+        public static TypeRecord FromSignature(Signatures.Type type) => new TypeRecord { Tag = type.ElementType, Object = 0 };
 
         //TODO Need to properly implement what CLR types can be added, also overflow
         public static TypeRecord Add(TypeRecord a, TypeRecord b) {
