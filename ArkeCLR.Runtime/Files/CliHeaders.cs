@@ -6,6 +6,12 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#pragma warning disable S1104
+#pragma warning disable S4016
+#pragma warning disable S2346
+#pragma warning disable S3459
+#pragma warning disable S2344
+
 namespace ArkeCLR.Runtime.Files {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct CliHeader {
@@ -48,17 +54,17 @@ namespace ArkeCLR.Runtime.Files {
         public ushort Flags;
         public ushort StreamCount;
 
-        public void Read(ByteReader file) {
-            var root1 = file.ReadStruct<RootHeader1>();
+        public void Read(ByteReader reader) {
+            var root1 = reader.ReadStruct<RootHeader1>();
             this.Signature = root1.Signature;
             this.MajorVersion = root1.MajorVersion;
             this.MinorVersion = root1.MinorVersion;
             this.Reserved1 = root1.Reserved1;
             this.VersionLength = root1.VersionLength;
 
-            this.Version = file.ReadString(Encoding.UTF8, this.VersionLength);
+            this.Version = reader.ReadString(Encoding.UTF8, this.VersionLength);
 
-            var root2 = file.ReadStruct<RootHeader2>();
+            var root2 = reader.ReadStruct<RootHeader2>();
             this.Flags = root2.Flags;
             this.StreamCount = root2.StreamCount;
         }
@@ -75,12 +81,12 @@ namespace ArkeCLR.Runtime.Files {
         public uint Size;
         public string Name;
 
-        public void Read(ByteReader file) {
-            var header1 = file.ReadStruct<StreamHeader1>();
+        public void Read(ByteReader reader) {
+            var header1 = reader.ReadStruct<StreamHeader1>();
             this.Offset = header1.Offset;
             this.Size = header1.Size;
 
-            this.Name = file.ReadStringTerminated(Encoding.ASCII, 0, 4);
+            this.Name = reader.ReadStringTerminated(Encoding.ASCII, 0, 4);
         }
     }
 
@@ -105,8 +111,8 @@ namespace ArkeCLR.Runtime.Files {
         public BitVector Sorted;
         public uint[] Rows;
 
-        public void Read(ByteReader file) {
-            var header1 = file.ReadStruct<StreamHeader1>();
+        public void Read(ByteReader reader) {
+            var header1 = reader.ReadStruct<StreamHeader1>();
             this.Reserved1 = header1.Reserved1;
             this.MajorVersion = header1.MajorVersion;
             this.MinorVersion = header1.MinorVersion;
@@ -115,7 +121,7 @@ namespace ArkeCLR.Runtime.Files {
             this.Valid = new BitVector(header1.Valid);
             this.Sorted = new BitVector(header1.Sorted);
 
-            var rows = file.ReadArray<uint>(this.Valid.CountSet());
+            var rows = reader.ReadArray<uint>(this.Valid.CountSet());
             var i = 0;
 
             this.Rows = this.Valid.Select(v => v ? rows[i++] : 0).ToArray();
@@ -131,36 +137,37 @@ namespace ArkeCLR.Runtime.Files {
         public MethodBody Body;
         public MethodDataSectionHeader[] DataSections;
 
-        public void Read(ByteReader file) {
-            if (((MethodFlags)file.PeekU1()).FlagSet(MethodFlags.FatFormat)) {
-                var first = file.ReadU2();
+        public void Read(ByteReader reader) {
+            if (((MethodFlags)reader.PeekU1()).FlagSet(MethodFlags.FatFormat)) {
+                var first = reader.ReadU2();
 
                 this.Flags = (MethodFlags)((first >> 4) & 0b1111_1111_1111);
                 this.Size = (byte)(first & 0b1111);
 
-                file.Read(out this.MaxStack);
-                file.Read(out this.CodeSize);
-                file.Read(out this.LocalVarSigTok);
+                reader.Read(out this.MaxStack);
+                reader.Read(out this.CodeSize);
+                reader.Read(out this.LocalVarSigTok);
             }
             else {
-                var first = file.ReadU1();
+                var first = reader.ReadU1();
 
                 this.Flags = (MethodFlags)(first & 0b11);
                 this.CodeSize = (first & 0b1111_1100U) >> 2;
                 this.MaxStack = 8;
             }
 
-            this.Body = file.ReadByteReader(this.CodeSize).ReadCustom<MethodBody>();
+            this.Body = reader.ReadByteReader(this.CodeSize).ReadCustom<MethodBody>();
 
             var sects = new List<MethodDataSectionHeader>();
 
             if (this.Flags.FlagSet(MethodFlags.MoreSects)) {
-                file.SeekToMultiple(4);
+                reader.SeekToMultiple(4);
 
                 var sect = default(MethodDataSectionHeader);
 
                 do {
-                    sects.Add(sect = file.ReadCustom<MethodDataSectionHeader>());
+                    sect = reader.ReadCustom<MethodDataSectionHeader>();
+                    sects.Add(sect);
                 } while (sect.Kind.FlagSet(MethodDataSectionFlags.MoreSects));
             }
 
@@ -172,16 +179,16 @@ namespace ArkeCLR.Runtime.Files {
         public uint[] Offsets;
         public MethodInstruction[] Instructions;
 
-        public void Read(ByteReader file) {
+        public void Read(ByteReader reader) {
             var offsets = new List<uint>();
             var instructions = new List<MethodInstruction>();
 
-            while (file.Position < file.Length) {
-                offsets.Add((uint)file.Position);
-                instructions.Add(file.ReadCustom<MethodInstruction>());
+            while (reader.Position < reader.Length) {
+                offsets.Add((uint)reader.Position);
+                instructions.Add(reader.ReadCustom<MethodInstruction>());
             }
 
-            offsets.Add((uint)file.Position);
+            offsets.Add((uint)reader.Position);
 
             this.Offsets = offsets.ToArray();
             this.Instructions = instructions.ToArray();
@@ -229,10 +236,10 @@ namespace ArkeCLR.Runtime.Files {
         [FieldOffset(12)]
         public byte ShortVar;
 
-        public void Read(ByteReader file) {
-            var first = file.ReadU1();
+        public void Read(ByteReader reader) {
+            var first = reader.ReadU1();
 
-            this.Op = (InstructionType)(first != 0xFE ? first : (0xFE00 | file.ReadU1()));
+            this.Op = (InstructionType)(first != 0xFE ? first : (0xFE00 | reader.ReadU1()));
 
             switch (this.Op) {
                 case InstructionType.beq:
@@ -249,7 +256,7 @@ namespace ArkeCLR.Runtime.Files {
                 case InstructionType.brfalse:
                 case InstructionType.brtrue:
                 case InstructionType.leave:
-                    file.Read(out this.BrTarget);
+                    reader.Read(out this.BrTarget);
                     break;
 
                 case InstructionType.ldfld:
@@ -258,15 +265,15 @@ namespace ArkeCLR.Runtime.Files {
                 case InstructionType.ldsfld:
                 case InstructionType.ldsflda:
                 case InstructionType.stsfld:
-                    file.Read(out this.Field);
+                    reader.Read(out this.Field);
                     break;
 
                 case InstructionType.ldc_i4:
-                    file.Read(out this.I);
+                    reader.Read(out this.I);
                     break;
 
                 case InstructionType.ldc_i8:
-                    file.Read(out this.I8);
+                    reader.Read(out this.I8);
                     break;
 
                 case InstructionType.callvirt:
@@ -275,28 +282,28 @@ namespace ArkeCLR.Runtime.Files {
                 case InstructionType.ldvirtftn:
                 case InstructionType.jmp:
                 case InstructionType.call:
-                    file.Read(out this.Method);
+                    reader.Read(out this.Method);
                     break;
 
                 case InstructionType.ldc_r8:
-                    file.Read(out this.R);
+                    reader.Read(out this.R);
                     break;
 
                 case InstructionType.calli:
-                    file.Read(out this.Sig);
+                    reader.Read(out this.Sig);
                     break;
 
                 case InstructionType.ldstr:
-                    file.Read(out this.String);
+                    reader.Read(out this.String);
                     break;
 
                 case InstructionType.@switch:
-                    file.Read(out this.Switch);
-                    file.ReadArray(this.Switch, out this.SwitchTable);
+                    reader.Read(out this.Switch);
+                    reader.ReadArray(this.Switch, out this.SwitchTable);
                     break;
 
                 case InstructionType.ldtoken:
-                    file.Read(out this.Tok);
+                    reader.Read(out this.Tok);
                     break;
 
                 case InstructionType.initobj:
@@ -316,7 +323,7 @@ namespace ArkeCLR.Runtime.Files {
                 case InstructionType.box:
                 case InstructionType.refanyval:
                 case InstructionType.mkrefany:
-                    file.Read(out this.Type);
+                    reader.Read(out this.Type);
                     break;
 
                 case InstructionType.ldarg:
@@ -325,7 +332,7 @@ namespace ArkeCLR.Runtime.Files {
                 case InstructionType.ldloc:
                 case InstructionType.ldloca:
                 case InstructionType.stloc:
-                    file.Read(out this.Var);
+                    reader.Read(out this.Var);
                     break;
 
                 case InstructionType.br_s:
@@ -342,16 +349,16 @@ namespace ArkeCLR.Runtime.Files {
                 case InstructionType.ble_un_s:
                 case InstructionType.blt_un_s:
                 case InstructionType.leave_s:
-                    file.Read(out this.ShortBrTarget);
+                    reader.Read(out this.ShortBrTarget);
                     break;
 
                 case InstructionType.ldc_i4_s:
                 case InstructionType.unaligned_prefix:
-                    file.Read(out this.ShortI);
+                    reader.Read(out this.ShortI);
                     break;
 
                 case InstructionType.ldc_r4:
-                    file.Read(out this.ShortR);
+                    reader.Read(out this.ShortR);
                     break;
 
                 case InstructionType.ldarg_s:
@@ -360,7 +367,7 @@ namespace ArkeCLR.Runtime.Files {
                 case InstructionType.ldloc_s:
                 case InstructionType.ldloca_s:
                 case InstructionType.stloc_s:
-                    file.Read(out this.ShortVar);
+                    reader.Read(out this.ShortVar);
                     break;
             }
         }
@@ -392,17 +399,17 @@ namespace ArkeCLR.Runtime.Files {
         public uint DataSize;
         public ExceptionHandlingClause[] Clauses;
 
-        public void Read(ByteReader file) {
-            file.ReadEnum(out this.Kind);
-            file.Read(out this.DataSize);
+        public void Read(ByteReader reader) {
+            reader.ReadEnum(out this.Kind);
+            reader.Read(out this.DataSize);
 
             if (!this.Kind.FlagSet(MethodDataSectionFlags.FatFormat)) {
                 this.DataSize >>= 16;
 
-                this.Clauses = file.ReadArray<TinyExceptionHandlingClause>((this.DataSize - 4) / 12).ToArray(c => c.Expand());
+                this.Clauses = reader.ReadArray<TinyExceptionHandlingClause>((this.DataSize - 4) / 12).ToArray(c => c.Expand());
             }
             else {
-                file.ReadArray((this.DataSize - 4) / 24, out this.Clauses);
+                reader.ReadArray((this.DataSize - 4) / 24, out this.Clauses);
             }
         }
     }
@@ -452,6 +459,7 @@ namespace ArkeCLR.Runtime.Files {
         Fault = 0x04
     }
 
+#pragma warning disable IDE1006
     public enum InstructionType : ushort {
         nop = 0x00,
         @break = 0x01,
@@ -673,4 +681,5 @@ namespace ArkeCLR.Runtime.Files {
         refanytype = 0xFE_1D,
         readonly_prefix = 0xFE_1E,
     }
+#pragma warning restore IDE1006
 }

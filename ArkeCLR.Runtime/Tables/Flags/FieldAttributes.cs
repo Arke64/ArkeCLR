@@ -1,5 +1,7 @@
 using System;
 
+#pragma warning disable S2346
+
 namespace ArkeCLR.Runtime.Tables.Flags {
     [Flags]
     public enum FieldAttributes : ushort {

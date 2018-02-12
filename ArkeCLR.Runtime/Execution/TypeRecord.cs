@@ -2,6 +2,8 @@
 using System;
 using System.Runtime.InteropServices;
 
+#pragma warning disable S1104
+
 namespace ArkeCLR.Runtime.Execution {
     [StructLayout(LayoutKind.Explicit)]
     public struct TypeRecord {

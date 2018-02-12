@@ -43,9 +43,7 @@ namespace ArkeCLR.Runtime.Files {
             if ((int)type >= this.NtHeader.NtSpecificFields.NumberOfDataDirectories)
                 throw new ArgumentException($"Cannot find the data directory {type}.", nameof(type));
 
-            var rva = this.DataDirectories[(int)type];
-
-            return !rva.IsZero ? this.ReadRva(rva) : throw new ArgumentException($"The data directory {type} is not present.", nameof(type));
+            return this.DataDirectories[(int)type] is var rva && !rva.IsZero ? this.ReadRva(rva) : throw new ArgumentException($"The data directory {type} is not present.", nameof(type));
         }
 
         public ByteReader ReadRva(RvaAndSize rva) => this.image.CreateView(this.RvaToFileAddress(rva.Rva), rva.Size);

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
+
+#pragma warning disable S1104
+#pragma warning disable S4016
+#pragma warning disable S2346
 
 namespace ArkeCLR.Runtime.Files {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

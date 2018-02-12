@@ -134,7 +134,8 @@ namespace ArkeCLR.Runtime.Logical {
                 case InstructionType.ble_un_s:
                 case InstructionType.blt_un_s:
                 case InstructionType.leave_s:
-                    goto case InstructionType.br;
+                    this.BranchTarget = Instruction.ConvertRelativeByteOffsetToIndex(body, index, inst.BrTarget);
+                    break;
 
                 case InstructionType.ldc_i4_s:
                 case InstructionType.unaligned_prefix:

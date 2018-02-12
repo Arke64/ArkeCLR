@@ -1,5 +1,7 @@
 ﻿using ArkeCLR.Utilities;
 
+#pragma warning disable S1104
+
 namespace ArkeCLR.Runtime.Signatures {
     public class ArrayShape : ICustomByteReader {
         public uint Rank;

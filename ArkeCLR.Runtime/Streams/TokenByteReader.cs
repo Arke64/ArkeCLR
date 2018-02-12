@@ -11,11 +11,11 @@ namespace ArkeCLR.Runtime.Streams {
         public TableToken ReadToken(TableType type) => new TableToken { Table = type, Row = this.stream.Header.Rows[(int)type] >= 65536 ? this.ReadU4() : this.ReadU2() };
 
         public TableToken ReadToken(CodedIndexType type) {
-            var def = TableStream.CodedIndexDefinitions[type];
+            var (_, tagSize, tagMask, _) = TableStream.CodedIndexDefinitions[type];
             var isLarge = this.stream.CodedIndexSizes[type];
             var value = isLarge ? this.ReadU4() : this.ReadU2();
 
-            return new TableToken { Table = (TableType)(value & def.tagMask), Row = value >> def.tagSize };
+            return new TableToken { Table = (TableType)(value & tagMask), Row = value >> tagSize };
         }
 
         public void Read(HeapType type, out HeapToken value) => value = this.ReadToken(type);

@@ -1,5 +1,7 @@
 using System;
 
+#pragma warning disable S2344
+
 namespace ArkeCLR.Runtime.Tables.Flags {
     [Flags]
     public enum AssemblyFlags : uint {

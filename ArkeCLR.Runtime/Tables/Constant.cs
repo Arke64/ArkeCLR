@@ -2,6 +2,8 @@
 using ArkeCLR.Runtime.Streams;
 using ArkeCLR.Utilities;
 
+#pragma warning disable S1104
+
 namespace ArkeCLR.Runtime.Tables {
     public struct Constant : ICustomByteReader<TokenByteReader> {
         public ElementType Type;

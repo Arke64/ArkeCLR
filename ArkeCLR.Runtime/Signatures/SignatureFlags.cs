@@ -1,5 +1,8 @@
 ﻿using System;
 
+#pragma warning disable S2344
+#pragma warning disable S2346
+
 namespace ArkeCLR.Runtime.Signatures {
     [Flags]
     public enum SignatureFlags : byte {

@@ -1,6 +1,8 @@
-﻿using ArkeCLR.Runtime.Tables.Flags;
-using ArkeCLR.Runtime.Streams;
+﻿using ArkeCLR.Runtime.Streams;
+using ArkeCLR.Runtime.Tables.Flags;
 using ArkeCLR.Utilities;
+
+#pragma warning disable S1104
 
 namespace ArkeCLR.Runtime.Tables {
     public struct MethodDef : ICustomByteReader<TokenByteReader> {

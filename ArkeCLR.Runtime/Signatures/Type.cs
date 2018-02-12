@@ -1,6 +1,8 @@
 ﻿using ArkeCLR.Runtime.Signatures.Types;
 using ArkeCLR.Utilities;
 
+#pragma warning disable S1104
+
 namespace ArkeCLR.Runtime.Signatures {
     public class Type : ICustomByteReader {
         public ElementType ElementType;

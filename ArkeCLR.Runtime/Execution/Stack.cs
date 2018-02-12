@@ -76,7 +76,7 @@ namespace ArkeCLR.Runtime.Execution {
                 if (!method.IsStatic)
                     this.args[0] = TypeRecord.FromType(method.Type);
 
-                for (uint i = 0, j = method.FormatParametersStart; i < method.FormalParameters; i++, j++)
+                for (uint i = 0, j = method.FormalParametersStart; i < method.FormalParameters; i++, j++)
                     this.args[j] = TypeRecord.FromSignature(method.Signature.Params[i].Type);
 
                 for (var i = 0; i < method.Locals.Count; i++)

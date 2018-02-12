@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+#pragma warning disable S1104
+
 namespace ArkeCLR.Runtime.Streams {
     public abstract class Heap<T> : Stream {
         private readonly Dictionary<int, T> cache = new Dictionary<int, T>();

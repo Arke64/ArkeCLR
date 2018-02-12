@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 
+#pragma warning disable S1104
+
 namespace ArkeCLR.Runtime.Signatures {
     public class LocalVarSig : ICustomByteReader {
         public uint Count;

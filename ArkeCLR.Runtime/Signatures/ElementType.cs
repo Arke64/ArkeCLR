@@ -1,3 +1,5 @@
+#pragma warning disable S4016
+
 namespace ArkeCLR.Runtime.Signatures {
     public enum ElementType : byte {
         End = 0x00,

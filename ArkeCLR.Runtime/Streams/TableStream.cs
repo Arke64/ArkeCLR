@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+#pragma warning disable S1104
+
 namespace ArkeCLR.Runtime.Streams {
     public class TableStream : Stream {
         public static IReadOnlyDictionary<CodedIndexType, (IReadOnlyList<TableType> tables, int tagSize, int tagMask, int maxRows)> CodedIndexDefinitions { get; }

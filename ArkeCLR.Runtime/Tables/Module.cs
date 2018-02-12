@@ -1,6 +1,8 @@
 ﻿using ArkeCLR.Runtime.Streams;
 using ArkeCLR.Utilities;
 
+#pragma warning disable S1104
+
 namespace ArkeCLR.Runtime.Tables {
     public struct Module : ICustomByteReader<TokenByteReader> {
         public ushort Generation;

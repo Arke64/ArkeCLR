@@ -1,3 +1,5 @@
+#pragma warning disable S4016
+
 namespace ArkeCLR.Runtime.Tables.Flags {
     public enum AssemblyHashAlgorithm : uint {
         None = 0x0000,

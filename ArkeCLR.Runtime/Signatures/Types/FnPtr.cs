@@ -1,6 +1,8 @@
 ﻿using ArkeCLR.Utilities;
 using System.IO;
 
+#pragma warning disable S1104
+
 namespace ArkeCLR.Runtime.Signatures.Types {
     public class FnPtr : ICustomByteReader {
         public MethodDefSig MethodDefSig;
@@ -15,10 +17,10 @@ namespace ArkeCLR.Runtime.Signatures.Types {
 
             if ((this.MethodDefSig.Flags & SignatureFlags.VarArg) != 0) {
                 this.MethodDefSig = null;
-                reader.Seek(start, SeekOrigin.Begin);
-
-                reader.ReadCustom(out this.MethodRefSig);
                 this.IsDef = false;
+
+                reader.Seek(start, SeekOrigin.Begin);
+                reader.ReadCustom(out this.MethodRefSig);
             }
         }
     }

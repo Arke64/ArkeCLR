@@ -1,6 +1,8 @@
 ﻿using ArkeCLR.Utilities;
 using System.Collections.Generic;
 
+#pragma warning disable S1104
+
 namespace ArkeCLR.Runtime.Signatures {
     public class MethodRefSig : ICustomByteReader {
         public SignatureFlags Flags;
